@@ -90,19 +90,27 @@ export default function HMTFinancialServices() {
       const result = await response.json();
 
       if (response.ok) {
-        setShowPopup(true);
-        // Reset form after successful submission
-        setFormData({
-          name: "",
-          email: "",
-          phone: "",
-          business: "",
-          country: "",
-          service: "",
-          requirements: "",
-        });
-        setSelectedService("");
-      } else {
+
+  setShowPopup(true);
+
+  // Delay reset so popup can still show customer data
+  setTimeout(() => {
+
+    setFormData({
+      name: "",
+      email: "",
+      phone: "",
+      business: "",
+      country: "",
+      service: "",
+      requirements: "",
+    });
+
+    setSelectedService("");
+
+  }, 500);
+
+} else {
         alert('Error sending email: ' + (result.error || 'Unknown error'));
         console.error('API error:', result);
       }
