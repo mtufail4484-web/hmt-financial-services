@@ -72,6 +72,12 @@ export default function HMTFinancialServices() {
   async function handleSubmit(event) {
     event.preventDefault();
     
+    // Validate all required fields
+    if (!formData.name || !formData.email || !formData.phone || !formData.business || !formData.country || !formData.service || !formData.requirements) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
     try {
       const response = await fetch('/api/send-email', {
         method: 'POST',
@@ -98,6 +104,7 @@ export default function HMTFinancialServices() {
         setSelectedService("");
       } else {
         alert('Error sending email: ' + (result.error || 'Unknown error'));
+        console.error('API error:', result);
       }
     } catch (error) {
       console.error('Submission error:', error);
@@ -1388,7 +1395,7 @@ export default function HMTFinancialServices() {
                   Thank you, {formData.name || "Customer"}!
                 </h2>
                 <p className="text-slate-300 text-lg leading-relaxed">
-                  Your request for <span className="font-semibold text-yellow-300">{selectedService || "Consultancy"}</span> has been received. Our team will contact you shortly to confirm the details.
+                  Your request for <span className="font-semibold text-yellow-300">{formData.service || "Consultancy"}</span> has been received. Our team will contact you shortly to confirm the details.
                 </p>
               </div>
               <button
@@ -1402,7 +1409,7 @@ export default function HMTFinancialServices() {
             <div className="mt-8 grid gap-4 sm:grid-cols-2">
               <div className="rounded-3xl bg-white/5 p-5">
                 <p className="text-sm text-slate-400">Requested service</p>
-                <p className="mt-2 text-lg font-semibold text-white">{selectedService || "Consultancy"}</p>
+                <p className="mt-2 text-lg font-semibold text-white">{formData.service || "Not provided"}</p>
               </div>
               <div className="rounded-3xl bg-white/5 p-5">
                 <p className="text-sm text-slate-400">Name</p>
