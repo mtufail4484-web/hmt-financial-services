@@ -96,6 +96,11 @@ export default function HMTFinancialServices() {
       image: "/Bank Reconciliation.png",
     },
     {
+      title: "Receivable & Payable Management",
+      desc: "Efficient management of accounts receivable and payable for better cash flow.",
+      image: "/Recceivable and payable.png",
+    },
+    {
       title: "Payroll Management",
       desc: "Reliable payroll and salary handling services.",
       image: "/Pay Roll Management.png",
