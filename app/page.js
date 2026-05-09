@@ -1020,7 +1020,8 @@ export default function HMTFinancialServices() {
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* Testimonials - Hidden for now */}
+      {/*
       <section className="py-24 bg-slate-100">
         <div className="max-w-7xl mx-auto px-6 text-center mb-16">
           <p className="uppercase tracking-[0.3em] text-yellow-400 font-semibold mb-4">
@@ -1044,6 +1045,7 @@ export default function HMTFinancialServices() {
           ))}
         </div>
       </section>
+      */}
 
       {/* FAQ */}
       <section className="py-24 bg-white">
