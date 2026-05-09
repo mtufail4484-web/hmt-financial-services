@@ -69,9 +69,40 @@ export default function HMTFinancialServices() {
     }));
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
-    setShowPopup(true);
+    
+    try {
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setShowPopup(true);
+        // Reset form after successful submission
+        setFormData({
+          name: "",
+          email: "",
+          phone: "",
+          business: "",
+          country: "",
+          service: "",
+          requirements: "",
+        });
+        setSelectedService("");
+      } else {
+        alert('Error sending email: ' + (result.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Submission error:', error);
+      alert('Failed to submit form. Please try again.');
+    }
   }
 
   function closePopup() {
