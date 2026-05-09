@@ -91,6 +91,11 @@ export default function HMTFinancialServices() {
       image: "/Excel Automation.jpg",
     },
     {
+      title: "Bank Reconciliation",
+      desc: "Accurate bank reconciliation services to match your accounts and cash flow.",
+      image: "/Bank Reconciliation.png",
+    },
+    {
       title: "Payroll Management",
       desc: "Reliable payroll and salary handling services.",
       image: "/Pay Roll Management.png",
