@@ -13,6 +13,7 @@ export default function HMTFinancialServices() {
     email: "",
     phone: "",
     business: "",
+    country: "",
     service: "",
     requirements: "",
   });
@@ -117,6 +118,24 @@ export default function HMTFinancialServices() {
       desc: "Fast and accurate financial data entry services.",
       image: "/Data Entry.jpg",
     },
+  ];
+
+  const businessTypes = [
+    "Retail",
+    "Manufacturing",
+    "Services",
+    "E-commerce",
+    "Consultancy",
+    "Other",
+  ];
+
+  const countries = [
+    "Pakistan",
+    "United States",
+    "United Kingdom",
+    "United Arab Emirates",
+    "Canada",
+    "Australia",
   ];
 
   const featureItems = [
@@ -544,15 +563,36 @@ export default function HMTFinancialServices() {
                 />
 
                 <label className="sr-only" htmlFor="consult-business">Business Type</label>
-                <input
+                <select
                   id="consult-business"
                   name="business"
-                  type="text"
-                  placeholder="Business Type"
                   value={formData.business}
                   onChange={handleFormChange}
                   className="w-full rounded-3xl border border-white/15 bg-slate-950/80 px-5 py-4 text-slate-100 shadow-lg shadow-black/10 outline-none transition focus:border-yellow-400 focus:bg-slate-900"
-                />
+                >
+                  <option value="">Select Business Type</option>
+                  {businessTypes.map((type, index) => (
+                    <option key={index} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+
+                <label className="sr-only" htmlFor="consult-country">Country</label>
+                <select
+                  id="consult-country"
+                  name="country"
+                  value={formData.country}
+                  onChange={handleFormChange}
+                  className="w-full rounded-3xl border border-white/15 bg-slate-950/80 px-5 py-4 text-slate-100 shadow-lg shadow-black/10 outline-none transition focus:border-yellow-400 focus:bg-slate-900"
+                >
+                  <option value="">Select Country</option>
+                  {countries.map((country, index) => (
+                    <option key={index} value={country}>
+                      {country}
+                    </option>
+                  ))}
+                </select>
 
                 <label className="sr-only" htmlFor="consult-service">Service Required</label>
                 <select
