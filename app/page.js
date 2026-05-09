@@ -93,22 +93,7 @@ export default function HMTFinancialServices() {
 
   setShowPopup(true);
 
-  // Delay reset so popup can still show customer data
-  setTimeout(() => {
 
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      business: "",
-      country: "",
-      service: "",
-      requirements: "",
-    });
-
-    setSelectedService("");
-
-  }, 500);
 
 } else {
         alert('Error sending email: ' + (result.error || 'Unknown error'));
@@ -121,8 +106,20 @@ export default function HMTFinancialServices() {
   }
 
   function closePopup() {
-    setShowPopup(false);
-  }
+  setShowPopup(false);
+
+  setFormData({
+    name: "",
+    email: "",
+    phone: "",
+    business: "",
+    country: "",
+    service: "",
+    requirements: "",
+  });
+
+  setSelectedService("");
+}
 
   const services = [
     {
