@@ -16,7 +16,7 @@ export async function POST(request) {
 
     // Send email to admin
     const adminEmail = await resend.emails.send({
-      from: 'info@hmtfinancialservice.com',
+      from: 'info@hmtfinancialservices.com',
       to: 'm.tufail4484@gmail.com',
       subject: `New Consultancy Request from ${name}`,
       html: `
@@ -39,7 +39,7 @@ export async function POST(request) {
 
     // Send confirmation email to client
     const clientEmail = await resend.emails.send({
-      from: 'info@hmtfinancialservice.com',
+      from: 'info@hmtfinancialservices.com',
       to: email,
       subject: 'We Received Your Consultancy Request - HMT Financial Services',
       html: `
@@ -57,7 +57,7 @@ export async function POST(request) {
           <p style="color: #6b7280; font-size: 14px; margin-top: 30px; border-top: 1px solid #e5e7eb; padding-top: 20px;">
             Best regards,<br>
             HMT Financial Services Team<br>
-            info@hmtfinancialservice.com
+            info@hmtfinancialservices.com
           </p>
         </div>
       `,
