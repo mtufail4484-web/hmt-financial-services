@@ -730,6 +730,7 @@ export default function HMTFinancialServices() {
                   placeholder="Your Name"
                   value={formData.name}
                   onChange={handleFormChange}
+                  required
                   className="w-full rounded-3xl border border-white/15 bg-slate-950/80 px-5 py-4 text-slate-100 shadow-lg shadow-black/10 outline-none transition focus:border-yellow-400 focus:bg-slate-900"
                 />
 
@@ -741,6 +742,7 @@ export default function HMTFinancialServices() {
                   placeholder="Your Email"
                   value={formData.email}
                   onChange={handleFormChange}
+                  required
                   className="w-full rounded-3xl border border-white/15 bg-slate-950/80 px-5 py-4 text-slate-100 shadow-lg shadow-black/10 outline-none transition focus:border-yellow-400 focus:bg-slate-900"
                 />
 
@@ -752,6 +754,7 @@ export default function HMTFinancialServices() {
                   placeholder="Phone Number"
                   value={formData.phone}
                   onChange={handleFormChange}
+                  required
                   className="w-full rounded-3xl border border-white/15 bg-slate-950/80 px-5 py-4 text-slate-100 shadow-lg shadow-black/10 outline-none transition focus:border-yellow-400 focus:bg-slate-900"
                 />
 
@@ -761,6 +764,7 @@ export default function HMTFinancialServices() {
                   name="business"
                   value={formData.business}
                   onChange={handleFormChange}
+                  required
                   className="w-full rounded-3xl border border-white/15 bg-slate-950/80 px-5 py-4 text-slate-100 shadow-lg shadow-black/10 outline-none transition focus:border-yellow-400 focus:bg-slate-900"
                 >
                   <option value="">Select Business Type</option>
@@ -777,6 +781,7 @@ export default function HMTFinancialServices() {
                   name="country"
                   value={formData.country}
                   onChange={handleFormChange}
+                  required
                   className="w-full rounded-3xl border border-white/15 bg-slate-950/80 px-5 py-4 text-slate-100 shadow-lg shadow-black/10 outline-none transition focus:border-yellow-400 focus:bg-slate-900"
                 >
                   <option value="">Select Country</option>
@@ -793,6 +798,7 @@ export default function HMTFinancialServices() {
                   name="service"
                   value={formData.service}
                   onChange={handleFormChange}
+                  required
                   className="w-full rounded-3xl border border-white/15 bg-slate-950/80 px-5 py-4 text-slate-100 shadow-lg shadow-black/10 outline-none transition focus:border-yellow-400 focus:bg-slate-900"
                 >
                   <option value="">Select a Service</option>
