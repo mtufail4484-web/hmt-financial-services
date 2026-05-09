@@ -8,6 +8,7 @@ export default function HMTFinancialServices() {
   const [projects, setProjects] = useState(0);
   const [reports, setReports] = useState(0);
   const [selectedService, setSelectedService] = useState("");
+  const [language, setLanguage] = useState("English");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -331,6 +332,138 @@ export default function HMTFinancialServices() {
     "Zimbabwe",
   ];
 
+  const languages = [
+    "English",
+    "Spanish",
+    "French",
+    "Urdu",
+  ];
+
+  const translations = {
+    English: {
+      home: "Home",
+      services: "Services",
+      about: "About",
+      consultancy: "Consultancy",
+      contact: "Contact",
+      bookConsultancy: "Book Consultancy",
+      ourServices: "Our Services",
+      servicesDescription: "Professional financial solutions for your business.",
+      aboutLabel: "About HMT",
+      aboutHeading: "Trusted Financial Experts",
+      aboutText1: "HMT Financial Services provides bookkeeping, ERP management, payroll handling, reporting and consultancy solutions.",
+      aboutText2: "We help businesses stay organized, compliant and growth focused through modern financial systems.",
+      consultancyRequest: "Consultancy Request",
+      consultancyHeading: "Book Consultancy",
+      consultancyCopy: "Share your requirements and our financial experts will reach out with a customised plan that fits your business.",
+      formHeading: "Let’s shape your financial future.",
+      formCopy: "Complete the form and we’ll get back to you with a practical, secure financial solution designed for your needs.",
+      selectBusinessType: "Select Business Type",
+      selectCountry: "Select Country",
+      selectService: "Select a Service",
+      describeRequirements: "Describe Your Requirements",
+      submitRequest: "Submit Consultancy Request",
+      quickSupport: "Quick Support",
+      needAssistance: "Need assistance now?",
+      supportText: "Our expert team is ready to help with bookkeeping, payroll, ERP, reporting and automation for growing businesses.",
+      serviceBadge: "Service",
+      bookThisService: "Book This Service",
+      language: "Language",
+    },
+    Spanish: {
+      home: "Inicio",
+      services: "Servicios",
+      about: "Acerca de",
+      consultancy: "Consultoría",
+      contact: "Contacto",
+      bookConsultancy: "Reservar Consultoría",
+      ourServices: "Nuestros Servicios",
+      servicesDescription: "Soluciones financieras profesionales para su negocio.",
+      aboutLabel: "Acerca de HMT",
+      aboutHeading: "Expertos financieros de confianza",
+      aboutText1: "HMT Financial Services proporciona servicios de contabilidad, gestión ERP, nómina, informes y consultoría.",
+      aboutText2: "Ayudamos a las empresas a mantenerse organizadas, conformes y enfocadas en el crecimiento a través de sistemas financieros modernos.",
+      consultancyRequest: "Solicitud de Consultoría",
+      consultancyHeading: "Reservar Consultoría",
+      consultancyCopy: "Comparta sus requisitos y nuestros expertos financieros se comunicarán con un plan personalizado que se adapte a su negocio.",
+      formHeading: "Demos forma a su futuro financiero.",
+      formCopy: "Complete el formulario y nos pondremos en contacto con una solución financiera práctica y segura diseñada para sus necesidades.",
+      selectBusinessType: "Seleccione tipo de negocio",
+      selectCountry: "Seleccione país",
+      selectService: "Seleccione un servicio",
+      describeRequirements: "Describa sus requisitos",
+      submitRequest: "Enviar solicitud de consultoría",
+      quickSupport: "Soporte rápido",
+      needAssistance: "¿Necesita ayuda ahora?",
+      supportText: "Nuestro equipo experto está listo para ayudar con contabilidad, nómina, ERP, informes y automatización para empresas en crecimiento.",
+      serviceBadge: "Servicio",
+      bookThisService: "Reservar este servicio",
+      language: "Idioma",
+    },
+    French: {
+      home: "Accueil",
+      services: "Services",
+      about: "À propos",
+      consultancy: "Conseil",
+      contact: "Contact",
+      bookConsultancy: "Réserver une consultation",
+      ourServices: "Nos Services",
+      servicesDescription: "Solutions financières professionnelles pour votre entreprise.",
+      aboutLabel: "À propos de HMT",
+      aboutHeading: "Experts financiers de confiance",
+      aboutText1: "HMT Financial Services fournit des services de tenue de livres, de gestion ERP, de paie, de rapports et de conseil.",
+      aboutText2: "Nous aidons les entreprises à rester organisées, conformes et axées sur la croissance grâce à des systèmes financiers modernes.",
+      consultancyRequest: "Demande de conseil",
+      consultancyHeading: "Réserver une consultation",
+      consultancyCopy: "Partagez vos besoins et nos experts financiers vous contacteront avec un plan personnalisé adapté à votre entreprise.",
+      formHeading: "Façonnons votre avenir financier.",
+      formCopy: "Remplissez le formulaire et nous vous répondrons avec une solution financière pratique et sécurisée conçue pour vos besoins.",
+      selectBusinessType: "Sélectionnez le type d'entreprise",
+      selectCountry: "Sélectionnez un pays",
+      selectService: "Sélectionnez un service",
+      describeRequirements: "Décrivez vos exigences",
+      submitRequest: "Envoyer la demande de conseil",
+      quickSupport: "Support rapide",
+      needAssistance: "Besoin d'aide maintenant ?",
+      supportText: "Notre équipe d'experts est prête à aider avec la comptabilité, la paie, l'ERP, les rapports et l'automatisation pour les entreprises en croissance.",
+      serviceBadge: "Service",
+      bookThisService: "Réservez ce service",
+      language: "Langue",
+    },
+    Urdu: {
+      home: "ہوم",
+      services: "خدمات",
+      about: "ہمارے بارے میں",
+      consultancy: "مشاورت",
+      contact: "رابطہ",
+      bookConsultancy: "مشاورت بک کریں",
+      ourServices: "ہماری خدمات",
+      servicesDescription: "آپ کے کاروبار کے لیے پیشہ ورانہ مالی حل۔",
+      aboutLabel: "HMT کے بارے میں",
+      aboutHeading: "قابل اعتماد مالی ماہرین",
+      aboutText1: "HMT Financial Services کتابت، ERP مینجمنٹ، پے رول، رپورٹنگ اور مشاورت کے حل فراہم کرتا ہے۔",
+      aboutText2: "ہم جدید مالی نظام کے ذریعے کاروبار کو منظم، مطابق اور ترقی پر مرکوز رکھنے میں مدد کرتے ہیں۔",
+      consultancyRequest: "مشاورت کی درخواست",
+      consultancyHeading: "مشاورت بک کریں",
+      consultancyCopy: "اپنی ضروریات شیئر کریں اور ہمارے مالی ماہرین آپ کے کاروبار کے مطابق منصوبہ لے کر رابطہ کریں گے۔",
+      formHeading: "آئیے آپ کے مالی مستقبل کو تشکیل دیں۔",
+      formCopy: "فارم مکمل کریں اور ہم آپ کی ضروریات کے مطابق ایک عملی، محفوظ مالی حل کے ساتھ رابطہ کریں گے۔",
+      selectBusinessType: "کاروبار کی قسم منتخب کریں",
+      selectCountry: "ملک منتخب کریں",
+      selectService: "ایک خدمت منتخب کریں",
+      describeRequirements: "اپنی ضروریات بیان کریں",
+      submitRequest: "مشاورت کی درخواست جمع کریں",
+      quickSupport: "جلدی مدد",
+      needAssistance: "اب مدد درکار ہے؟",
+      supportText: "ہماری ماہر ٹیم بڑھتے کاروباروں کے لیے کتابت، پے رول، ERP، رپورٹنگ اور آٹومیشن میں مدد کے لیے تیار ہے۔",
+      serviceBadge: "سروس",
+      bookThisService: "اس سروس کو بک کریں",
+      language: "زبان",
+    },
+  };
+
+  const t = (key) => translations[language]?.[key] ?? key;
+
   const featureItems = [
     {
       label: "You Can Trust",
@@ -408,26 +541,42 @@ export default function HMTFinancialServices() {
           <nav className="hidden md:flex gap-8 text-white font-semibold text-lg">
 
             <a href="#home" className="hover:text-yellow-400 transition">
-              Home
+              {t("home")}
             </a>
 
             <a href="#services" className="hover:text-yellow-400 transition">
-              Services
+              {t("services")}
             </a>
 
             <a href="#about" className="hover:text-yellow-400 transition">
-              About
+              {t("about")}
             </a>
 
             <a href="#consultancy" className="hover:text-yellow-400 transition">
-              Consultancy
+              {t("consultancy")}
             </a>
 
             <a href="#contact" className="hover:text-yellow-400 transition">
-              Contact
+              {t("contact")}
             </a>
 
           </nav>
+
+          <div className="hidden md:flex items-center gap-3 text-white">
+            <label className="sr-only" htmlFor="language-select">{t("language")}</label>
+            <select
+              id="language-select"
+              value={language}
+              onChange={(event) => setLanguage(event.target.value)}
+              className="rounded-2xl bg-slate-900/80 border border-white/20 px-4 py-2 text-sm text-white outline-none transition focus:border-yellow-400"
+            >
+              {languages.map((lang) => (
+                <option key={lang} value={lang} className="bg-slate-900 text-white">
+                  {lang}
+                </option>
+              ))}
+            </select>
+          </div>
 
         </div>
 
@@ -483,14 +632,14 @@ export default function HMTFinancialServices() {
                 href="#consultancy"
                 className="bg-yellow-400 text-black px-8 py-4 rounded-2xl font-black hover:scale-105 transition duration-300 shadow-2xl"
               >
-                Book Consultancy
+                {t("bookConsultancy")}
               </a>
 
               <a
                 href="#services"
                 className="border-2 border-white text-white px-8 py-4 rounded-2xl font-bold hover:bg-white hover:text-black transition duration-300"
               >
-                Our Services
+                {t("ourServices")}
               </a>
 
             </div>
@@ -581,11 +730,11 @@ export default function HMTFinancialServices() {
           <div className="text-center mb-16">
 
             <h2 className="text-5xl font-black text-[#071739] mb-4">
-              Our Services
+              {t("ourServices")}
             </h2>
 
             <p className="text-lg text-slate-600">
-              Professional financial solutions for your business.
+              {t("servicesDescription")}
             </p>
 
           </div>
@@ -609,7 +758,7 @@ export default function HMTFinancialServices() {
 
                 <div className="p-8">
                   <span className="inline-flex rounded-full bg-slate-900/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-slate-600">
-                    Service
+                    {t("serviceBadge")}
                   </span>
 
                   <h3 className="mt-4 text-2xl font-black text-slate-950 mb-4">
@@ -625,7 +774,7 @@ export default function HMTFinancialServices() {
                     onClick={() => handleBookService(service.title)}
                     className="w-full rounded-2xl bg-yellow-400 px-5 py-3 text-sm font-bold text-black transition duration-300 hover:bg-yellow-500 hover:-translate-y-0.5"
                   >
-                    Book This Service
+                    {t("bookThisService")}
                   </button>
                 </div>
 
@@ -660,22 +809,19 @@ export default function HMTFinancialServices() {
           <div>
 
             <p className="uppercase tracking-[6px] text-yellow-500 font-bold mb-4">
-              About HMT
+              {t("aboutLabel")}
             </p>
 
             <h2 className="text-5xl font-black text-[#071739] mb-6">
-              Trusted Financial Experts
+              {t("aboutHeading")}
             </h2>
 
             <p className="text-lg text-slate-600 leading-relaxed mb-6">
-              HMT Financial Services provides bookkeeping,
-              ERP management, payroll handling,
-              reporting and consultancy solutions.
+              {t("aboutText1")}
             </p>
 
             <p className="text-lg text-slate-600 leading-relaxed">
-              We help businesses stay organized,
-              compliant and growth focused through modern financial systems.
+              {t("aboutText2")}
             </p>
 
           </div>
@@ -695,15 +841,15 @@ export default function HMTFinancialServices() {
           <div className="text-center mb-16">
 
             <p className="uppercase tracking-[0.3em] text-yellow-400 font-semibold mb-4">
-              Consultancy Request
+              {t("consultancyRequest")}
             </p>
 
             <h2 className="text-5xl font-black mb-5">
-              Book Consultancy
+              {t("consultancyHeading")}
             </h2>
 
             <p className="mx-auto max-w-2xl text-lg text-slate-300">
-              Share your requirements and our financial experts will reach out with a customised plan that fits your business.
+              {t("consultancyCopy")}
             </p>
 
           </div>
@@ -714,10 +860,10 @@ export default function HMTFinancialServices() {
 
               <div className="mb-8 rounded-[2rem] bg-gradient-to-r from-yellow-400/20 via-white/10 to-slate-200/10 p-6 shadow-inner">
                 <h3 className="text-3xl font-black text-white mb-3">
-                  Let’s shape your financial future.
+                  {t("formHeading")}
                 </h3>
                 <p className="text-slate-300 leading-relaxed">
-                  Complete the form and we’ll get back to you with a practical, secure financial solution designed for your needs.
+                  {t("formCopy")}
                 </p>
               </div>
 
@@ -767,7 +913,7 @@ export default function HMTFinancialServices() {
                   required
                   className="w-full rounded-3xl border border-white/15 bg-slate-950/80 px-5 py-4 text-slate-100 shadow-lg shadow-black/10 outline-none transition focus:border-yellow-400 focus:bg-slate-900"
                 >
-                  <option value="">Select Business Type</option>
+                  <option value="">{t("selectBusinessType")}</option>
                   {businessTypes.map((type, index) => (
                     <option key={index} value={type}>
                       {type}
@@ -784,7 +930,7 @@ export default function HMTFinancialServices() {
                   required
                   className="w-full rounded-3xl border border-white/15 bg-slate-950/80 px-5 py-4 text-slate-100 shadow-lg shadow-black/10 outline-none transition focus:border-yellow-400 focus:bg-slate-900"
                 >
-                  <option value="">Select Country</option>
+                  <option value="">{t("selectCountry")}</option>
                   {countries.map((country, index) => (
                     <option key={index} value={country}>
                       {country}
@@ -801,7 +947,7 @@ export default function HMTFinancialServices() {
                   required
                   className="w-full rounded-3xl border border-white/15 bg-slate-950/80 px-5 py-4 text-slate-100 shadow-lg shadow-black/10 outline-none transition focus:border-yellow-400 focus:bg-slate-900"
                 >
-                  <option value="">Select a Service</option>
+                  <option value="">{t("selectService")}</option>
                   {services.map((service, index) => (
                     <option key={index} value={service.title}>
                       {service.title}
@@ -814,7 +960,7 @@ export default function HMTFinancialServices() {
                   id="consult-details"
                   name="requirements"
                   rows="6"
-                  placeholder="Describe Your Requirements"
+                  placeholder={t("describeRequirements")}
                   value={formData.requirements}
                   onChange={handleFormChange}
                   className="w-full rounded-3xl border border-white/15 bg-slate-950/80 px-5 py-4 text-slate-100 shadow-lg shadow-black/10 outline-none transition focus:border-yellow-400 focus:bg-slate-900"
@@ -824,7 +970,7 @@ export default function HMTFinancialServices() {
                   type="submit"
                   className="w-full rounded-3xl bg-yellow-400 px-6 py-4 text-base font-black uppercase tracking-[0.08em] text-black shadow-2xl shadow-yellow-500/20 transition duration-300 hover:-translate-y-0.5 hover:bg-yellow-500"
                 >
-                  Submit Consultancy Request
+                  {t("submitRequest")}
                 </button>
               </form>
 
@@ -834,13 +980,13 @@ export default function HMTFinancialServices() {
               <div className="space-y-6">
                 <div>
                   <p className="text-sm uppercase tracking-[0.3em] text-yellow-400 font-semibold mb-3">
-                    Quick Support
+                    {t("quickSupport")}
                   </p>
                   <h3 className="text-3xl font-black text-white">
-                    Need assistance now?
+                    {t("needAssistance")}
                   </h3>
                   <p className="mt-4 text-slate-300 leading-relaxed">
-                    Our expert team is ready to help with bookkeeping, payroll, ERP, reporting and automation for growing businesses.
+                    {t("supportText")}
                   </p>
                 </div>
 
