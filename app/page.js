@@ -13,6 +13,7 @@ export default function HMTFinancialServices() {
     email: "",
     phone: "",
     business: "",
+    service: "",
     requirements: "",
   });
   const [showPopup, setShowPopup] = useState(false);
@@ -50,6 +51,7 @@ export default function HMTFinancialServices() {
   useEffect(() => {
     if (selectedService && formRef.current) {
       formRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      setFormData(prev => ({...prev, service: selectedService}));
     }
   }, [selectedService]);
 
@@ -552,15 +554,21 @@ export default function HMTFinancialServices() {
                   className="w-full rounded-3xl border border-white/15 bg-slate-950/80 px-5 py-4 text-slate-100 shadow-lg shadow-black/10 outline-none transition focus:border-yellow-400 focus:bg-slate-900"
                 />
 
-                <label className="sr-only" htmlFor="consult-service">Services Needed</label>
-                <input
+                <label className="sr-only" htmlFor="consult-service">Service Required</label>
+                <select
                   id="consult-service"
-                  type="text"
-                  value={selectedService || ""}
-                  readOnly
-                  placeholder="Services Needed"
-                  className="w-full rounded-3xl border border-yellow-400/30 bg-yellow-400/10 px-5 py-4 text-slate-100 shadow-inner outline-none transition focus:border-yellow-300"
-                />
+                  name="service"
+                  value={formData.service}
+                  onChange={handleFormChange}
+                  className="w-full rounded-3xl border border-white/15 bg-slate-950/80 px-5 py-4 text-slate-100 shadow-lg shadow-black/10 outline-none transition focus:border-yellow-400 focus:bg-slate-900"
+                >
+                  <option value="">Select a Service</option>
+                  {services.map((service, index) => (
+                    <option key={index} value={service.title}>
+                      {service.title}
+                    </option>
+                  ))}
+                </select>
 
                 <label className="sr-only" htmlFor="consult-details">Describe Your Requirements</label>
                 <textarea
