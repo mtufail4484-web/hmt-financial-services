@@ -337,6 +337,7 @@ export default function HMTFinancialServices() {
     "Spanish",
     "French",
     "Urdu",
+    "Arabic",
   ];
 
   const translations = {
@@ -460,6 +461,36 @@ export default function HMTFinancialServices() {
       bookThisService: "اس سروس کو بک کریں",
       language: "زبان",
     },
+    Arabic: {
+      home: "الصفحة الرئيسية",
+      services: "الخدمات",
+      about: "من نحن",
+      consultancy: "الاستشارات",
+      contact: "اتصل",
+      bookConsultancy: "احجز استشارة",
+      ourServices: "خدماتنا",
+      servicesDescription: "حلول مالية احترافية لعملك.",
+      aboutLabel: "حول HMT",
+      aboutHeading: "خبراء ماليون موثوقون",
+      aboutText1: "توفر HMT Financial Services خدمات مسك الدفاتر وإدارة ERP والرواتب والتقارير والاستشارات.",
+      aboutText2: "نساعد الشركات على البقاء منظمة ومتوافقة ومركزة على النمو من خلال أنظمة مالية حديثة.",
+      consultancyRequest: "طلب استشارة",
+      consultancyHeading: "احجز استشارة",
+      consultancyCopy: "شارك متطلباتك وسيتواصل خبراؤنا الماليون مع خطة مخصصة تناسب عملك.",
+      formHeading: "لنُشكّل مستقبلك المالي.",
+      formCopy: "أكمل النموذج وسنعود إليك بحل مالي عملي وآمن مصمم لاحتياجاتك.",
+      selectBusinessType: "اختر نوع العمل",
+      selectCountry: "اختر الدولة",
+      selectService: "اختر خدمة",
+      describeRequirements: "وصف متطلباتك",
+      submitRequest: "إرسال طلب الاستشارة",
+      quickSupport: "دعم سريع",
+      needAssistance: "هل تحتاج مساعدة الآن؟",
+      supportText: "فريقنا المختص جاهز لمساعدتك في مسك الدفاتر والرواتب وERP والتقارير والأتمتة للشركات النامية.",
+      serviceBadge: "الخدمة",
+      bookThisService: "احجز هذه الخدمة",
+      language: "اللغة",
+    },
   };
 
   const t = (key) => translations[language]?.[key] ?? key;
@@ -519,7 +550,7 @@ export default function HMTFinancialServices() {
 
   return (
 
-    <div className="bg-slate-50 text-slate-800 overflow-hidden">
+    <div dir={language === "Arabic" ? "rtl" : "ltr"} className="bg-slate-50 text-slate-800 overflow-hidden">
 
       {/* Navbar */}
       <header className="bg-black/70 backdrop-blur-md sticky top-0 z-50">
