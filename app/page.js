@@ -383,7 +383,7 @@ export default function HMTFinancialServices() {
       faqLabel: "Frequently Asked Questions",
       faqHeading: "Answers that help you decide",
       faqCopy: "Everything you need to know before you request consultancy or financial services.",
-      testimonial1: "HMT made our month-end reporting faster and more accurate. Their team is responsive and detail-oriented.",
+      testimonial1: "HMT's financial services helped us streamline our operations and improve our SEO-driven marketing results. Professional and reliable team.",
       testimonial2: "We now have clear cash flow visibility and reliable payroll support. Highly recommended.",
       testimonial3: "The consultancy process was organized, professional and very helpful for our business planning.",
       faq1Question: "How soon can I start?",
@@ -443,7 +443,7 @@ export default function HMTFinancialServices() {
       faqLabel: "Preguntas frecuentes",
       faqHeading: "Respuestas que te ayudan a decidir",
       faqCopy: "Todo lo que necesita saber antes de solicitar consultoría o servicios financieros.",
-      testimonial1: "HMT hizo que nuestros informes de fin de mes fueran más rápidos y precisos. Su equipo es receptivo y detallista.",
+      testimonial1: "Los servicios financieros de HMT nos ayudaron a optimizar nuestras operaciones y mejorar nuestros resultados de marketing impulsados por SEO. Equipo profesional y confiable.",
       testimonial2: "Ahora tenemos una visibilidad clara del flujo de efectivo y soporte confiable para nómina. Muy recomendado.",
       testimonial3: "El proceso de consultoría fue organizado, profesional y muy útil para nuestra planificación empresarial.",
       faq1Question: "¿Qué tan pronto puedo comenzar?",
@@ -503,7 +503,7 @@ export default function HMTFinancialServices() {
       faqLabel: "Questions fréquentes",
       faqHeading: "Des réponses pour vous aider à décider",
       faqCopy: "Tout ce que vous devez savoir avant de demander une consultation ou des services financiers.",
-      testimonial1: "HMT a rendu nos rapports de fin de mois plus rapides et plus précis. Leur équipe est réactive et minutieuse.",
+      testimonial1: "Les services financiers de HMT nous ont aidés à rationaliser nos opérations et à améliorer nos résultats de marketing axés sur le référencement. Équipe professionnelle et fiable.",
       testimonial2: "Nous avons maintenant une visibilité claire de la trésorerie et un support fiable de la paie. Fortement recommandé.",
       testimonial3: "Le processus de consultation était organisé, professionnel et très utile pour notre planification commerciale.",
       faq1Question: "Quand puis-je commencer ?",
@@ -563,7 +563,7 @@ export default function HMTFinancialServices() {
       faqLabel: "اکثر پوچھے گئے سوالات",
       faqHeading: "جوابات جو آپ کو فیصلہ کرنے میں مدد دیتے ہیں",
       faqCopy: "مشاورت یا مالی خدمات کی درخواست کرنے سے پہلے آپ کو جو کچھ جاننے کی ضرورت ہے۔",
-      testimonial1: "HMT نے ہمارے ماہانہ رپورٹنگ کو تیز اور زیادہ درست بنایا۔ ان کی ٹیم فوری اور تفصیلی ہے۔",
+      testimonial1: "HMT کی مالی خدمات نے ہماری کارروائیوں کو ہموار کرنے اور ہمارے SEO سے چلنے والے مارکیٹنگ کے نتائج کو بہتر بنانے میں مدد کی۔ پیشہ ورانہ اور قابل بھروسہ ٹیم۔",
       testimonial2: "اب ہمارے پاس واضح کیش فلو نظر ہے اور پے رول کے لیے قابل بھروسہ سپورٹ ہے۔ انتہائی سفارش شدہ۔",
       testimonial3: "مشاورت کا عمل منظم، پیشہ ورانہ اور ہمارے کاروباری منصوبہ بندی کے لیے بہت مددگار تھا۔",
       faq1Question: "میں کتنی جلدی شروع کر سکتا ہوں؟",
@@ -623,7 +623,7 @@ export default function HMTFinancialServices() {
       faqLabel: "الأسئلة الشائعة",
       faqHeading: "إجابات تساعدك على اتخاذ القرار",
       faqCopy: "كل ما تحتاج لمعرفته قبل طلب الاستشارة أو الخدمات المالية.",
-      testimonial1: "جعلت HMT تقارير نهاية الشهر أسرع وأكثر دقة. فريقهم سريع الاستجابة ويميز التفاصيل.",
+      testimonial1: "ساعدتنا خدمات HMT المالية في تبسيط عملياتنا وتحسين نتائج التسويق المدفوع بالكلمات الرئيسية. فريق محترف وموثوق.",
       testimonial2: "الآن لدينا رؤية واضحة للتدفق النقدي ودعم موثوق للرواتب. موصى به بشدة.",
       testimonial3: "كان عملية الاستشارة منظمة ومهنية ومفيدة للغاية لتخطيط أعمالنا.",
       faq1Question: "كم بسرعة يمكنني البدء؟",
@@ -705,7 +705,7 @@ export default function HMTFinancialServices() {
   ];
 
   const testimonials = [
-    { quote: "testimonial1", name: "Ayesha R.", role: "SME Owner" },
+    { quote: "testimonial1", name: "M. Noman", role: "SEO at Bin Muhammad Tech" },
     { quote: "testimonial2", name: "Bilal K.", role: "Business Manager" },
     { quote: "testimonial3", name: "Sara N.", role: "Finance Head" },
   ];
