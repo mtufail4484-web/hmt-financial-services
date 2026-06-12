@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import Link from "next/link";
 
 export default function HMTFinancialServices() {
 
@@ -9,6 +10,7 @@ export default function HMTFinancialServices() {
   const [reports, setReports] = useState(0);
   const [selectedService, setSelectedService] = useState("");
   const [language, setLanguage] = useState("English");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -147,6 +149,7 @@ export default function HMTFinancialServices() {
       desc: "Efficient management of accounts receivable and payable for better cash flow.",
       image: "/Recceivable and payable.png",
     },
+
     {
       title: "Payroll Management",
       desc: "Reliable payroll and salary handling services.",
@@ -162,6 +165,18 @@ export default function HMTFinancialServices() {
       desc: "Fast and accurate financial data entry services.",
       image: "/Data Entry.jpg",
     },
+    
+    {
+  title: "Digital Services",
+  desc: "Professional website development, mobile app development, e-commerce solutions, UI/UX design, and complete digital business solutions for modern brands.",
+  image: "/Digital Solution.png",
+},
+{
+  title: "Free Computer Course",
+  desc: "Join our FREE live computer classes starting from 30 May. Learn Computer Basics, MS Word, Excel, PowerPoint, CV Making and Office Skills through YouTube live sessions.",
+  image: "/computer-course.jpg",
+  link: "/computer-course",
+},
   ];
 
   const businessTypes = [
@@ -821,7 +836,73 @@ export default function HMTFinancialServices() {
             </select>
           </div>
 
+          <button
+            type="button"
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileMenuOpen}
+            onClick={() => setMobileMenuOpen((open) => !open)}
+            className="md:hidden grid h-11 w-11 place-items-center rounded-lg border border-white/20 bg-white/10 text-white transition hover:bg-white/20"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-6 w-6"
+            >
+              {mobileMenuOpen ? (
+                <path d="M18 6 6 18M6 6l12 12" />
+              ) : (
+                <path d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
+
         </div>
+
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-white/10 bg-black/90 px-6 py-5 text-white shadow-2xl">
+            <nav className="flex flex-col gap-4 text-base font-semibold">
+              <a href="#home" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-2 transition hover:bg-white/10 hover:text-yellow-400">
+                {t("home")}
+              </a>
+              <a href="#services" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-2 transition hover:bg-white/10 hover:text-yellow-400">
+                {t("services")}
+              </a>
+              <a href="#about" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-2 transition hover:bg-white/10 hover:text-yellow-400">
+                {t("about")}
+              </a>
+              <a href="#consultancy" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-2 transition hover:bg-white/10 hover:text-yellow-400">
+                {t("consultancy")}
+              </a>
+              <a href="#contact" onClick={() => setMobileMenuOpen(false)} className="rounded-lg px-3 py-2 transition hover:bg-white/10 hover:text-yellow-400">
+                {t("contact")}
+              </a>
+            </nav>
+
+            <div className="mt-5 border-t border-white/10 pt-5">
+              <label className="sr-only" htmlFor="mobile-language-select">{t("language")}</label>
+              <select
+                id="mobile-language-select"
+                value={language}
+                onChange={(event) => {
+                  setLanguage(event.target.value);
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full rounded-lg bg-slate-900/90 border border-white/20 px-4 py-3 text-sm text-white outline-none transition focus:border-yellow-400"
+              >
+                {languages.map((lang) => (
+                  <option key={lang} value={lang} className="bg-slate-900 text-white">
+                    {lang}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
 
       </header>
 
@@ -986,7 +1067,9 @@ export default function HMTFinancialServices() {
 
             {services.map((service, index) => (
 
-              <div
+  <Link href={service.link || "#"} key={index}>
+
+  <div
                 key={index}
                 className="group overflow-hidden rounded-[2rem] bg-gradient-to-br from-white via-slate-50 to-slate-100 shadow-2xl transition duration-500 hover:-translate-y-2 hover:shadow-blue-300/30"
               >
@@ -1022,6 +1105,7 @@ export default function HMTFinancialServices() {
                 </div>
 
               </div>
+              </Link>
 
             ))}
 
@@ -1443,4 +1527,5 @@ export default function HMTFinancialServices() {
     </div>
 
   );
+
 }
