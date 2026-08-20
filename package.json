@@ -22,7 +22,7 @@
     "@tailwindcss/postcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
-    "firebase-tools": "^15.28.1",
+    "firebase-tools": "^14.27.0",
     "sharp": "^0.35.3",
     "tailwindcss": "^4"
   }

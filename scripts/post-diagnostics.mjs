@@ -46,13 +46,25 @@ try {
     }
   })();
   if (committed || process.env.FORCE_DIAG_PUSH === "1") {
-    const token = process.env.GITHUB_TOKEN;
-    const pushUrl = `https://x-access-token:${token}@github.com/${repo}.git`;
+    // Primary: plain origin push — actions/checkout has already stored the
+    // job token as a git credential on the runner (no env var needed).
+    // Fallback: explicit x-access-token URL if GITHUB_TOKEN is exported.
     try {
-      run(`git push "${pushUrl}" HEAD:refs/heads/${branch}`);
-      console.log("[post-diagnostics] pushed ci-diagnostics/last-failure.txt");
-    } catch (e) {
-      console.log(`[post-diagnostics] push failed: ${String(e.stderr || e.message).replaceAll(token ?? "???", "***")}`);
+      run(`git push origin HEAD:refs/heads/${branch}`);
+      console.log("[post-diagnostics] pushed ci-diagnostics/last-failure.txt (via origin)");
+    } catch (e1) {
+      const token = process.env.GITHUB_TOKEN;
+      if (token) {
+        try {
+          const pushUrl = `https://x-access-token:${token}@github.com/${repo}.git`;
+          run(`git push "${pushUrl}" HEAD:refs/heads/${branch}`);
+          console.log("[post-diagnostics] pushed ci-diagnostics/last-failure.txt (via token URL)");
+        } catch (e2) {
+          console.log(`[post-diagnostics] push failed: ${String((e2.stderr || e2.message)).replaceAll(token, "***")}`);
+        }
+      } else {
+        console.log(`[post-diagnostics] push failed: ${String(e1.stderr || e1.message).slice(0, 300)}`);
+      }
     }
   } else {
     console.log("[post-diagnostics] nothing new to commit");
