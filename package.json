@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
-    "test:rules": "node scripts/run-rules-tests.mjs"
+    "test:rules": "node scripts/run-rules-tests.mjs; code=$?; node scripts/post-diagnostics.mjs $code || true; exit $code"
   },
   "dependencies": {
     "firebase": "^12.14.0",

@@ -46,3 +46,6 @@ next-env.d.ts
 .expo/
 app.json
 eas.json
+
+# CI diagnostics output (created by test runner)
+ci-output.txt
