@@ -1,29 +1,38 @@
 rules_version = '2';
 
 // ============================================================================
-// HMT Success Academy — Firestore Security Rules (PROPOSAL v3 — NOT DEPLOYED)
+// HMT Success Academy — Firestore Security Rules (v3.1 — NOT DEPLOYED)
 // ----------------------------------------------------------------------------
-// v3 additions requested by owner:
-//   * watchedSeconds can only INCREASE (never reduced, never deleted)
-//   * completed can only transition false -> true (never true -> false)
-//   * once completed: completedAt / completionThreshold / requiredSecondsAtCompletion
-//     are IMMUTABLE (cannot be changed or removed)
-//   * per-lecture progress lives in students/{uid}/progress/{lectureId} so these
-//     guarantees can be enforced per document for ANY lecture id (rules language
-//     cannot iterate over map keys inside the parent document)
+// v3.1: same guarantees as v3, rewritten with conservative rules syntax
+//       (no function arguments, no dynamic map indexing) for maximum
+//       emulator/compiler compatibility.
 //
-// HONEST LIMITATION (acknowledged by owner): completion is client-written, so a
-// determined account owner can still FORGE a completion (set completed:true via
-// an authenticated client). Rules prevent: removal, reduction, cross-student
-// edits, threshold tampering, counter manipulation, and admin self-promotion.
-// This is "tamper-resistant", NOT cheat-proof. Server-side validation is a
-// future phase.
+// Guarantees:
+//   * watchedSeconds on a progress doc can only INCREASE (never reduced,
+//     never deleted)
+//   * completed can only transition false -> true (never true -> false)
+//   * once completed: completedAt / completionThreshold /
+//     requiredSecondsAtCompletion / videoDurationSeconds are immutable
+//   * completedVideos on the profile is append-only (a completion can never
+//     be removed)
+//   * students can read/write ONLY their own data; listing students (and
+//     therefore getCountFromServer) is ADMIN-ONLY
+//   * config (completion threshold): admin-write-only, int 1..100
+//   * admins registry: console-managed; users can only check their own entry
+//   * stats counter: public read of a NUMBER; signups may bump by exactly +1;
+//     admins may set the true value
+//   * default deny for everything else
+//
+// HONEST LIMITATION (acknowledged by owner): completion is client-written, so
+// a determined account owner can still FORGE a completion. Rules prevent
+// removal, reduction, cross-student edits, threshold tampering, counter jumps,
+// and admin self-promotion. Tamper-resistant, NOT cheat-proof. Server-side
+// validation is a future phase.
 // ============================================================================
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ---- Helpers -------------------------------------------------------------
     function isSignedIn() {
       return request.auth != null;
     }
@@ -36,7 +45,7 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
     }
 
-    // ---- Student profile document: owner-only, progress-fields-only ----------
+    // ---- Student profile document: owner-only, progress-fields-only --------
     match /students/{uid} {
 
       function isOwner() {
@@ -44,8 +53,6 @@ service cloud.firestore {
       }
 
       // Only these two fields may ever change on the profile document.
-      // uid, name, email, quizScore, assignmentScore, createdAt: immutable
-      // from any client.
       function touchesOnlyProgressFields() {
         return request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly(['completedVideos', 'watchTimeMinutes']);
@@ -78,39 +85,18 @@ service cloud.firestore {
       // Student documents are never deletable from any client.
       allow delete: if false;
 
-      // ---- Per-lecture progress: strictly monotonic, append-friendly ---------
+      // ---- Per-lecture progress: strictly monotonic, append-friendly -------
       // Document shape (created by the portal on first watch):
       //   watchedSeconds: int (only ever increases)
-      //   videoDurationSeconds: int (set once from the YouTube API, then immutable)
+      //   videoDurationSeconds: int (set once from the YouTube API, immutable)
       //   completed: bool (false -> true only)
       //   completedAt / completionThreshold / requiredSecondsAtCompletion:
       //       stamped once at completion, then immutable
       //   updatedAt: timestamp
       match /progress/{lectureId} {
 
-        function before() { return resource.data; }
-        function after() { return request.resource.data; }
-
-        // A field that has been set may keep its value or first appear, but
-        // can never change and never be deleted (FieldValue.delete() produces
-        // an error/absence here -> denied).
-        function immutableOnceSet(field) {
-          return !(field in before())
-            || after()[field] == before()[field];
-        }
-
-        function watchedSecondsNeverDecreases() {
-          return !('watchedSeconds' in before())
-            || after().watchedSeconds >= before().watchedSeconds;
-        }
-
-        function completedNeverUncompletes() {
-          return !('completed' in before())
-            || !(before().completed == true && after().completed == false);
-        }
-
-        function touchesOnlyProgressDocFields() {
-          return after().diff(before()).affectedKeys().hasOnly([
+        function onlyProgressDocFieldsChanged() {
+          return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
             'watchedSeconds',
             'videoDurationSeconds',
             'completed',
@@ -121,28 +107,62 @@ service cloud.firestore {
           ]);
         }
 
+        function watchedSecondsNeverDecreases() {
+          return !('watchedSeconds' in resource.data)
+            || request.resource.data.watchedSeconds >= resource.data.watchedSeconds;
+        }
+
+        function completedNeverUncompletes() {
+          return !('completed' in resource.data)
+            || !(resource.data.completed == true
+                 && request.resource.data.completed == false);
+        }
+
+        function completedAtImmutable() {
+          return !('completedAt' in resource.data)
+            || request.resource.data.completedAt == resource.data.completedAt;
+        }
+
+        function completionThresholdImmutable() {
+          return !('completionThreshold' in resource.data)
+            || request.resource.data.completionThreshold
+                 == resource.data.completionThreshold;
+        }
+
+        function requiredSecondsImmutable() {
+          return !('requiredSecondsAtCompletion' in resource.data)
+            || request.resource.data.requiredSecondsAtCompletion
+                 == resource.data.requiredSecondsAtCompletion;
+        }
+
+        function videoDurationImmutable() {
+          return !('videoDurationSeconds' in resource.data)
+            || request.resource.data.videoDurationSeconds
+                 == resource.data.videoDurationSeconds;
+        }
+
         allow get, list: if isOwner();
 
         allow create: if isOwner()
-          && after().watchedSeconds is number
-          && after().watchedSeconds >= 0
-          && after().completed is bool;
+          && request.resource.data.watchedSeconds is number
+          && request.resource.data.watchedSeconds >= 0
+          && request.resource.data.completed is bool;
 
         allow update: if isOwner()
-          && touchesOnlyProgressDocFields()
+          && onlyProgressDocFieldsChanged()
           && watchedSecondsNeverDecreases()
           && completedNeverUncompletes()
-          && immutableOnceSet('completedAt')
-          && immutableOnceSet('completionThreshold')
-          && immutableOnceSet('requiredSecondsAtCompletion')
-          && immutableOnceSet('videoDurationSeconds');
+          && completedAtImmutable()
+          && completionThresholdImmutable()
+          && requiredSecondsImmutable()
+          && videoDurationImmutable();
 
         // Progress documents are never deletable from any client.
         allow delete: if false;
       }
     }
 
-    // ---- Portal settings (lecture completion threshold) -----------------------
+    // ---- Portal settings (lecture completion threshold) ----------------------
     // Signed-in users may READ. Only ADMINS may WRITE, and only an int 1..100.
     // A threshold change never rewrites student progress documents, so past
     // completions (stamped with their own threshold) are untouched.
@@ -154,9 +174,8 @@ service cloud.firestore {
         && request.resource.data.lectureCompletionThreshold <= 100;
     }
 
-    // ---- Admin registry: UID-keyed, self-check read only -----------------------
+    // ---- Admin registry: UID-keyed, self-check read only ----------------------
     // Created/managed ONLY in the Firebase console (console bypasses rules).
-    // Students cannot create, alter, or enumerate admin records.
     match /admins/{uid} {
       allow get: if isSignedIn() && request.auth.uid == uid;
       allow list, create, update, delete: if false;
@@ -166,9 +185,8 @@ service cloud.firestore {
     match /stats/{docId} {
       allow read: if true;
       allow create, delete: if false;
-      // Signed-up students may bump the count by EXACTLY +1 (plus metadata).
-      // Decreasing or jumping by more than 1 is denied. Admins may set any
-      // value ("Sync real count").
+      // Registration may bump the count by EXACTLY +1 (plus metadata).
+      // Admins may set any value ("Sync real count").
       allow update: if isAdmin()
         || (isSignedIn()
             && request.resource.data.count == resource.data.count + 1
