@@ -49,3 +49,11 @@ eas.json
 
 # CI diagnostics output (created by test runner)
 ci-output.txt
+
+# expo artifacts (not used by this Next.js app)
+.expo/
+app.json
+eas.json
+
+# CI diagnostics output (created by test runner)
+ci-output.txt

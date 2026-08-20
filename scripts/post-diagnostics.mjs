@@ -23,7 +23,11 @@ const header =
   `run: ${runUrl}\ncommit: ${process.env.GITHUB_SHA}\nexit: ${code}\n\n` +
   `==== full captured output ====\n`;
 
-const run = (cmd) => execSync(cmd, { stdio: ["ignore", "ignore", "pipe"] }).toString();
+// execSync helper — NOTE: with stdout ignored, execSync returns null, so we
+// never call .toString() on the result (that bug killed the poster in CI).
+const run = (cmd) => {
+  execSync(cmd, { stdio: ["ignore", "ignore", "pipe"] });
+};
 
 try {
   rmSync("ci-diagnostics", { recursive: true, force: true });
