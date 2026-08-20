@@ -50,8 +50,18 @@ child.stderr.on("data", (c) => emit(c.toString()));
 child.on("error", (e) => emit(`\n[wrapper] spawn error: ${e.message}\n`));
 
 const code = await new Promise((resolve) => {
-  child.on("close", (c) => resolve(c ?? 99));
+  child.on("close", (c) => resolve(typeof c === "number" ? c : 99));
 });
 
 emit(`\n[wrapper] finished with exit code ${code}\n`);
+
+// Make the failure visible on the Actions Summary page (no permissions needed).
+if (code !== 0 && process.env.GITHUB_STEP_SUMMARY) {
+  try {
+    appendFileSync(
+      process.env.GITHUB_STEP_SUMMARY,
+      `\n## ❌ Rules test run failed (exit ${code})\n\n\`\`\`\n${output.slice(-6000)}\n\`\`\`\n`
+    );
+  } catch { /* best effort */ }
+}
 process.exit(code);
