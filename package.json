@@ -6,26 +6,24 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint .",
+    "test:rules": "firebase emulators:exec --only firestore --project demo-hmt \"node --test tests/firestore.rules.test.mjs\""
   },
   "dependencies": {
-    "@expo/vector-icons": "^15.0.2",
-    "expo-dev-client": "~55.0.32",
-    "expo-router": "^55.0.14",
     "firebase": "^12.14.0",
+    "geist": "^1.7.2",
     "next": "16.2.6",
     "react": "19.2.4",
     "react-dom": "19.2.4",
-    "react-native-gesture-handler": "^2.31.2",
-    "react-native-reanimated": "^4.3.1",
-    "react-native-safe-area-context": "^5.7.0",
-    "react-native-screens": "^4.24.0",
     "resend": "^6.12.3"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.2",
     "@tailwindcss/postcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "firebase-tools": "^15.28.1",
+    "sharp": "^0.35.3",
     "tailwindcss": "^4"
   }
 }
