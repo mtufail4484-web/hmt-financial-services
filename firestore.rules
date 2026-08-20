@@ -66,7 +66,8 @@ service cloud.firestore {
                .hasAll(resource.data.completedVideos);
       }
 
-      allow get: if isOwner();
+      // Owner reads own record; admins may open any student record (dashboard).
+      allow get: if isOwner() || isAdmin();
       // Listing the students collection is ADMIN-ONLY -> blocks cross-student
       // reads AND makes getCountFromServer() admin-only (it needs "list").
       allow list: if isAdmin();
