@@ -2,7 +2,7 @@
 // HMT Success Academy — Firestore Security Rules test suite
 // ----------------------------------------------------------------------------
 // Runs against the Firestore EMULATOR (project "demo-hmt") — never touches any
-// (invoked via scripts/run-rules-tests.mjs wrapper; diagnostics auto-post on failure)
+// (invoked via scripts/run-rules-tests.mjs; failures are committed to ci-diagnostics/)
 // real Firebase project. Run locally with:
 //   npm run test:rules
 // (requires Java + firebase-tools; also runs automatically in GitHub Actions)
