@@ -1,0 +1,203 @@
+rules_version = '2';
+
+// ============================================================================
+// HMT Success Academy — Firestore Security Rules (v3.1 — NOT DEPLOYED)
+// ----------------------------------------------------------------------------
+// v3.1: same guarantees as v3, rewritten with conservative rules syntax
+//       (no function arguments, no dynamic map indexing) for maximum
+//       emulator/compiler compatibility.
+//
+// Guarantees:
+//   * watchedSeconds on a progress doc can only INCREASE (never reduced,
+//     never deleted)
+//   * completed can only transition false -> true (never true -> false)
+//   * once completed: completedAt / completionThreshold /
+//     requiredSecondsAtCompletion / videoDurationSeconds are immutable
+//   * completedVideos on the profile is append-only (a completion can never
+//     be removed)
+//   * students can read/write ONLY their own data; listing students (and
+//     therefore getCountFromServer) is ADMIN-ONLY
+//   * config (completion threshold): admin-write-only, int 1..100
+//   * admins registry: console-managed; users can only check their own entry
+//   * stats counter: public read of a NUMBER; signups may bump by exactly +1;
+//     admins may set the true value
+//   * default deny for everything else
+//
+// HONEST LIMITATION (acknowledged by owner): completion is client-written, so
+// a determined account owner can still FORGE a completion. Rules prevent
+// removal, reduction, cross-student edits, threshold tampering, counter jumps,
+// and admin self-promotion. Tamper-resistant, NOT cheat-proof. Server-side
+// validation is a future phase.
+// ============================================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Admin = signed-in user whose Firebase Auth UID has a doc in "admins".
+    // request.auth.uid comes from the verified, signed auth token — not
+    // client-supplied, not forgeable.
+    function isAdmin() {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // ---- Student profile document: owner-only, progress-fields-only --------
+    match /students/{uid} {
+
+      function isOwner() {
+        return isSignedIn() && request.auth.uid == uid;
+      }
+
+      // Only these two fields may ever change on the profile document.
+      function touchesOnlyProgressFields() {
+        return request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['completedVideos', 'watchTimeMinutes']);
+      }
+
+      // completedVideos may only GROW (arrayUnion). Entries can never be
+      // removed or replaced -> a recorded completion is permanent.
+      function completedVideosNeverRemoved() {
+        return !('completedVideos' in resource.data)
+          || request.resource.data.completedVideos
+               .hasAll(resource.data.completedVideos);
+      }
+
+      // Owner reads own record; admins may open any student record (dashboard).
+      allow get: if isOwner() || isAdmin();
+      // Listing the students collection is ADMIN-ONLY -> blocks cross-student
+      // reads AND makes getCountFromServer() admin-only (it needs "list").
+      allow list: if isAdmin();
+
+      // Registration: only your own doc, with your own uid and your own
+      // verified auth email.
+      allow create: if isSignedIn()
+        && request.auth.uid == uid
+        && request.resource.data.uid == uid
+        && request.resource.data.email == request.auth.token.email;
+
+      allow update: if isOwner()
+        && touchesOnlyProgressFields()
+        && completedVideosNeverRemoved();
+
+      // Student documents are never deletable from any client.
+      allow delete: if false;
+
+      // ---- Per-lecture progress: strictly monotonic, append-friendly -------
+      // Document shape (created by the portal on first watch):
+      //   watchedSeconds: int (only ever increases)
+      //   videoDurationSeconds: int (set once from the YouTube API, immutable)
+      //   completed: bool (false -> true only)
+      //   completedAt / completionThreshold / requiredSecondsAtCompletion:
+      //       stamped once at completion, then immutable
+      //   updatedAt: timestamp
+      match /progress/{lectureId} {
+
+        function onlyProgressDocFieldsChanged() {
+          return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'watchedSeconds',
+            'videoDurationSeconds',
+            'completed',
+            'completedAt',
+            'completionThreshold',
+            'requiredSecondsAtCompletion',
+            'updatedAt'
+          ]);
+        }
+
+        function watchedSecondsNeverDecreases() {
+          return !('watchedSeconds' in resource.data)
+            || request.resource.data.watchedSeconds >= resource.data.watchedSeconds;
+        }
+
+        function completedNeverUncompletes() {
+          return !('completed' in resource.data)
+            || !(resource.data.completed == true
+                 && request.resource.data.completed == false);
+        }
+
+        function completedAtImmutable() {
+          return !('completedAt' in resource.data)
+            || request.resource.data.completedAt == resource.data.completedAt;
+        }
+
+        function completionThresholdImmutable() {
+          return !('completionThreshold' in resource.data)
+            || request.resource.data.completionThreshold
+                 == resource.data.completionThreshold;
+        }
+
+        function requiredSecondsImmutable() {
+          return !('requiredSecondsAtCompletion' in resource.data)
+            || request.resource.data.requiredSecondsAtCompletion
+                 == resource.data.requiredSecondsAtCompletion;
+        }
+
+        function videoDurationImmutable() {
+          return !('videoDurationSeconds' in resource.data)
+            || request.resource.data.videoDurationSeconds
+                 == resource.data.videoDurationSeconds;
+        }
+
+        allow get, list: if isOwner();
+
+        allow create: if isOwner()
+          && request.resource.data.watchedSeconds is number
+          && request.resource.data.watchedSeconds >= 0
+          && request.resource.data.completed is bool;
+
+        allow update: if isOwner()
+          && onlyProgressDocFieldsChanged()
+          && watchedSecondsNeverDecreases()
+          && completedNeverUncompletes()
+          && completedAtImmutable()
+          && completionThresholdImmutable()
+          && requiredSecondsImmutable()
+          && videoDurationImmutable();
+
+        // Progress documents are never deletable from any client.
+        allow delete: if false;
+      }
+    }
+
+    // ---- Portal settings (lecture completion threshold) ----------------------
+    // Signed-in users may READ. Only ADMINS may WRITE, and only an int 1..100.
+    // A threshold change never rewrites student progress documents, so past
+    // completions (stamped with their own threshold) are untouched.
+    match /config/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin()
+        && request.resource.data.lectureCompletionThreshold is int
+        && request.resource.data.lectureCompletionThreshold >= 1
+        && request.resource.data.lectureCompletionThreshold <= 100;
+    }
+
+    // ---- Admin registry: UID-keyed, self-check read only ----------------------
+    // Created/managed ONLY in the Firebase console (console bypasses rules).
+    match /admins/{uid} {
+      allow get: if isSignedIn() && request.auth.uid == uid;
+      allow list, create, update, delete: if false;
+    }
+
+    // ---- Public counter: a number, zero PII -------------------------------------
+    match /stats/{docId} {
+      allow read: if true;
+      allow create, delete: if false;
+      // Registration may bump the count by EXACTLY +1 (plus metadata).
+      // Admins may set any value ("Sync real count").
+      allow update: if isAdmin()
+        || (isSignedIn()
+            && request.resource.data.count == resource.data.count + 1
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['count', 'updatedAt', 'updatedBy']));
+    }
+
+    // ---- Default deny -------------------------------------------------------------
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,17 +1,9 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { GeistSans } from "geist/font/sans";
+import { GeistMono } from "geist/font/mono";
+import Image from "next/image";
 import "./globals.css";
 // 🔗 Navigation ke liye Link import kiya
-import Link from "next/link"; 
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import Link from "next/link";
 
 export const metadata = {
   title: "HMT Financial and Digital Services",
@@ -31,32 +23,40 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${GeistSans.variable} ${GeistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-white text-black m-0 p-0">
-        
+
         {/* 🌐 PROFESSIONAL TOP NAVIGATION BAR */}
         <header style={{
           width: "100%",
           background: "#0b2c5f", // HMT Blue Theme Color
           padding: "12px 24px",
-          boxSet: "0 2px 10px rgba(0,0,0,0.1)",
+          boxShadow: "0 2px 10px rgba(0,0,0,0.1)", // (fixed: was invalid `boxSet`)
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           boxSizing: "border-box"
         }}>
           {/* Logo / Brand Name */}
-          <Link href="/" style={{ 
-            color: "white", 
-            textDecoration: "none", 
-            fontWeight: "bold", 
-            fontSize: "18px",
-            display: "flex",
-            alignItems: "center",
-            gap: "10px"
-          }}>
-            <img src="/logo.png" alt="HMT Logo" style={{ height: "30px", width: "auto" }} />
+          <Link href="/"
+            style={{
+              color: "white",
+              textDecoration: "none",
+              fontWeight: "bold",
+              fontSize: "18px",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px"
+            }}>
+            <Image
+              src="/logo.png"
+              alt="HMT Logo"
+              width={120}
+              height={40}
+              priority
+              style={{ height: "30px", width: "auto" }}
+            />
             <span>HMT Services</span>
           </Link>
 
@@ -65,10 +65,10 @@ export default function RootLayout({ children }) {
             <Link href="/computer-course" style={{ color: "white", textDecoration: "none", fontSize: "14px", fontWeight: "500" }}>
               💻 Computer Course
             </Link>
-            
+
             {/* 🔑 MAIN STUDENT PORTAL LOGIN BUTTON */}
-            <Link 
-              href="/portal" 
+            <Link
+              href="/portal"
               style={{
                 background: "#28a745", // Green color for high visibility
                 color: "white",

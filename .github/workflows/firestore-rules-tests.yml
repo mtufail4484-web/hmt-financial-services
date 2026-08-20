@@ -1,0 +1,36 @@
+name: Firestore Rules Tests
+
+on:
+  push:
+    branches: [arena/01a01cbb-hmt-financial-services]
+    paths:
+      - "firestore.rules"
+      - "tests/**"
+      - ".github/workflows/firestore-rules-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  rules:
+    name: Emulator test suite (demo project, never production)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Firestore emulator rules test suite
+        run: npm run test:rules

@@ -1,6 +1,15 @@
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Lazy client: constructing Resend at module scope crashes build-time page
+// data collection when RESEND_API_KEY is not set (e.g. CI/preview builds).
+// Behavior in production (with the env var) is unchanged.
+let resendClient = null;
+function getResend() {
+  if (!resendClient) {
+    resendClient = new Resend(process.env.RESEND_API_KEY);
+  }
+  return resendClient;
+}
 
 export async function POST(request) {
   try {
@@ -41,7 +50,7 @@ export async function POST(request) {
     // SEND EMAIL TO ADMIN
     // =========================
 
-    const adminEmail = await resend.emails.send({
+    const adminEmail = await getResend().emails.send({
       from: 'HMT Financial Services <info@hmtfinancialservices.com>',
       to: 'm.tufail4484@gmail.com',
       subject: `New Consultancy Request from ${name}`,
@@ -93,7 +102,7 @@ export async function POST(request) {
     // SEND EMAIL TO CUSTOMER
     // =========================
 
-    const clientEmail = await resend.emails.send({
+    const clientEmail = await getResend().emails.send({
       from: 'HMT Financial Services <info@hmtfinancialservices.com>',
       to: email,
       subject: 'We Received Your Consultancy Request - HMT Financial Services',
