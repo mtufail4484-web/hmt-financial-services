@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import Image from "next/image";
 import Link from "next/link";
 
 export default function HMTFinancialServices() {
@@ -788,12 +787,9 @@ export default function HMTFinancialServices() {
           {/* Logo */}
           <div className="bg-white/90 rounded-xl px-2 py-1 shadow-xl backdrop-blur-sm">
 
-            <Image
+            <img
               src="/logo.png"
               alt="HMT Logo"
-              width={160}
-              height={44}
-              priority
               className="h-10 w-auto object-contain"
             />
 
@@ -940,12 +936,9 @@ export default function HMTFinancialServices() {
       >
 
         {/* Background Image */}
-        <Image
+        <img
           src="/hero.png"
           alt="Hero"
-          fill
-          priority
-          sizes="100vw"
           className="absolute inset-0 w-full h-full object-cover"
         />
 
@@ -1081,13 +1074,11 @@ export default function HMTFinancialServices() {
                 className="group overflow-hidden rounded-[2rem] bg-gradient-to-br from-white via-slate-50 to-slate-100 shadow-2xl transition duration-500 hover:-translate-y-2 hover:shadow-blue-300/30"
               >
 
-                <div className="overflow-hidden relative h-60">
-                  <Image
+                <div className="overflow-hidden">
+                  <img
                     src={service.image}
                     alt={service.title}
-                    fill
-                    sizes="(min-width: 768px) 33vw, 100vw"
-                    className="object-cover transition duration-500 group-hover:scale-105"
+                    className="h-60 w-full object-cover transition duration-500 group-hover:scale-105"
                   />
                 </div>
 
@@ -1220,13 +1211,10 @@ export default function HMTFinancialServices() {
 
           <div>
 
-            <Image
+            <img
               src="/about.jpg"
               alt="About"
-              width={1200}
-              height={800}
-              sizes="(min-width: 768px) 50vw, 100vw"
-              className="rounded-3xl shadow-2xl w-full h-auto"
+              className="rounded-3xl shadow-2xl"
             />
 
           </div>
