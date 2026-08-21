@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 // 🔗 Next.js client-side navigation use karne ke liye Link import kiya hai
-import Link from "next/link";
-import Image from "next/image";
+import Link from "next/link"; 
 
 export default function ComputerCourse() {
   // 🟢 ALL STUDENT PORTAL LINKS FULLY INTEGRATED WITH YOUR LIVE LINKS
@@ -89,15 +88,11 @@ export default function ComputerCourse() {
         </div>
 
         {/* COURSE IMAGE */}
-        <Image
+        <img
           src="/computer-course.jpg"
           alt="Computer Course"
-          width={1600}
-          height={900}
-          priority
           style={{
             width: "100%",
-            height: "auto",
             borderRadius: "20px",
             marginBottom: "30px",
           }}
