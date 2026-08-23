@@ -6,21 +6,32 @@ service firebase.storage {
       return request.auth != null;
     }
 
+    function isTeacher() {
+      return signedIn()
+        && (
+          request.auth.uid == "fSJ0jUBCONXGJA7H41ChRq2ERLs1"
+          || request.auth.token.email.toLowerCase() == "m.tufailkhan12335@gmail.com"
+          || request.auth.token.admin == true
+          || request.auth.token.teacher == true
+        );
+    }
+
     function isAdmin() {
       return signedIn()
         && (
           request.auth.uid == "fSJ0jUBCONXGJA7H41ChRq2ERLs1"
           || request.auth.token.email.toLowerCase() == "m.tufailkhan12335@gmail.com"
+          || request.auth.token.admin == true
         );
     }
 
     match /profilePhotos/{userId}/{allPaths=**} {
       allow read: if true;
-      allow write: if isAdmin() || (signedIn() && request.auth.uid == userId);
+      allow write: if isTeacher() || (signedIn() && request.auth.uid == userId);
     }
 
     match /assignments/{userId}/{allPaths=**} {
-      allow read, write: if isAdmin() || (signedIn() && request.auth.uid == userId);
+      allow read, write: if isTeacher() || (signedIn() && request.auth.uid == userId);
     }
 
     match /announcements/{allPaths=**} {

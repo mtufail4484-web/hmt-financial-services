@@ -12,6 +12,17 @@ import {
   getPasswordStrength,
 } from "../../lib/validation";
 import {
+  ROLES,
+  getEffectiveRole,
+  canManageStaff,
+  canDownloadBackups,
+  canManageLectures,
+  canPostAnnouncements,
+  canReviewAssignments,
+  canReplyQuestions,
+  OWNER_UID,
+} from "../../lib/roles";
+import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
@@ -490,15 +501,59 @@ export default function PortalPage() {
   const canClaimCertificate = isCourseFullyCompleted && CERTIFICATES_RELEASED;
   const isValidSubmissionUrl = (value) => typeof value === "string" && /^https?:\/\//i.test(value.trim());
 
-  const isAdmin = Boolean(
-    user && (
-      user.isAdmin === true ||
-      user.role === "admin" ||
-      user.accountType === "admin" ||
-      user.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ||
-      user.uid === ADMIN_UID
-    )
-  );
+  const activeUserRole = getEffectiveRole(user);
+  const isOwner = activeUserRole === ROLES.OWNER;
+  const isAdmin = activeUserRole === ROLES.OWNER || activeUserRole === ROLES.ADMIN;
+  const isTeacher = activeUserRole === ROLES.OWNER || activeUserRole === ROLES.ADMIN || activeUserRole === ROLES.TEACHER;
+
+  const handleAssignUserRole = async (targetStudent, newRole) => {
+    if (!isOwner) {
+      alert("Only the Academy Owner can assign user roles.");
+      return;
+    }
+
+    const docId = targetStudent?.docId || targetStudent?.uid;
+    if (!docId) {
+      alert("Selected student record is missing ID.");
+      return;
+    }
+
+    if (docId === OWNER_UID || targetStudent.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+      alert("Master Owner account role is permanent and cannot be modified.");
+      return;
+    }
+
+    try {
+      const studentRef = doc(db, "students", docId);
+      const now = new Date().toISOString();
+      await updateDoc(studentRef, {
+        role: newRole,
+        accountType: newRole,
+        isAdmin: newRole === ROLES.ADMIN || newRole === ROLES.OWNER,
+        isTeacher: newRole === ROLES.TEACHER || newRole === ROLES.ADMIN || newRole === ROLES.OWNER,
+        roleUpdatedAt: now,
+        roleUpdatedBy: user?.email || ADMIN_EMAIL,
+      });
+
+      setAllStudents((prev) =>
+        prev.map((item) =>
+          item.docId === docId || item.uid === docId
+            ? {
+                ...item,
+                role: newRole,
+                accountType: newRole,
+                isAdmin: newRole === ROLES.ADMIN || newRole === ROLES.OWNER,
+                isTeacher: newRole === ROLES.TEACHER || newRole === ROLES.ADMIN || newRole === ROLES.OWNER,
+              }
+            : item
+        )
+      );
+
+      alert(`Role for ${targetStudent.name || targetStudent.email} successfully updated to ${newRole.toUpperCase()}.`);
+    } catch (err) {
+      alert("Could not update role: " + err.message);
+    }
+  };
 
   useEffect(() => {
     if (!user?.uid || isAdmin || typeof window === "undefined") return;
@@ -3840,6 +3895,15 @@ export default function PortalPage() {
                     >
                       Forum Board ({allQuestions.filter(q => !q.reply).length})
                     </button>
+                    {isOwner && (
+                      <button
+                        type="button"
+                        onClick={() => setAdminSubTab("staff")}
+                        className={`flex-1 sm:flex-initial px-3 py-2 text-xs font-bold rounded-xl border ${adminSubTab === "staff" ? "bg-amber-500 text-slate-950 border-amber-500 font-black" : "bg-slate-50 text-slate-700"}`}
+                      >
+                        👑 Staff & Roles
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -4082,7 +4146,7 @@ export default function PortalPage() {
                             <th className="p-3">Lectures Done</th>
                             <th className="p-3">Visits</th>
                             <th className="p-3">Status</th>
-                            <th className="p-3">Manual Edit</th>
+                            <th className="p-3">System Role</th>
                             <th className="p-3">Assignments</th>
                             <th className="p-3 rounded-r-xl">Actions</th>
                           </tr>
@@ -4148,7 +4212,32 @@ export default function PortalPage() {
                                     {s.accountStatus === "deactivated" ? "Deactivated" : s.accountStatus === "struckOff" ? "Struck Off" : "Active"}
                                   </span>
                                 </td>
-                                <td className="p-3 text-slate-400 text-[10px] font-black">Disabled</td>
+                                 <td className="p-3">
+                                   {isOwner && s.uid !== OWNER_UID && s.email?.toLowerCase() !== ADMIN_EMAIL.toLowerCase() ? (
+                                     <select
+                                       aria-label={`Change role for ${s.name || "student"}`}
+                                       value={getEffectiveRole(s)}
+                                       onChange={(e) => handleAssignUserRole(s, e.target.value)}
+                                       className="input bg-white text-[11px] py-1 px-2 font-bold border-amber-300 rounded-lg shadow-xs"
+                                     >
+                                       <option value={ROLES.STUDENT}>📚 Student</option>
+                                       <option value={ROLES.TEACHER}>🎓 Teacher</option>
+                                       <option value={ROLES.ADMIN}>🛠️ Admin</option>
+                                     </select>
+                                   ) : (
+                                     <span className={`rounded-full px-2.5 py-1 text-[10px] font-black ${
+                                       getEffectiveRole(s) === ROLES.OWNER
+                                         ? "bg-amber-100 text-amber-900 border border-amber-300"
+                                         : getEffectiveRole(s) === ROLES.ADMIN
+                                         ? "bg-purple-100 text-purple-800"
+                                         : getEffectiveRole(s) === ROLES.TEACHER
+                                         ? "bg-blue-100 text-blue-800"
+                                         : "bg-slate-100 text-slate-700"
+                                     }`}>
+                                       {getEffectiveRole(s) === ROLES.OWNER ? "👑 Owner" : getEffectiveRole(s) === ROLES.ADMIN ? "🛠️ Admin" : getEffectiveRole(s) === ROLES.TEACHER ? "🎓 Teacher" : "📚 Student"}
+                                     </span>
+                                   )}
+                                 </td>
                                 <td className="p-3">
                                   <div className="flex flex-col gap-2">
                                     {firstSubmittedWork ? (
@@ -4507,6 +4596,83 @@ export default function PortalPage() {
                       </table>
                     </div>
                   )}
+                </div>
+              ) : adminSubTab === "staff" && isOwner ? (
+                <div className="bg-white rounded-3xl shadow-sm border p-4 md:p-5 space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div>
+                      <h3 className="font-black text-slate-900 text-base">👑 Academy Staff & Role Management</h3>
+                      <p className="mt-0.5 text-xs font-semibold text-slate-500">
+                        Assign system permissions to staff members. Changes update Firestore security rules instantly.
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <span className="bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-black px-3 py-1.5 rounded-xl">
+                        👑 1 Owner
+                      </span>
+                      <span className="bg-purple-100 text-purple-800 text-[10px] font-black px-3 py-1.5 rounded-xl">
+                        🛠️ {allStudents.filter(s => getEffectiveRole(s) === ROLES.ADMIN).length} Admins
+                      </span>
+                      <span className="bg-blue-100 text-blue-800 text-[10px] font-black px-3 py-1.5 rounded-xl">
+                        🎓 {allStudents.filter(s => getEffectiveRole(s) === ROLES.TEACHER).length} Teachers
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs min-w-[800px] text-left border-collapse">
+                      <thead>
+                        <tr className="bg-slate-100 text-slate-700 font-bold">
+                          <th className="p-3 rounded-l-xl">User / Staff Name</th>
+                          <th className="p-3">Email Address</th>
+                          <th className="p-3">Roll No</th>
+                          <th className="p-3">Current Role</th>
+                          <th className="p-3 rounded-r-xl">Assign Permission Level</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {allStudents.map((staffMember) => {
+                          const role = getEffectiveRole(staffMember);
+                          return (
+                            <tr key={staffMember.uid || staffMember.docId} className="border-b hover:bg-slate-50">
+                              <td className="p-3 font-bold text-slate-900">{staffMember.name || "N/A"}</td>
+                              <td className="p-3 font-mono text-blue-700">{staffMember.email || "No email"}</td>
+                              <td className="p-3 font-mono font-bold text-slate-700">{staffMember.rollNo || "N/A"}</td>
+                              <td className="p-3">
+                                <span className={`rounded-full px-2.5 py-1 text-[10px] font-black ${
+                                  role === ROLES.OWNER
+                                    ? "bg-amber-100 text-amber-900 border border-amber-300"
+                                    : role === ROLES.ADMIN
+                                    ? "bg-purple-100 text-purple-800"
+                                    : role === ROLES.TEACHER
+                                    ? "bg-blue-100 text-blue-800"
+                                    : "bg-slate-100 text-slate-700"
+                                }`}>
+                                  {role === ROLES.OWNER ? "👑 Owner" : role === ROLES.ADMIN ? "🛠️ Admin" : role === ROLES.TEACHER ? "🎓 Teacher" : "📚 Student"}
+                                </span>
+                              </td>
+                              <td className="p-3">
+                                {staffMember.uid === OWNER_UID || staffMember.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ? (
+                                  <span className="text-[10px] font-bold text-amber-800">Master Owner Locked</span>
+                                ) : (
+                                  <select
+                                    aria-label={`Assign role to ${staffMember.name || "user"}`}
+                                    value={role}
+                                    onChange={(e) => handleAssignUserRole(staffMember, e.target.value)}
+                                    className="input bg-white text-xs font-bold border-amber-300 rounded-xl py-1.5 px-3"
+                                  >
+                                    <option value={ROLES.STUDENT}>📚 Student (Level 1)</option>
+                                    <option value={ROLES.TEACHER}>🎓 Teacher (Level 2 - Homework & Forum)</option>
+                                    <option value={ROLES.ADMIN}>🛠️ Admin (Level 3 - Lectures & Posts)</option>
+                                  </select>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               ) : (
                 <div className="bg-white rounded-3xl shadow-sm border p-4 md:p-5 space-y-4">

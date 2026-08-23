@@ -6,39 +6,49 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function isAdmin() {
-      return signedIn()
-        && (request.auth.email == "m.tufailkhan12335@gmail.com"
-            || request.auth.token.email == "m.tufailkhan12335@gmail.com"
-            || request.auth.uid == "fSJ0jUBCONXGJA7H41ChRq2ERLs1");
-    }
-
-    function isOwner(userId) {
+    function isUserOwner(userId) {
       return signedIn() && request.auth.uid == userId;
     }
 
-    function isEmailVerified() {
-      return request.auth.token.email_verified == true;
+    function getUserData() {
+      return get(/databases/$(database)/documents/students/$(request.auth.uid)).data;
+    }
+
+    function isMasterOwner() {
+      return signedIn()
+        && (request.auth.uid == "fSJ0jUBCONXGJA7H41ChRq2ERLs1"
+            || request.auth.email.toLowerCase() == "m.tufailkhan12335@gmail.com"
+            || getUserData().role == "owner");
+    }
+
+    function isAdmin() {
+      return isMasterOwner()
+        || (signedIn() && (getUserData().role == "admin" || request.auth.token.admin == true));
+    }
+
+    function isTeacher() {
+      return isAdmin()
+        || (signedIn() && (getUserData().role == "teacher" || request.auth.token.teacher == true));
     }
 
     match /students/{userId} {
-      allow read, write: if isOwner(userId) || isAdmin();
+      allow read: if isUserOwner(userId) || isTeacher();
+      allow create: if signedIn();
+      allow update: if isUserOwner(userId) || isTeacher();
+      allow delete: if isAdmin();
     }
 
     match /publicStudentVerifications/{rollNo} {
-      // Verification is public by roll number, but the directory cannot be listed.
       allow get: if true;
       allow create: if isAdmin() || (
         signedIn()
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.rollNo == rollNo
-        && get(/databases/$(database)/documents/students/$(request.auth.uid)).data.rollNo == rollNo
       );
       allow update: if isAdmin() || (
-        isOwner(resource.data.uid)
+        isUserOwner(resource.data.uid)
         && request.resource.data.uid == resource.data.uid
         && request.resource.data.rollNo == rollNo
-        && get(/databases/$(database)/documents/students/$(request.auth.uid)).data.rollNo == rollNo
       );
       allow delete: if isAdmin();
     }
@@ -49,9 +59,9 @@ service cloud.firestore {
     }
 
     match /questions/{questionId} {
-      allow read: if isAdmin() || (signedIn() && resource.data.studentId == request.auth.uid);
+      allow read: if isTeacher() || (signedIn() && resource.data.studentId == request.auth.uid);
       allow create: if signedIn() && request.resource.data.studentId == request.auth.uid;
-      allow update, delete: if isOwner(resource.data.studentId) || isAdmin();
+      allow update, delete: if isUserOwner(resource.data.studentId) || isTeacher();
     }
 
     match /announcements/{announcementId} {
@@ -60,12 +70,11 @@ service cloud.firestore {
     }
 
     match /aiCourseInterest/{docId} {
-      allow read: if isOwner(docId) || isAdmin();
-      allow create: if isOwner(docId) && request.resource.data.studentId == request.auth.uid;
+      allow read: if isUserOwner(docId) || isTeacher();
+      allow create: if isUserOwner(docId) && request.resource.data.studentId == request.auth.uid;
       allow update, delete: if isAdmin();
     }
 
-    // Registration counter: students may create it once or increment it by one.
     match /metadata/student_counter {
       allow read: if true;
       allow create: if isAdmin() || (
