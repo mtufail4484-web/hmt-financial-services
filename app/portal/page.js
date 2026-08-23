@@ -3900,15 +3900,13 @@ export default function PortalPage() {
                     >
                       Forum Board ({allQuestions.filter(q => !q.reply).length})
                     </button>
-                    {isOwner && (
-                      <button
-                        type="button"
-                        onClick={() => setAdminSubTab("staff")}
-                        className={`flex-1 sm:flex-initial px-3 py-2 text-xs font-bold rounded-xl border ${adminSubTab === "staff" ? "bg-amber-500 text-slate-950 border-amber-500 font-black" : "bg-slate-50 text-slate-700"}`}
-                      >
-                        👑 Staff & Roles
-                      </button>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => setAdminSubTab("staff")}
+                      className={`flex-1 sm:flex-initial px-3 py-2 text-xs font-bold rounded-xl border ${adminSubTab === "staff" ? "bg-amber-500 text-slate-950 border-amber-500 font-black" : "bg-slate-50 text-slate-700"}`}
+                    >
+                      👑 Staff & Roles
+                    </button>
                   </div>
                 </div>
               </div>
@@ -4602,7 +4600,7 @@ export default function PortalPage() {
                     </div>
                   )}
                 </div>
-              ) : adminSubTab === "staff" && isOwner ? (
+              ) : adminSubTab === "staff" ? (
                 <div className="bg-white rounded-3xl shadow-sm border p-4 md:p-5 space-y-4">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
