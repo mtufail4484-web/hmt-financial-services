@@ -1564,7 +1564,7 @@ export default function PortalPage() {
       }
 
       try {
-        await firebaseUser.getIdToken(true).catch((err) => {
+        await firebaseUser.getIdToken().catch((err) => {
           console.warn("Could not refresh Firebase auth token.", err);
         });
 
@@ -1734,7 +1734,7 @@ export default function PortalPage() {
       }
 
       try {
-        const response = await fetch(`/api/youtube-playlist?playlistId=${encodeURIComponent(selectedCourse.playlistId)}`, { cache: "no-store" });
+        const response = await fetch(`/api/youtube-playlist?playlistId=${encodeURIComponent(selectedCourse.playlistId)}`);
         const data = response.ok ? await response.json() : null;
         const fetchedVideos = Array.isArray(data?.videos) ? data.videos : [];
         const baseVideos = fetchedVideos.length > 0 ? normalizeLectures(fetchedVideos) : normalizeLectures(HMT_PLAYLIST);
