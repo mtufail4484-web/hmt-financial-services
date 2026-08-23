@@ -3597,7 +3597,7 @@ export default function PortalPage() {
 
               {isAdmin ? (
                 <span className="inline-flex items-center justify-center rounded-xl border border-amber-300/40 bg-amber-400/15 px-3 py-2 text-[11px] font-black text-amber-200 md:text-xs">
-                  Admin Account Locked
+                  {isOwner ? "👑 Master Owner Account" : "🛡️ Verified Admin Account"}
                 </span>
               ) : (
                 <button type="button" onClick={openProfileEditor} className="bg-white/10 hover:bg-white/20 text-white text-[11px] md:text-xs font-bold px-3 py-2 rounded-xl transition">
