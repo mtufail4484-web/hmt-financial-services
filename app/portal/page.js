@@ -22,6 +22,7 @@ import {
   canReplyQuestions,
   OWNER_UID,
 } from "../../lib/roles";
+import { generateSecret, verifyTOTP, getOtpAuthUri } from "../../lib/totp";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -318,6 +319,15 @@ export default function PortalPage() {
   const [staffSearchQuery, setStaffSearchQuery] = useState("");
   const [staffFilterRole, setStaffFilterRole] = useState("all");
   const [forumFilter, setForumFilter] = useState("unanswered");
+
+  const [twoFactorSecret, setTwoFactorSecret] = useState("");
+  const [show2FaSetupModal, setShow2FaSetupModal] = useState(false);
+  const [setup2FaVerificationCode, setSetup2FaVerificationCode] = useState("");
+  const [twoFactorRequired, setTwoFactorRequired] = useState(false);
+  const [twoFactorInput, setTwoFactorInput] = useState("");
+  const [pendingUserSession, setPendingUserSession] = useState(null);
+  const [twoFactorVerified, setTwoFactorVerified] = useState(false);
+
   const [totalStudents, setTotalStudents] = useState(0);
   const [courseCatalog, setCourseCatalog] = useState(() => {
     const baseCatalog = [DEFAULT_COURSE];
@@ -556,6 +566,80 @@ export default function PortalPage() {
     } catch (err) {
       alert("Could not update role: " + err.message);
     }
+  };
+
+  const handleStart2FaSetup = () => {
+    const existingSecret = user?.twoFactorSecret;
+    const activeSecret = existingSecret || generateSecret();
+    setTwoFactorSecret(activeSecret);
+    setSetup2FaVerificationCode("");
+    setShow2FaSetupModal(true);
+  };
+
+  const handleConfirm2FaSetup = async () => {
+    if (!setup2FaVerificationCode || setup2FaVerificationCode.trim().length !== 6) {
+      alert("Please enter the 6-digit verification code from your Google Authenticator app.");
+      return;
+    }
+
+    const isValid = await verifyTOTP(setup2FaVerificationCode, twoFactorSecret);
+    if (!isValid) {
+      alert("❌ Invalid 6-digit code. Please check your Google Authenticator app and try again.");
+      return;
+    }
+
+    try {
+      if (user?.uid) {
+        const studentRef = doc(db, "students", user.uid);
+        const now = new Date().toISOString();
+        await updateDoc(studentRef, {
+          twoFactorEnabled: true,
+          twoFactorSecret: twoFactorSecret,
+          twoFactorEnabledAt: now,
+        });
+
+        safeUpdateUser({
+          twoFactorEnabled: true,
+          twoFactorSecret: twoFactorSecret,
+          twoFactorEnabledAt: now,
+        });
+      }
+
+      setShow2FaSetupModal(false);
+      setTwoFactorVerified(true);
+      alert("🎉 Google Authenticator 2FA Enabled Successfully!\n\nYour Master Owner / Admin account is now 100% secured against stolen passwords.");
+    } catch (err) {
+      alert("Could not enable 2FA: " + err.message);
+    }
+  };
+
+  const handleVerify2FaLogin = async () => {
+    if (!twoFactorInput || twoFactorInput.trim().length !== 6) {
+      alert("Please enter your 6-digit Google Authenticator code.");
+      return;
+    }
+
+    const secretToCheck = pendingUserSession?.twoFactorSecret || twoFactorSecret;
+    if (!secretToCheck) {
+      alert("2FA secret missing for session.");
+      return;
+    }
+
+    const isValid = await verifyTOTP(twoFactorInput, secretToCheck);
+    if (!isValid) {
+      alert("❌ Invalid 6-digit Google Authenticator code. Please check your app and try again.");
+      return;
+    }
+
+    setUser(pendingUserSession);
+    setPendingUserSession(null);
+    setTwoFactorRequired(false);
+    setTwoFactorInput("");
+    setTwoFactorVerified(true);
+    if (getEffectiveRole(pendingUserSession) !== ROLES.STUDENT) {
+      setActiveTab("admin");
+    }
+    setAuthChecking(false);
   };
 
   useEffect(() => {
@@ -3862,6 +3946,17 @@ export default function PortalPage() {
                     >
                       + New Announcement
                     </button>
+                    <button
+                      type="button"
+                      onClick={handleStart2FaSetup}
+                      className={`px-3 py-2 text-xs font-bold rounded-xl border shadow-xs transition ${
+                        user?.twoFactorEnabled
+                          ? "bg-emerald-100 text-emerald-900 border-emerald-300 hover:bg-emerald-200"
+                          : "bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700 font-black"
+                      }`}
+                    >
+                      {user?.twoFactorEnabled ? "✅ 2FA Active" : "🔐 Setup Google 2FA"}
+                    </button>
                   </div>
                 </div>
 
@@ -5751,6 +5846,131 @@ export default function PortalPage() {
                   <button type="button" onClick={() => window.print()} className="bg-amber-700 text-white rounded-xl px-4 py-2 text-xs font-bold">Print Certificate</button>
                   <button type="button" onClick={() => setShowCertModal(false)} className="bg-gray-200 rounded-xl px-4 py-2 text-xs font-bold">Close</button>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {show2FaSetupModal && (
+          <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-slate-100">
+              <div className="flex items-center justify-between border-b pb-3">
+                <h3 className="font-black text-slate-900 text-lg flex items-center gap-2">
+                  <span>🔐 Setup Google 2FA</span>
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setShow2FaSetupModal(false)}
+                  className="text-slate-400 hover:text-slate-600 font-bold text-lg px-2"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="text-xs text-slate-600 space-y-2">
+                <p className="font-semibold">
+                  1. Open the <strong>Google Authenticator</strong> or <strong>Microsoft Authenticator</strong> app on your phone.
+                </p>
+                <p className="font-semibold">
+                  2. Scan the QR code below or enter the secret key manually:
+                </p>
+              </div>
+
+              <div className="bg-slate-50 border rounded-2xl p-4 flex flex-col items-center justify-center gap-3">
+                <img
+                  src={`/api/qr?size=220x220&data=${encodeURIComponent(getOtpAuthUri(twoFactorSecret, user?.email || ADMIN_EMAIL, "HMT Success Academy"))}`}
+                  alt="2FA QR Code"
+                  className="w-48 h-48 rounded-xl border bg-white p-2 shadow-xs"
+                />
+                <div className="text-center">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Secret Key (Manual Entry)</p>
+                  <p className="font-mono font-black text-sm text-slate-900 tracking-wider bg-amber-100 border border-amber-300 text-amber-950 px-3 py-1 rounded-xl mt-1 select-all">
+                    {twoFactorSecret}
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-black text-slate-700">
+                  3. Enter 6-Digit Code from Authenticator App:
+                </label>
+                <input
+                  type="text"
+                  maxLength={6}
+                  placeholder="000000"
+                  value={setup2FaVerificationCode}
+                  onChange={(e) => setSetup2FaVerificationCode(e.target.value.replace(/\D/g, ""))}
+                  className="input text-center text-xl font-mono tracking-widest font-black py-2.5 bg-slate-50 border-blue-300"
+                />
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={handleConfirm2FaSetup}
+                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs py-3 rounded-2xl shadow-sm transition"
+                >
+                  Confirm & Enable 2FA
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShow2FaSetupModal(false)}
+                  className="px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-3 rounded-2xl transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {twoFactorRequired && (
+          <div className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl border border-amber-200">
+              <div className="text-center space-y-1">
+                <div className="w-16 h-16 bg-amber-100 text-amber-900 border border-amber-300 rounded-full flex items-center justify-center text-3xl mx-auto shadow-xs">
+                  🔐
+                </div>
+                <h3 className="font-black text-slate-900 text-xl pt-2">Google Authenticator 2FA</h3>
+                <p className="text-xs font-semibold text-slate-500">
+                  Security check required for {pendingUserSession?.email || user?.email || ADMIN_EMAIL}
+                </p>
+              </div>
+
+              <div className="space-y-2 bg-slate-50 border p-4 rounded-2xl">
+                <label className="block text-xs font-black text-slate-700 text-center">
+                  Enter 6-Digit Code From Your Authenticator App:
+                </label>
+                <input
+                  type="text"
+                  maxLength={6}
+                  autoFocus
+                  placeholder="000000"
+                  value={twoFactorInput}
+                  onChange={(e) => setTwoFactorInput(e.target.value.replace(/\D/g, ""))}
+                  className="input text-center text-2xl font-mono tracking-widest font-black py-3 bg-white border-blue-400 shadow-inner"
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={handleVerify2FaLogin}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black text-sm py-3 rounded-2xl shadow-md transition"
+                >
+                  Verify & Sign In
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    auth.signOut();
+                    setUser(null);
+                    setPendingUserSession(null);
+                    setTwoFactorRequired(false);
+                  }}
+                  className="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs py-2.5 rounded-2xl transition"
+                >
+                  Cancel Sign In
+                </button>
               </div>
             </div>
           </div>
