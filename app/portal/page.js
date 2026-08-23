@@ -315,6 +315,9 @@ export default function PortalPage() {
   const [allAnnouncements, setAllAnnouncements] = useState([]);
   const [allAiInterests, setAllAiInterests] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [staffSearchQuery, setStaffSearchQuery] = useState("");
+  const [staffFilterRole, setStaffFilterRole] = useState("all");
+  const [forumFilter, setForumFilter] = useState("unanswered");
   const [totalStudents, setTotalStudents] = useState(0);
   const [courseCatalog, setCourseCatalog] = useState(() => {
     const baseCatalog = [DEFAULT_COURSE];
@@ -3903,12 +3906,12 @@ export default function PortalPage() {
                     onClick={() => setAdminSubTab("staff")}
                     className={`px-3.5 py-2 text-xs font-bold rounded-xl border transition ${adminSubTab === "staff" ? "bg-amber-500 text-slate-950 border-amber-500 font-black shadow-xs" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"}`}
                   >
-                    👑 Staff & Roles
+                    👑 Staff & Roles ({allStudents.filter(s => getEffectiveRole(s) !== ROLES.STUDENT).length})
                   </button>
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 shadow-sm">
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-4 shadow-sm space-y-3">
                 <div className="flex flex-col gap-3 md:flex-row md:items-end">
                   <div className="flex-1">
                     <label className="mb-1 block text-[11px] font-black uppercase text-slate-600">Active Course</label>
@@ -3950,33 +3953,50 @@ export default function PortalPage() {
                     />
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={handleAddCoursePlaylist}
-                    disabled={courseSaving}
-                    className="rounded-2xl bg-blue-600 px-4 py-3 text-[10px] font-black text-white hover:bg-blue-700 disabled:bg-slate-300"
-                  >
-                    {courseSaving ? "Loading..." : "Add Course Playlist"}
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleAddCoursePlaylist}
+                      disabled={courseSaving}
+                      className="rounded-2xl bg-blue-600 px-4 py-3 text-[10px] font-black text-white hover:bg-blue-700 disabled:bg-slate-300 shadow-xs"
+                    >
+                      {courseSaving ? "Loading..." : "Add Playlist"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("dashboard")}
+                      className="rounded-2xl bg-slate-900 px-3 py-3 text-[10px] font-black text-white hover:bg-black shadow-xs"
+                    >
+                      👁️ Preview Player
+                    </button>
+                  </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
                 {[
-                  ["Total Students", adminStats.totalStudents, "bg-slate-900 text-white", "Registered accounts"],
-                  ["Active Learners", adminStats.activeStudents, "bg-blue-50 text-blue-900 border-blue-100", `${averageProgress}% average progress`],
-                  ["Pending Reviews", adminStats.pendingAssignments, "bg-amber-50 text-amber-900 border-amber-100", "Assignments waiting"],
-                  ["Course Completed", adminStats.completedStudents, "bg-emerald-50 text-emerald-900 border-emerald-100", "Ready for certificate"],
-                  ["Portal Visits", allStudents.reduce((sum, student) => sum + (student.visitCount || 0), 0), "bg-indigo-50 text-indigo-900 border-indigo-100", "Total student logins"],
-                  ["Cities Covered", uniqueCities.length, "bg-cyan-50 text-cyan-900 border-cyan-100", "Student locations"],
-                  ["Deactivated", inactiveStudents, "bg-slate-100 text-slate-800 border-slate-200", "Temporarily disabled"],
-                  ["Struck Off", struckOffStudents, "bg-red-50 text-red-900 border-red-100", "Removed from active list"],
-                ].map(([label, value, tone, detail]) => (
-                  <div key={label} className={`rounded-3xl border p-4 shadow-sm ${tone}`}>
+                  ["Total Students", adminStats.totalStudents, "bg-slate-900 text-white", "Registered accounts", "all"],
+                  ["Active Learners", adminStats.activeStudents, "bg-blue-50 text-blue-900 border-blue-100", `${averageProgress}% average progress`, "active"],
+                  ["Pending Reviews", adminStats.pendingAssignments, "bg-amber-50 text-amber-900 border-amber-100", "Assignments waiting", "pending"],
+                  ["Course Completed", adminStats.completedStudents, "bg-emerald-50 text-emerald-900 border-emerald-100", "Ready for certificate", "completed"],
+                  ["Portal Visits", allStudents.reduce((sum, student) => sum + (student.visitCount || 0), 0), "bg-indigo-50 text-indigo-900 border-indigo-100", "Total student logins", "all"],
+                  ["Cities Covered", uniqueCities.length, "bg-cyan-50 text-cyan-900 border-cyan-100", "Student locations", "all"],
+                  ["Deactivated", inactiveStudents, "bg-slate-100 text-slate-800 border-slate-200", "Temporarily disabled", "deactivated"],
+                  ["Struck Off", struckOffStudents, "bg-red-50 text-red-900 border-red-100", "Removed from active list", "struckOff"],
+                ].map(([label, value, tone, detail, filterKey]) => (
+                  <button
+                    key={label}
+                    type="button"
+                    onClick={() => {
+                      setAdminSubTab("students");
+                      setAdminFilter(filterKey);
+                    }}
+                    className={`rounded-3xl border p-4 shadow-sm text-left transition hover:scale-[1.02] cursor-pointer ${tone}`}
+                  >
                     <p className="text-[10px] font-black uppercase opacity-75">{label}</p>
                     <p className="mt-1 text-2xl font-black">{value}</p>
                     <p className="mt-1 text-[11px] font-bold opacity-75">{detail}</p>
-                  </div>
+                  </button>
                 ))}
               </div>
 
@@ -4619,6 +4639,27 @@ export default function PortalPage() {
                     </div>
                   </div>
 
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      type="text"
+                      placeholder="Search staff by Name, Email, or Roll No..."
+                      value={staffSearchQuery}
+                      onChange={(e) => setStaffSearchQuery(e.target.value)}
+                      className="input py-2 text-xs flex-1 bg-slate-50 border-slate-200"
+                    />
+                    <select
+                      value={staffFilterRole}
+                      onChange={(e) => setStaffFilterRole(e.target.value)}
+                      className="input py-2 text-xs bg-slate-50 sm:w-52 font-bold border-slate-200"
+                    >
+                      <option value="all">All Users ({allStudents.length})</option>
+                      <option value="staffOnly">Staff Members Only</option>
+                      <option value={ROLES.ADMIN}>🛠️ Admins Only</option>
+                      <option value={ROLES.TEACHER}>🎓 Teachers Only</option>
+                      <option value={ROLES.STUDENT}>📚 Students Only</option>
+                    </select>
+                  </div>
+
                   <div className="overflow-x-auto">
                     <table className="w-full text-xs min-w-[800px] text-left border-collapse">
                       <thead>
@@ -4631,9 +4672,26 @@ export default function PortalPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {allStudents.map((staffMember) => {
-                          const role = getEffectiveRole(staffMember);
-                          return (
+                        {allStudents
+                          .filter((staffMember) => {
+                            const role = getEffectiveRole(staffMember);
+                            const q = staffSearchQuery.toLowerCase().trim();
+                            const matchesSearch =
+                              !q ||
+                              (staffMember.name || "").toLowerCase().includes(q) ||
+                              (staffMember.email || "").toLowerCase().includes(q) ||
+                              (staffMember.rollNo || "").toLowerCase().includes(q);
+
+                            const matchesRole =
+                              staffFilterRole === "all" ||
+                              (staffFilterRole === "staffOnly" && role !== ROLES.STUDENT) ||
+                              role === staffFilterRole;
+
+                            return matchesSearch && matchesRole;
+                          })
+                          .map((staffMember) => {
+                            const role = getEffectiveRole(staffMember);
+                            return (
                             <tr key={staffMember.uid || staffMember.docId} className="border-b hover:bg-slate-50">
                               <td className="p-3 font-bold text-slate-900">{staffMember.name || "N/A"}</td>
                               <td className="p-3 font-mono text-blue-700">{staffMember.email || "No email"}</td>
@@ -4676,12 +4734,48 @@ export default function PortalPage() {
                 </div>
               ) : (
                 <div className="bg-white rounded-3xl shadow-sm border p-4 md:p-5 space-y-4">
-                  <h3 className="font-black text-gray-900 text-base">Student Forum Inquiries</h3>
-                  {allQuestions.length === 0 ? (
-                    <p className="text-xs text-gray-400 italic py-6 text-center">No questions submitted to the board yet.</p>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3">
+                    <h3 className="font-black text-gray-900 text-base">Student Forum Inquiries</h3>
+                    <div className="flex gap-1 bg-slate-100 p-1 rounded-xl">
+                      <button
+                        type="button"
+                        onClick={() => setForumFilter("unanswered")}
+                        className={`px-3 py-1 text-xs font-bold rounded-lg transition ${forumFilter === "unanswered" ? "bg-white text-blue-700 shadow-xs" : "text-slate-600 hover:text-slate-900"}`}
+                      >
+                        Unanswered ({allQuestions.filter(q => !q.reply).length})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setForumFilter("answered")}
+                        className={`px-3 py-1 text-xs font-bold rounded-lg transition ${forumFilter === "answered" ? "bg-white text-emerald-700 shadow-xs" : "text-slate-600 hover:text-slate-900"}`}
+                      >
+                        Answered ({allQuestions.filter(q => Boolean(q.reply)).length})
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setForumFilter("all")}
+                        className={`px-3 py-1 text-xs font-bold rounded-lg transition ${forumFilter === "all" ? "bg-white text-slate-900 shadow-xs" : "text-slate-600 hover:text-slate-900"}`}
+                      >
+                        All ({allQuestions.length})
+                      </button>
+                    </div>
+                  </div>
+
+                  {allQuestions.filter((q) => {
+                    if (forumFilter === "unanswered") return !q.reply;
+                    if (forumFilter === "answered") return Boolean(q.reply);
+                    return true;
+                  }).length === 0 ? (
+                    <p className="text-xs text-gray-400 italic py-6 text-center">No questions matching "{forumFilter}" filter.</p>
                   ) : (
                     <div className="space-y-3">
-                      {allQuestions.map((q) => (
+                      {allQuestions
+                        .filter((q) => {
+                          if (forumFilter === "unanswered") return !q.reply;
+                          if (forumFilter === "answered") return Boolean(q.reply);
+                          return true;
+                        })
+                        .map((q) => (
                         <div key={q.id} className="border p-4 rounded-2xl bg-slate-50 space-y-2">
                           <div className="flex justify-between items-start flex-wrap gap-1">
                             <div>
