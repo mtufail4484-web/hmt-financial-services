@@ -3828,19 +3828,19 @@ export default function PortalPage() {
 
           {activeTab === "admin" && isAdmin ? (
             <main className="lg:col-span-3 space-y-4">
-              <div className="bg-white rounded-3xl shadow-sm border p-4 md:p-5">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+              <div className="bg-white rounded-3xl shadow-sm border p-4 md:p-5 space-y-4">
+                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3 border-b pb-4">
                   <div>
                     <h2 className="text-xl md:text-2xl font-black text-slate-900">🛡️ Protected Admin Panel</h2>
                     <p className="text-xs text-slate-500 mt-0.5">Control hub parameters for academy databases.</p>
                     <p className="mt-1 text-[10px] font-mono text-slate-400">Admin UID: {user.uid}</p>
                   </div>
-                  <div className="flex gap-1.5 w-full sm:w-auto">
+                  <div className="flex flex-wrap gap-2 w-full lg:w-auto">
                     <button
                       type="button"
                       onClick={handleDownloadFullBackup}
                       disabled={backupGenerating}
-                      className="flex-1 sm:flex-initial px-3 py-2 text-xs font-bold rounded-xl border bg-violet-600 text-white border-violet-600 hover:bg-violet-700 disabled:bg-slate-200 disabled:text-slate-500"
+                      className="px-3 py-2 text-xs font-bold rounded-xl border bg-violet-600 text-white border-violet-600 hover:bg-violet-700 disabled:bg-slate-200 disabled:text-slate-500 shadow-xs"
                     >
                       {backupGenerating ? "Preparing Backup..." : "Download Full Backup"}
                     </button>
@@ -3848,60 +3848,63 @@ export default function PortalPage() {
                       type="button"
                       onClick={handleSyncVerificationRecords}
                       disabled={syncingVerificationRecords}
-                      className="flex-1 sm:flex-initial px-3 py-2 text-xs font-bold rounded-xl border bg-amber-500 text-slate-950 border-amber-500 hover:bg-amber-400 disabled:bg-slate-200 disabled:text-slate-500"
+                      className="px-3 py-2 text-xs font-bold rounded-xl border bg-amber-500 text-slate-950 border-amber-500 hover:bg-amber-400 disabled:bg-slate-200 disabled:text-slate-500 shadow-xs"
                     >
                       {syncingVerificationRecords ? "Syncing..." : "Sync Verify"}
                     </button>
                     <button
                       type="button"
                       onClick={() => setShowAnnouncementModal(true)}
-                      className="flex-1 sm:flex-initial px-3 py-2 text-xs font-bold rounded-xl border bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700"
+                      className="px-3 py-2 text-xs font-bold rounded-xl border bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700 shadow-xs"
                     >
-                      New Announcement
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setAdminSubTab("announcements")}
-                      className={`flex-1 sm:flex-initial px-3 py-2 text-xs font-bold rounded-xl border ${adminSubTab === "announcements" ? "bg-amber-500 text-slate-950 border-amber-500" : "bg-slate-50 text-slate-700"}`}
-                    >
-                      Announcements ({allAnnouncements.length})
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setAdminSubTab("students")}
-                      className={`flex-1 sm:flex-initial px-3 py-2 text-xs font-bold rounded-xl border ${adminSubTab === "students" ? "bg-blue-600 text-white border-blue-600" : "bg-slate-50 text-slate-700"}`}
-                    >
-                      Students List
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setAdminSubTab("lectures")}
-                      className={`flex-1 sm:flex-initial px-3 py-2 text-xs font-bold rounded-xl border ${adminSubTab === "lectures" ? "bg-blue-600 text-white border-blue-600" : "bg-slate-50 text-slate-700"}`}
-                    >
-                      Lectures ({courseVideos.length})
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setAdminSubTab("ai")}
-                      className={`flex-1 sm:flex-initial px-3 py-2 text-xs font-bold rounded-xl border ${adminSubTab === "ai" ? "bg-blue-600 text-white border-blue-600" : "bg-slate-50 text-slate-700"}`}
-                    >
-                      AI Interest ({pendingAiInterests})
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setAdminSubTab("questions")}
-                      className={`flex-1 sm:flex-initial px-3 py-2 text-xs font-bold rounded-xl border relative ${adminSubTab === "questions" ? "bg-blue-600 text-white border-blue-600" : "bg-slate-50 text-slate-700"}`}
-                    >
-                      Forum Board ({allQuestions.filter(q => !q.reply).length})
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setAdminSubTab("staff")}
-                      className={`flex-1 sm:flex-initial px-3 py-2 text-xs font-bold rounded-xl border ${adminSubTab === "staff" ? "bg-amber-500 text-slate-950 border-amber-500 font-black" : "bg-slate-50 text-slate-700"}`}
-                    >
-                      👑 Staff & Roles
+                      + New Announcement
                     </button>
                   </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setAdminSubTab("announcements")}
+                    className={`px-3.5 py-2 text-xs font-bold rounded-xl border transition ${adminSubTab === "announcements" ? "bg-amber-500 text-slate-950 border-amber-500 font-black shadow-xs" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"}`}
+                  >
+                    Announcements ({allAnnouncements.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAdminSubTab("students")}
+                    className={`px-3.5 py-2 text-xs font-bold rounded-xl border transition ${adminSubTab === "students" ? "bg-blue-600 text-white border-blue-600 font-black shadow-xs" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"}`}
+                  >
+                    Students List
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAdminSubTab("lectures")}
+                    className={`px-3.5 py-2 text-xs font-bold rounded-xl border transition ${adminSubTab === "lectures" ? "bg-blue-600 text-white border-blue-600 font-black shadow-xs" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"}`}
+                  >
+                    Lectures ({courseVideos.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAdminSubTab("ai")}
+                    className={`px-3.5 py-2 text-xs font-bold rounded-xl border transition ${adminSubTab === "ai" ? "bg-blue-600 text-white border-blue-600 font-black shadow-xs" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"}`}
+                  >
+                    AI Interest ({pendingAiInterests})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAdminSubTab("questions")}
+                    className={`px-3.5 py-2 text-xs font-bold rounded-xl border transition relative ${adminSubTab === "questions" ? "bg-blue-600 text-white border-blue-600 font-black shadow-xs" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"}`}
+                  >
+                    Forum Board ({allQuestions.filter(q => !q.reply).length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAdminSubTab("staff")}
+                    className={`px-3.5 py-2 text-xs font-bold rounded-xl border transition ${adminSubTab === "staff" ? "bg-amber-500 text-slate-950 border-amber-500 font-black shadow-xs" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"}`}
+                  >
+                    👑 Staff & Roles
+                  </button>
                 </div>
               </div>
 
