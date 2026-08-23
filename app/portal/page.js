@@ -2546,6 +2546,10 @@ export default function PortalPage() {
           completedVideos: [],
           lectureProgress: {},
           emailVerified: false,
+          role: ROLES.STUDENT,
+          accountType: ROLES.STUDENT,
+          isAdmin: false,
+          isTeacher: false,
           createdAt: new Date().toISOString(),
         };
 
