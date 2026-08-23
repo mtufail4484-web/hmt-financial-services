@@ -1,380 +1,181 @@
-"use client";
+import Link from "next/link";
 
-import { useState, useEffect } from "react";
-// 🔗 Next.js client-side navigation use karne ke liye Link import kiya hai
-import Link from "next/link"; 
+const YOUTUBE_PLAYLIST_ID = "PL7-zXwiLK4QpTLwRwytLdvhBJplS1lnhA";
+const YOUTUBE_PLAYLIST_URL = `https://www.youtube.com/playlist?list=${YOUTUBE_PLAYLIST_ID}`;
+const WHATSAPP_CHANNEL_URL = "https://whatsapp.com/channel/0029Vb8QglDIHphB2UZcLW3H";
+
+const courseTopics = [
+  "Computer basics and daily office use",
+  "MS Word document formatting",
+  "MS Excel sheets and basic formulas",
+  "PowerPoint presentations",
+  "Professional CV design",
+  "Internet, email, and productivity basics",
+];
+
+const portalFeatures = [
+  "Verified lecture watch progress",
+  "Assignments and admin feedback",
+  "Student ID card and QR verification",
+  "Announcements and student questions",
+  "Certificate status",
+  "Upcoming AI course interest registration",
+];
 
 export default function ComputerCourse() {
-  // 🟢 ALL STUDENT PORTAL LINKS FULLY INTEGRATED WITH YOUR LIVE LINKS
-  const youtubePlaylistLink = "https://www.youtube.com/playlist?list=PL7-zXwiLK4QpTLwRwytLdvhBJplS1lnhA";
-  const googleDriveLink = "https://drive.google.com/drive/folders/1-d9C9vTIUD-Y_Q0GKltyQHM7_9TWm_tB?usp=sharing"; 
-  const googleFormSubmissionLink = "https://forms.gle/LM17vUDFQZzE3a8o9"; 
-  const cvTemplateLink = "https://docs.google.com/document/d/1vQ4FWdqN2Uq2UygMlaLePHqdeKXZ28_D/edit?usp=drive_link&ouid=112391314571199093147&rtpof=true&sd=true";
-  const office2021Link = "https://drive.google.com/file/d/11-Qk552kmKxK56-TWgi5afMQQv9Ej40O/view?usp=drive_link";
-  const whatsappChannelLink = "https://whatsapp.com/channel/0029Vb8QglDIHphB2UZcLW3H";
-  const youtubeSubscribeLink = "https://youtube.com/@hmtsuccessacademy?sub_confirmation=1";
-
   return (
-    <div
-      style={{
-        padding: "20px",
-        fontFamily: "Arial, sans-serif",
-        background: "#f5f7fb",
-        minHeight: "100vh",
-      }}
-    >
-      <div
-        style={{
-          maxWidth: "1200px",
-          margin: "auto",
-          background: "white",
-          borderRadius: "20px",
-          padding: "25px",
-          boxShadow: "0 0 20px rgba(0,0,0,0.1)",
-        }}
-      >
-        {/* HEADING (MAIN TITLE) */}
-        <h1
-          style={{
-            fontSize: "40px",
-            color: "#0b2c5f",
-            textAlign: "center",
-            marginBottom: "5px",
-            fontWeight: "bold",
-          }}
-        >
-          FREE COMPUTER COURSE
-        </h1>
-
-        <h3
-          style={{
-            textAlign: "center",
-            color: "#6c757d",
-            marginBottom: "15px",
-            fontSize: "22px",
-            fontWeight: "bold"
-          }}
-        >
-          💻 Batch 02 — HMT Success Academy
-        </h3>
-
-        {/* ACTIVE COURSE STATUS BANNER */}
-        <div style={{ textAlign: "center", marginBottom: "25px" }}>
-          <h2 style={{ color: "red", margin: "0 0 5px 0", fontWeight: "bold", fontSize: "26px" }}>
-            🔴 CLASSES ARE IN PROGRESS / BATCH 02 IS LIVE!
-          </h2>
-          <h3 style={{ color: "red", margin: 0, fontSize: "22px", direction: "rtl", fontFamily: "Segoe UI, Arial" }}>
-            🔴 کمپیوٹر کلاسز باقاعدہ شروع ہو چکی ہیں!
-          </h3>
-        </div>
-
-        {/* STATUS BAR SECTION (UPDATED FOR COURSE PROGRESSION) */}
-        <div
-          style={{
-            background: "#0b2c5f",
-            color: "white",
-            textAlign: "center",
-            padding: "20px",
-            borderRadius: "12px",
-            marginBottom: "30px",
-          }}
-        >
+    <main className="min-h-screen bg-slate-50 text-slate-950">
+      <section className="bg-slate-950 px-4 py-10 text-white">
+        <div className="mx-auto grid max-w-6xl gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
           <div>
-            <span style={{ fontSize: "26px", fontWeight: "bold", display: "block" }}>✨ STATUS: COURSE IS IN PROGRESS!</span>
-            <span style={{ fontSize: "18px", display: "block", marginTop: "5px", direction: "rtl" }}>
-              کمپیوٹر کورس کی کلاسز باقاعدگی سے جاری ہیں۔ نیچے دیے گئے اسٹوڈنٹ پورٹل پر لاگ ان کریں، ویڈیوز دیکھیں اور حاضری یقینی بنائیں۔ 👇
-            </span>
+            <p className="text-xs font-black uppercase tracking-wide text-cyan-200">HMT Success Academy</p>
+            <h1 className="mt-3 text-3xl font-black leading-tight md:text-5xl">Free Computer Course</h1>
+            <p className="mt-3 max-w-2xl text-sm font-semibold leading-relaxed text-slate-300 md:text-base">
+              Batch 02 is live. Students can watch lectures, track progress, submit practice work, ask questions, and manage course documents inside the HMT student portal.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-2">
+              <Link href="/portal" className="rounded-xl bg-cyan-300 px-5 py-3 text-sm font-black text-slate-950 hover:bg-cyan-200">
+                Go to Student Portal
+              </Link>
+              <Link href="/tools" className="rounded-xl bg-white/10 px-5 py-3 text-sm font-black text-white hover:bg-white/15">
+                Free Student Tools
+              </Link>
+              <a href={YOUTUBE_PLAYLIST_URL} target="_blank" rel="noreferrer" className="rounded-xl bg-red-600 px-5 py-3 text-sm font-black text-white hover:bg-red-700">
+                Open Playlist
+              </a>
+            </div>
+          </div>
+
+          <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl">
+            <img src="/computer-course.jpg" alt="HMT free computer course" className="h-full w-full object-cover" />
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto grid max-w-6xl gap-4 px-4 py-6 md:grid-cols-3">
+        {[
+          ["Status", "Batch 02 Live", "Current students should continue from the student portal."],
+          ["Access", "Portal Based", "Lecture progress, assignments, questions, and cards are handled in one place."],
+          ["Next Course", "Artificial Intelligence", "AI basics, prompt writing, ChatGPT workflows, and productivity tools are coming next."],
+        ].map(([label, value, detail]) => (
+          <div key={label} className="rounded-2xl border bg-white p-5 shadow-sm">
+            <p className="text-[10px] font-black uppercase text-blue-600">{label}</p>
+            <h2 className="mt-1 text-xl font-black text-slate-950">{value}</h2>
+            <p className="mt-2 text-xs font-semibold leading-relaxed text-slate-500">{detail}</p>
+          </div>
+        ))}
+      </section>
+
+      <section className="mx-auto grid max-w-6xl gap-5 px-4 pb-6 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="rounded-3xl border bg-white p-5 shadow-sm">
+          <h2 className="text-xl font-black text-slate-950">What Students Learn</h2>
+          <div className="mt-4 grid gap-2">
+            {courseTopics.map((topic) => (
+              <div key={topic} className="rounded-2xl bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700">
+                {topic}
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* COURSE IMAGE */}
-        <img
-          src="/computer-course.jpg"
-          alt="Computer Course"
-          style={{
-            width: "100%",
-            borderRadius: "20px",
-            marginBottom: "30px",
-          }}
-        />
-
-        {/* SUBSCRIBE BUTTON WITH AUTO-CONFIRM LINK */}
-        <div style={{ textAlign: "center", marginBottom: "35px" }}>
-          <a
-            href={youtubeSubscribeLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              background: "red",
-              color: "white",
-              padding: "18px 30px",
-              borderRadius: "12px",
-              textDecoration: "none",
-              fontWeight: "bold",
-              fontSize: "20px",
-              display: "inline-block",
-              boxShadow: "0 4px 15px rgba(255, 0, 0, 0.3)",
-              textAlign: "center"
-            }}
-          >
-            <span style={{ display: "block" }}>🔴 Subscribe to YouTube Channel</span>
-            <span style={{ display: "block", fontSize: "16px", fontWeight: "normal", marginTop: "5px", direction: "rtl" }}>
-              چینل کو سبسکرائب کریں تاکہ روزانہ نئی لائیو کلاس کا نوٹیفکیشن مل سکے
-            </span>
-          </a>
-        </div>
-
-        {/* LIVE CLASS PLAYLIST PLAYER */}
-        <div
-          style={{
-            background: "#fff3cd",
-            padding: "25px",
-            borderRadius: "15px",
-            marginBottom: "30px",
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px", marginBottom: "15px" }}>
-            <h2 style={{ color: "#0b2c5f", margin: 0 }}>🎥 COURSE PLAYLIST (ALL CLASSES)</h2>
-            <h2 style={{ color: "#0b2c5f", margin: 0, direction: "rtl", fontFamily: "Segoe UI, Arial" }}>کمپیوٹر کورس مکمل پلے لسٹ 🎥</h2>
+        <div className="rounded-3xl border bg-white p-5 shadow-sm">
+          <h2 className="text-xl font-black text-slate-950">Use the Portal For</h2>
+          <div className="mt-4 grid gap-2 sm:grid-cols-2">
+            {portalFeatures.map((feature) => (
+              <div key={feature} className="rounded-2xl bg-blue-50 px-4 py-3 text-sm font-bold text-blue-900">
+                {feature}
+              </div>
+            ))}
           </div>
-          
-          <p style={{ fontSize: "18px", marginBottom: "20px", lineHeight: "1.6", color: "#333" }}>
-            <strong>English:</strong> Click the top-right corner icon inside the video box below to view all uploaded and completed classes of Batch 02 in sequence!
-            <br />
-            <span style={{ display: "block", marginTop: "8px", color: "#664d03" }}>
-              <strong>Urdu:</strong> پچھلی تمام کلاسز اور نئی ویڈیوز دیکھنے کے لیے نیچے پلے لسٹ پلیئر کا استعمال کریں۔ تمام ویڈیوز ترتیب وار یہاں موجود رہیں گی۔
-            </span>
-          </p>
+        </div>
+      </section>
 
-          <div style={{ position: "relative", paddingBottom: "56.25%", height: 0, overflow: "hidden", borderRadius: "15px" }}>
+      <section className="mx-auto grid max-w-6xl gap-5 px-4 pb-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="rounded-3xl border bg-white p-5 shadow-sm">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-[10px] font-black uppercase text-red-600">Course Playlist</p>
+              <h2 className="mt-1 text-xl font-black text-slate-950">Watch Course Lectures</h2>
+              <p className="mt-1 text-xs font-semibold text-slate-500">Students should use the portal for verified progress. This public player is only for preview and easy access.</p>
+            </div>
+            <a href={YOUTUBE_PLAYLIST_URL} target="_blank" rel="noreferrer" className="rounded-xl bg-red-600 px-4 py-2 text-center text-xs font-black text-white hover:bg-red-700">
+              Full YouTube Playlist
+            </a>
+          </div>
+          <div className="video-container mt-4">
             <iframe
-              src="https://www.youtube.com/embed/videoseries?list=PL7-zXwiLK4QpTLwRwytLdvhBJplS1lnhA"
+              src={`https://www.youtube.com/embed/videoseries?list=${YOUTUBE_PLAYLIST_ID}`}
               title="HMT Computer Course Batch 2 Playlist"
-              frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-              }}
-            ></iframe>
+            />
           </div>
         </div>
 
-        {/* EXPANDED DOWNLOAD & SUBMISSION DASHBOARD */}
-        <div
-          style={{
-            background: "#e8fff1",
-            padding: "25px",
-            borderRadius: "15px",
-            marginBottom: "30px",
-          }}
-        >
-          <h2 style={{ color: "#0b2c5f", marginBottom: "5px", textAlign: "center" }}>🎁 Course Download & Submission Center</h2>
-          <h3 style={{ color: "#155724", margin: "0 0 20px 0", textAlign: "center", direction: "rtl", fontFamily: "Segoe UI, Arial" }}>ڈاؤن لوڈز اور ہوم ورک جمع کرنے کا مین پورٹل 🎁</h3>
-          
-          {/* Grid Container for Buttons */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-              gap: "20px",
-              marginTop: "10px"
-            }}
-          >
-            {/* ⭐ NEW: PROFESSIONAL STUDENT PORTAL ACCESS BUTTON */}
-            <Link
-              href="/portal"
-              style={{
-                background: "#0d6efd",
-                color: "white",
-                padding: "15px 20px",
-                borderRadius: "10px",
-                textDecoration: "none",
-                fontWeight: "bold",
-                fontSize: "16px",
-                boxShadow: "0 4px 15px rgba(13, 110, 253, 0.3)",
-                textAlign: "center",
-                border: "2px solid #0056b3"
-              }}
-            >
-              <span style={{ display: "block" }}>🔑 Go to Student Portal / Login</span>
-              <span style={{ display: "block", fontSize: "12px", fontWeight: "normal", marginTop: "3px", direction: "rtl" }}>
-                لاگ ان کر کے 30 منٹ کلاس مکمل کریں
-              </span>
-            </Link>
-
-            {/* 1. PRACTICE FILES */}
-            <a
-              href={googleDriveLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                background: "#28a745",
-                color: "white",
-                padding: "15px 20px",
-                borderRadius: "10px",
-                textDecoration: "none",
-                fontWeight: "bold",
-                fontSize: "16px",
-                boxShadow: "0 4px 12 rgba(40, 167, 69, 0.2)",
-                textAlign: "center"
-              }}
-            >
-              <span style={{ display: "block" }}>📥 Daily Practice Files</span>
-              <span style={{ display: "block", fontSize: "12px", fontWeight: "normal", marginTop: "3px", direction: "rtl" }}>
-                روزانہ کی پریکٹس فائلز
-              </span>
-            </a>
-
-            {/* 2. SUBMIT HOMEWORK */}
-            <a
-              href={googleFormSubmissionLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                background: "#6c757d", // Changed to gray since main actions are portal/files
-                color: "white",
-                padding: "15px 20px",
-                borderRadius: "10px",
-                textDecoration: "none",
-                fontWeight: "bold",
-                fontSize: "16px",
-                boxShadow: "0 4px 12px rgba(108, 117, 125, 0.2)",
-                textAlign: "center"
-              }}
-            >
-              <span style={{ display: "block" }}>📤 Submit Homework Here</span>
-              <span style={{ display: "block", fontSize: "12px", fontWeight: "normal", marginTop: "3px", direction: "rtl" }}>
-                اپنا ہوم ورک جمع کروائیں
-              </span>
-            </a>
-
-            {/* 3. CV TEMPLATE */}
-            <a
-              href={cvTemplateLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                background: "#6f42c1",
-                color: "white",
-                padding: "15px 20px",
-                borderRadius: "10px",
-                textDecoration: "none",
-                fontWeight: "bold",
-                fontSize: "16px",
-                boxShadow: "0 4px 12px rgba(111, 66, 193, 0.2)",
-                textAlign: "center"
-              }}
-            >
-              <span style={{ display: "block" }}>📄 CV Template (Word File)</span>
-              <span style={{ display: "block", fontSize: "12px", fontWeight: "normal", marginTop: "3px", direction: "rtl" }}>
-                پیشہ ورانہ سی وی ٹیمپلیٹ
-              </span>
-            </a>
-
-            {/* 4. OFFICE 2021 INSTALLER */}
-            <a
-              href={office2021Link}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                background: "#fd7e14",
-                color: "white",
-                padding: "15px 20px",
-                borderRadius: "10px",
-                textDecoration: "none",
-                fontWeight: "bold",
-                fontSize: "16px",
-                boxShadow: "0 4px 12px rgba(253, 126, 20, 0.2)",
-                textAlign: "center"
-              }}
-            >
-              <span style={{ display: "block" }}>💿 Microsoft Office 2021</span>
-              <span style={{ display: "block", fontSize: "12px", fontWeight: "normal", marginTop: "3px", direction: "rtl" }}>
-                آفس 2021 سافٹ ویئر ڈاؤن لوڈ
-              </span>
-            </a>
-          </div>
-        </div>
-
-        {/* WHAT YOU WILL LEARN */}
-        <div
-          style={{
-            background: "#eef4ff",
-            padding: "25px",
-            borderRadius: "15px",
-            marginBottom: "30px",
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px", marginBottom: "20px" }}>
-            <h2 style={{ color: "#0b2c5f", margin: 0 }}>📚 What You Will Learn</h2>
-            <h2 style={{ color: "#0b2c5f", margin: 0, direction: "rtl", fontFamily: "Segoe UI, Arial" }}>آپ اس کورس میں کیا سیکھیں گے؟ 📚</h2>
-          </div>
-
-          <ul style={{ fontSize: "20px", lineHeight: "2", paddingLeft: "20px", color: "#1e3a63" }}>
-            <li><strong>Computer Basics</strong> (کمپیوٹر کی بنیادی معلومات)</li>
-            <li><strong>MS Word Typing</strong> (ایم ایس ورڈ پر ٹائپنگ کرنا)</li>
-            <li><strong>MS Excel Work</strong> (ایم ایس ایکسل پر کام کرنا)</li>
-            <li><strong>PowerPoint Presentations</strong> (پاورپوائنٹ پریزنٹیشن بنانا)</li>
-            <li><strong>Professional CV Making</strong> (موبائل اور کمپیوٹر پر سی وی بنانا)</li>
-            <li><strong>Office Work Skills</strong> (دفاتر میں استعمال ہونے والی مہارتیں)</li>
-            <li><strong>Internet Basics & Email</strong> (انٹرنیٹ اور ای میل کا استعمال)</li>
-            <li><strong>Practical Projects</strong> (عملی طور پر کام سیکھنا)</li>
-          </ul>
-        </div>
-
-        {/* WHATSAPP BUTTON */}
-        <div style={{ textAlign: "center", marginBottom: "35px" }}>
-          <a
-            href={whatsappChannelLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              background: "#25D366",
-              color: "white",
-              padding: "18px 35px",
-              borderRadius: "12px",
-              textDecoration: "none",
-              fontWeight: "bold",
-              fontSize: "22px",
-              display: "inline-block",
-              boxShadow: "0 4px 15px rgba(37, 211, 102, 0.3)",
-              textAlign: "center"
-            }}
-          >
-            <span style={{ display: "block" }}>💬 Connected on WhatsApp Channel</span>
-            <span style={{ display: "block", fontSize: "16px", fontWeight: "normal", marginTop: "5px", direction: "rtl" }}>
-              روزانہ کلاس الرٹس حاصل کرنے کے لیے واٹس ایپ چینل وزٹ کریں
-            </span>
-          </a>
-        </div>
-
-        {/* NEXT COURSE */}
-        <div
-          style={{
-            background: "#0b2c5f",
-            color: "white",
-            padding: "25px",
-            borderRadius: "15px",
-            textAlign: "center",
-          }}
-        >
-          <h2 style={{ marginBottom: "5px" }}>🤖 UPCOMING COURSE</h2>
-          <h3 style={{ color: "#ffc107", margin: "0 0 15px 0", direction: "rtl", fontFamily: "Segoe UI, Arial" }}>اگلا آنے والا بڑا کورس: آرٹیفیشل انٹیلیجنس (AI) 🤖</h3>
-          
-          <p style={{ fontSize: "20px", lineHeight: "1.8" }}>
-            <strong>Artificial Intelligence (AI) Mastery</strong>
-            <br />
-            ChatGPT • Advanced AI Tools • AI Video Editing & Production
-            <br />
-            <span style={{ color: "#ffc107", fontWeight: "bold" }}>Launching Immediately After This Batch!</span>
+        <div className="rounded-3xl border border-cyan-200 bg-gradient-to-br from-slate-950 via-cyan-950 to-slate-900 p-5 text-white shadow-sm">
+          <p className="text-[10px] font-black uppercase tracking-wide text-cyan-200">Next Course</p>
+          <h2 className="mt-2 text-2xl font-black">Artificial Intelligence Course</h2>
+          <p className="mt-3 text-sm font-semibold leading-relaxed text-slate-200">
+            HMT Success Academy will introduce AI basics, prompt writing, ChatGPT workflows, AI for study, office work, freelancing, and digital productivity.
           </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {["AI basics", "Prompt writing", "ChatGPT workflows", "Office productivity"].map((topic) => (
+              <span key={topic} className="rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-black text-cyan-100">
+                {topic}
+              </span>
+            ))}
+          </div>
+          <Link href="/portal" className="mt-5 inline-block rounded-xl bg-cyan-300 px-4 py-3 text-sm font-black text-slate-950 hover:bg-cyan-200">
+            Register Interest in Portal
+          </Link>
         </div>
-      </div>
-    </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 pb-10">
+        <div className="rounded-3xl bg-slate-950 p-5 text-white">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 className="text-xl font-black">Need course updates?</h2>
+              <p className="mt-1 text-xs font-semibold text-slate-300">Join the official WhatsApp channel for academy announcements and new course updates.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <a href={WHATSAPP_CHANNEL_URL} target="_blank" rel="noreferrer" className="rounded-xl bg-emerald-600 px-4 py-3 text-sm font-black text-white hover:bg-emerald-700">
+                WhatsApp Channel
+              </a>
+              <Link href="/portal" className="rounded-xl bg-white px-4 py-3 text-sm font-black text-slate-950 hover:bg-slate-100">
+                Student Portal
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <style>{`
+        .video-container {
+          position: relative;
+          width: 100%;
+          aspect-ratio: 16 / 9;
+          overflow: hidden;
+          border-radius: 1rem;
+          background: #000000;
+        }
+
+        .video-container iframe {
+          position: absolute;
+          inset: 0;
+          display: block;
+          width: 100%;
+          height: 100%;
+          border: 0;
+        }
+
+        @supports not (aspect-ratio: 16 / 9) {
+          .video-container {
+            height: 0;
+            padding-bottom: 56.25%;
+          }
+        }
+      `}</style>
+    </main>
   );
 }

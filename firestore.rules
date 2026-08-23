@@ -1,0 +1,93 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && (request.auth.email == "m.tufailkhan12335@gmail.com"
+            || request.auth.token.email == "m.tufailkhan12335@gmail.com"
+            || request.auth.uid == "fSJ0jUBCONXGJA7H41ChRq2ERLs1");
+    }
+
+    function isOwner(userId) {
+      return signedIn() && request.auth.uid == userId;
+    }
+
+    function isEmailVerified() {
+      return request.auth.token.email_verified == true;
+    }
+
+    match /students/{userId} {
+      allow read, write: if isOwner(userId) || isAdmin();
+    }
+
+    match /publicStudentVerifications/{rollNo} {
+      // Verification is public by roll number, but the directory cannot be listed.
+      allow get: if true;
+      allow create: if isAdmin() || (
+        signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.rollNo == rollNo
+        && get(/databases/$(database)/documents/students/$(request.auth.uid)).data.rollNo == rollNo
+      );
+      allow update: if isAdmin() || (
+        isOwner(resource.data.uid)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.rollNo == rollNo
+        && get(/databases/$(database)/documents/students/$(request.auth.uid)).data.rollNo == rollNo
+      );
+      allow delete: if isAdmin();
+    }
+
+    match /courseLectures/{lectureId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /questions/{questionId} {
+      allow read: if isAdmin() || (signedIn() && resource.data.studentId == request.auth.uid);
+      allow create: if signedIn() && request.resource.data.studentId == request.auth.uid;
+      allow update, delete: if isOwner(resource.data.studentId) || isAdmin();
+    }
+
+    match /announcements/{announcementId} {
+      allow read: if signedIn();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /aiCourseInterest/{docId} {
+      allow read: if isOwner(docId) || isAdmin();
+      allow create: if isOwner(docId) && request.resource.data.studentId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // Registration counter: students may create it once or increment it by one.
+    match /metadata/student_counter {
+      allow read: if true;
+      allow create: if isAdmin() || (
+        signedIn()
+        && request.resource.data.keys().hasOnly(["currentCount"])
+        && request.resource.data.currentCount == 1
+      );
+      allow update: if isAdmin() || (
+        signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(["currentCount"])
+        && request.resource.data.currentCount == resource.data.currentCount + 1
+      );
+      allow delete: if isAdmin();
+    }
+
+    match /metadata/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

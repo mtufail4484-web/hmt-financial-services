@@ -1,5 +1,8 @@
 {
   "expo": {
+    "name": "HMT Success Academy",
+    "slug": "hmt-success-academy",
+    "scheme": "hmtsuccessacademy",
     "extra": {
       "eas": {
         "projectId": "4d54226d-2785-4204-9a45-f1eb692bbeb8"

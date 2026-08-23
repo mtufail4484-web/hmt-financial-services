@@ -1,0 +1,49 @@
+# Quick Deployment Commands
+# Copy-paste ready commands for manual deployment
+
+## 1. LOCAL TESTING
+npm run dev
+# Test at http://localhost:3000
+
+## 2. GIT CLEANUP (Remove API keys from history - DO THIS ONCE ONLY)
+git filter-branch --tree-filter 'rm -f firebase.js' HEAD
+git push origin main --force
+
+## 3. COMMIT CHANGES
+git add .
+git commit -m "Security Upgrade: Phase 2 - Input Validation & Email Verification"
+git push origin main
+
+## 4. BUILD FOR PRODUCTION
+npm run build
+
+## 5. DEPLOY (Choose one based on your hosting)
+
+### VERCEL DEPLOYMENT
+npm i -g vercel
+vercel login
+vercel --prod
+
+### FIREBASE HOSTING
+npm i -g firebase-tools
+firebase login
+firebase deploy --only hosting
+
+### DOCKER DEPLOYMENT
+docker build -t hmt-portal .
+docker run -p 3000:3000 \
+  -e NEXT_PUBLIC_FIREBASE_API_KEY=your_key \
+  -e NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_domain \
+  hmt-portal
+
+## 6. VERIFY DEPLOYMENT
+# Visit your live URL and test:
+# - Sign up with invalid email (should fail)
+# - Sign up with weak password (should fail)
+# - Sign up with valid data (should send verification)
+# - Existing students should sign in normally
+
+## 7. ROLLBACK (If something breaks)
+# Vercel: Go to vercel.com/dashboard → Deployments → Promote previous
+# Firebase: firebase hosting:channel:deploy [channel-id]
+# Custom: git reset --hard <previous-commit> && npm run build && npm start
