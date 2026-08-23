@@ -1999,12 +1999,6 @@ export default function PortalPage() {
     }, 1000);
 
     return () => clearInterval(intervalRef.current);
-      [`lectureProgress.${activeVideo.id}.watchDone`]: true,
-      [`lectureProgress.${activeVideo.id}.requiredWatchSeconds`]: requiredWatchSeconds,
-      [`lectureProgress.${activeVideo.id}.videoDurationSeconds`]: videoTotalSeconds,
-      [`lectureProgress.${activeVideo.id}.watchPercent`]: 100,
-      [`lectureProgress.${activeVideo.id}.updatedAt`]: new Date().toISOString(),
-    }).catch(console.error);
   }, [activeVideo.id, currentProgress.watchDone, isLectureDone, requiredWatchSeconds, user?.uid, videoTotalSeconds, watchSeconds]);
 
   useEffect(() => {
