@@ -3850,7 +3850,7 @@ export default function PortalPage() {
                   setTwoFactorInput(val.replace(/\D/g, ""));
                 }
               }}
-              className="w-full text-center text-2xl font-mono tracking-widest font-black py-3 bg-white border border-blue-400 rounded-xl shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full text-center text-2xl font-mono tracking-widest font-black py-3 text-slate-950 bg-white border-2 border-blue-500 rounded-xl shadow-inner placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-200"
             />
             <p className="text-[10px] text-center text-slate-400 font-semibold pt-1">
               {useBackupCodeMode
@@ -6183,7 +6183,7 @@ export default function PortalPage() {
                   placeholder="000000"
                   value={setup2FaVerificationCode}
                   onChange={(e) => setSetup2FaVerificationCode(e.target.value.replace(/\D/g, ""))}
-                  className="input text-center text-xl font-mono tracking-widest font-black py-2.5 bg-slate-50 border-blue-300"
+                  className="w-full text-center text-xl font-mono tracking-widest font-black py-2.5 text-slate-950 bg-white border-2 border-blue-400 rounded-xl placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-200"
                 />
               </div>
 
