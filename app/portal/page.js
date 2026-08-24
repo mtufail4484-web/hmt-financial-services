@@ -3814,6 +3814,93 @@ export default function PortalPage() {
     );
   }
 
+  if (twoFactorRequired) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl border border-amber-200">
+          <div className="text-center space-y-1">
+            <div className="w-16 h-16 bg-amber-100 text-amber-900 border border-amber-300 rounded-full flex items-center justify-center text-3xl mx-auto shadow-xs">
+              {useBackupCodeMode ? "🔑" : "🔐"}
+            </div>
+            <h3 className="font-black text-slate-900 text-xl pt-2">
+              {useBackupCodeMode ? "Emergency Backup Recovery Code" : "Google Authenticator 2FA"}
+            </h3>
+            <p className="text-xs font-semibold text-slate-500">
+              Mandatory Security Verification for {pendingUserSession?.email || user?.email || ADMIN_EMAIL}
+            </p>
+          </div>
+
+          <div className="space-y-2 bg-slate-50 border p-4 rounded-2xl">
+            <label className="block text-xs font-black text-slate-700 text-center">
+              {useBackupCodeMode
+                ? "Enter 14-Character Emergency Backup Code:"
+                : "Enter 6-Digit Code From Google Authenticator App:"}
+            </label>
+            <input
+              type="text"
+              maxLength={useBackupCodeMode ? 14 : 6}
+              autoFocus
+              placeholder={useBackupCodeMode ? "HMT-XXXX-XXXX" : "000000"}
+              value={twoFactorInput}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (useBackupCodeMode) {
+                  setTwoFactorInput(val.toUpperCase());
+                } else {
+                  setTwoFactorInput(val.replace(/\D/g, ""));
+                }
+              }}
+              className="w-full text-center text-2xl font-mono tracking-widest font-black py-3 bg-white border border-blue-400 rounded-xl shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <p className="text-[10px] text-center text-slate-400 font-semibold pt-1">
+              {useBackupCodeMode
+                ? "Tip: Format can be entered with or without dashes (e.g. HMT-8F2A-90BC)"
+                : "Tip: Open Google Authenticator on your smartphone"}
+            </p>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <button
+              type="button"
+              onClick={handleVerify2FaLogin}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-black text-sm py-3 rounded-2xl shadow-md transition cursor-pointer"
+            >
+              Verify & Sign In
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setUseBackupCodeMode(!useBackupCodeMode);
+                setTwoFactorInput("");
+              }}
+              className="w-full bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 font-bold text-xs py-2.5 rounded-2xl transition cursor-pointer"
+            >
+              {useBackupCodeMode
+                ? "📱 Switch to Google Authenticator 6-Digit Code"
+                : "🔑 Lost your phone? Use Emergency Backup Code"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                auth.signOut();
+                setUser(null);
+                setPendingUserSession(null);
+                setTwoFactorRequired(false);
+                setTwoFactorInput("");
+                setUseBackupCodeMode(false);
+              }}
+              className="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs py-2.5 rounded-2xl transition cursor-pointer"
+            >
+              Cancel Sign In
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (user) {
     return (
       <div className="min-h-screen bg-[linear-gradient(135deg,#eef6ff_0%,#f8fbff_42%,#fff7ed_100%)]">
