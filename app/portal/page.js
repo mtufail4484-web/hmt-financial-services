@@ -22,7 +22,7 @@ import {
   canReplyQuestions,
   OWNER_UID,
 } from "../../lib/roles";
-import { generateSecret, verifyTOTP, getOtpAuthUri } from "../../lib/totp";
+import { generateSecret, verifyTOTP, getOtpAuthUri, generateBackupCodes, verifyBackupCode } from "../../lib/totp";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -327,6 +327,8 @@ export default function PortalPage() {
   const [twoFactorInput, setTwoFactorInput] = useState("");
   const [pendingUserSession, setPendingUserSession] = useState(null);
   const [twoFactorVerified, setTwoFactorVerified] = useState(false);
+  const [generatedBackupCodes, setGeneratedBackupCodes] = useState([]);
+  const [useBackupCodeMode, setUseBackupCodeMode] = useState(false);
 
   const [totalStudents, setTotalStudents] = useState(0);
   const [courseCatalog, setCourseCatalog] = useState(() => {
@@ -569,11 +571,31 @@ export default function PortalPage() {
   };
 
   const handleStart2FaSetup = () => {
-    const existingSecret = user?.twoFactorSecret;
+    const existingSecret = user?.twoFactorSecret || pendingUserSession?.twoFactorSecret;
     const activeSecret = existingSecret || generateSecret();
+    const existingBackupCodes = (user?.backupCodes || pendingUserSession?.backupCodes || []).length > 0
+      ? (user?.backupCodes || pendingUserSession?.backupCodes)
+      : generateBackupCodes(10);
     setTwoFactorSecret(activeSecret);
+    setGeneratedBackupCodes(existingBackupCodes);
     setSetup2FaVerificationCode("");
     setShow2FaSetupModal(true);
+  };
+
+  const handleRegenerateBackupCodes = async () => {
+    const newCodes = generateBackupCodes(10);
+    setGeneratedBackupCodes(newCodes);
+    const targetUid = user?.uid || pendingUserSession?.uid || auth.currentUser?.uid;
+    if (targetUid) {
+      try {
+        const studentRef = doc(db, "students", targetUid);
+        await setDoc(studentRef, { backupCodes: newCodes }, { merge: true });
+        safeUpdateUser({ backupCodes: newCodes });
+        alert("🎉 10 New Emergency Backup Recovery Codes Generated & Saved!");
+      } catch (err) {
+        console.warn("Could not save regenerated backup codes:", err);
+      }
+    }
   };
 
   const handleConfirm2FaSetup = async () => {
@@ -589,57 +611,162 @@ export default function PortalPage() {
     }
 
     try {
-      if (user?.uid) {
-        const studentRef = doc(db, "students", user.uid);
-        const now = new Date().toISOString();
-        await updateDoc(studentRef, {
-          twoFactorEnabled: true,
-          twoFactorSecret: twoFactorSecret,
-          twoFactorEnabledAt: now,
-        });
-
-        safeUpdateUser({
-          twoFactorEnabled: true,
-          twoFactorSecret: twoFactorSecret,
-          twoFactorEnabledAt: now,
-        });
+      const targetUid = user?.uid || pendingUserSession?.uid || auth.currentUser?.uid;
+      if (!targetUid) {
+        alert("❌ Could not determine admin account ID. Please try signing in again.");
+        return;
       }
+
+      const studentRef = doc(db, "students", targetUid);
+      const now = new Date().toISOString();
+      const backupCodesToSave = generatedBackupCodes.length > 0 ? generatedBackupCodes : generateBackupCodes(10);
+
+      await setDoc(studentRef, {
+        twoFactorEnabled: true,
+        twoFactorSecret: twoFactorSecret,
+        twoFactorEnabledAt: now,
+        backupCodes: backupCodesToSave,
+      }, { merge: true }).catch((err) => {
+        console.warn("Could not save 2FA to Firestore:", err);
+      });
+
+      if (typeof window !== "undefined") {
+        const payload = JSON.stringify({
+          twoFactorEnabled: true,
+          twoFactorSecret: twoFactorSecret,
+          twoFactorEnabledAt: now,
+          backupCodes: backupCodesToSave,
+        });
+        localStorage.setItem(`hmt-2fa-${targetUid}`, payload);
+        if (auth.currentUser?.email) {
+          localStorage.setItem(`hmt-2fa-${auth.currentUser.email.toLowerCase()}`, payload);
+        }
+        localStorage.setItem(`hmt-2fa-${ADMIN_EMAIL.toLowerCase()}`, payload);
+      }
+
+      if (pendingUserSession) {
+        setPendingUserSession((prev) => prev ? {
+          ...prev,
+          twoFactorEnabled: true,
+          twoFactorSecret: twoFactorSecret,
+          twoFactorEnabledAt: now,
+          backupCodes: backupCodesToSave,
+        } : null);
+      }
+
+      safeUpdateUser({
+        twoFactorEnabled: true,
+        twoFactorSecret: twoFactorSecret,
+        twoFactorEnabledAt: now,
+        backupCodes: backupCodesToSave,
+      });
 
       setShow2FaSetupModal(false);
       setTwoFactorVerified(true);
-      alert("🎉 Google Authenticator 2FA Enabled Successfully!\n\nYour Master Owner / Admin account is now 100% secured against stolen passwords.");
+      alert("🎉 Google Authenticator 2FA Enabled & Saved Permanently!\n\nIMPORTANT: Make sure you have saved your 10 Emergency Recovery Codes in a safe place. Your account is now 100% protected!");
     } catch (err) {
       alert("Could not enable 2FA: " + err.message);
     }
   };
 
+  const handleDisable2Fa = async () => {
+    if (!window.confirm("Are you sure you want to disable 2FA?")) return;
+    try {
+      const targetUid = user?.uid || pendingUserSession?.uid || auth.currentUser?.uid;
+      if (targetUid) {
+        const studentRef = doc(db, "students", targetUid);
+        await setDoc(studentRef, {
+          twoFactorEnabled: false,
+          twoFactorSecret: deleteField(),
+          backupCodes: deleteField(),
+        }, { merge: true }).catch((err) => {
+          console.warn("Could not remove 2FA from Firestore:", err);
+        });
+
+        if (typeof window !== "undefined") {
+          localStorage.removeItem(`hmt-2fa-${targetUid}`);
+          if (auth.currentUser?.email) {
+            localStorage.removeItem(`hmt-2fa-${auth.currentUser.email.toLowerCase()}`);
+          }
+          localStorage.removeItem(`hmt-2fa-${ADMIN_EMAIL.toLowerCase()}`);
+        }
+
+        safeUpdateUser({
+          twoFactorEnabled: false,
+          twoFactorSecret: null,
+          backupCodes: [],
+        });
+      }
+
+      setShow2FaSetupModal(false);
+      alert("🔓 2FA Disabled successfully.");
+    } catch (err) {
+      alert("Could not disable 2FA: " + err.message);
+    }
+  };
+
   const handleVerify2FaLogin = async () => {
-    if (!twoFactorInput || twoFactorInput.trim().length !== 6) {
-      alert("Please enter your 6-digit Google Authenticator code.");
+    const cleanInput = String(twoFactorInput || "").trim();
+    if (!cleanInput) {
+      alert("Please enter your 6-digit Google Authenticator code or an Emergency Backup Recovery Code.");
       return;
     }
 
     const secretToCheck = pendingUserSession?.twoFactorSecret || twoFactorSecret;
-    if (!secretToCheck) {
-      alert("2FA secret missing for session.");
+    const backupCodesToCheck = pendingUserSession?.backupCodes || user?.backupCodes || [];
+
+    // 1. Try 6-digit TOTP verification
+    let isValidTOTP = false;
+    if (cleanInput.length === 6 && /^\d{6}$/.test(cleanInput) && secretToCheck) {
+      isValidTOTP = await verifyTOTP(cleanInput, secretToCheck);
+    }
+
+    // 2. Try Emergency Recovery Code verification
+    const backupResult = verifyBackupCode(cleanInput, backupCodesToCheck);
+
+    if (isValidTOTP) {
+      setUser(pendingUserSession);
+      setPendingUserSession(null);
+      setTwoFactorRequired(false);
+      setTwoFactorInput("");
+      setTwoFactorVerified(true);
+      if (getEffectiveRole(pendingUserSession) !== ROLES.STUDENT) {
+        setActiveTab("admin");
+      }
+      setAuthChecking(false);
       return;
     }
 
-    const isValid = await verifyTOTP(twoFactorInput, secretToCheck);
-    if (!isValid) {
-      alert("❌ Invalid 6-digit Google Authenticator code. Please check your app and try again.");
+    if (backupResult.valid) {
+      // Consume the used backup code in Firestore
+      if (pendingUserSession?.uid) {
+        try {
+          const studentRef = doc(db, "students", pendingUserSession.uid);
+          await setDoc(studentRef, { backupCodes: backupResult.remainingCodes }, { merge: true });
+        } catch (err) {
+          console.warn("Could not update remaining backup codes in Firestore:", err);
+        }
+      }
+
+      const updatedSession = {
+        ...pendingUserSession,
+        backupCodes: backupResult.remainingCodes,
+      };
+
+      setUser(updatedSession);
+      setPendingUserSession(null);
+      setTwoFactorRequired(false);
+      setTwoFactorInput("");
+      setTwoFactorVerified(true);
+      if (getEffectiveRole(updatedSession) !== ROLES.STUDENT) {
+        setActiveTab("admin");
+      }
+      setAuthChecking(false);
+      alert(`⚠️ Emergency Recovery Code Accepted!\n\nCode verified and consumed. You have ${backupResult.remainingCodes.length} remaining backup codes left.`);
       return;
     }
 
-    setUser(pendingUserSession);
-    setPendingUserSession(null);
-    setTwoFactorRequired(false);
-    setTwoFactorInput("");
-    setTwoFactorVerified(true);
-    if (getEffectiveRole(pendingUserSession) !== ROLES.STUDENT) {
-      setActiveTab("admin");
-    }
-    setAuthChecking(false);
+    alert("❌ Invalid Verification Code!\n\nPlease enter the correct 6-digit code from Google Authenticator or an unused Emergency Backup Code (e.g. HMT-XXXX-XXXX).");
   };
 
   useEffect(() => {
@@ -1655,23 +1782,61 @@ export default function PortalPage() {
           console.warn("Could not refresh Firebase auth token.", err);
         });
 
-        if (firebaseUser.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+        const isMasterAdmin = firebaseUser.uid === OWNER_UID || firebaseUser.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
+
+        const docRef = doc(db, "students", firebaseUser.uid);
+        const docSnap = await getDoc(docRef).catch(() => null);
+        const data = docSnap?.exists() ? docSnap.data() : {};
+        const effectiveRole = getEffectiveRole({ ...data, uid: firebaseUser.uid, email: firebaseUser.email });
+        const isUserAdmin = isMasterAdmin || isAtLeastRole(effectiveRole, ROLES.ADMIN);
+
+        if (isUserAdmin) {
           if (!cancelled) {
-            setUser(buildAdminUser(firebaseUser));
-            setActiveTab("admin");
-            setAuthChecking(false);
+            let local2Fa = null;
+            if (typeof window !== "undefined") {
+              try {
+                const stored = localStorage.getItem(`hmt-2fa-${firebaseUser.uid}`) ||
+                               (firebaseUser.email ? localStorage.getItem(`hmt-2fa-${firebaseUser.email.toLowerCase()}`) : null) ||
+                               localStorage.getItem(`hmt-2fa-${ADMIN_EMAIL.toLowerCase()}`);
+                if (stored) local2Fa = JSON.parse(stored);
+              } catch (e) {
+                console.warn("Could not read local 2FA storage:", e);
+              }
+            }
+
+            const activeSecret = data.twoFactorSecret || local2Fa?.twoFactorSecret;
+            const activeBackupCodes = data.backupCodes || local2Fa?.backupCodes || [];
+            const has2FaActive = (data.twoFactorEnabled === true || local2Fa?.twoFactorEnabled === true) && Boolean(activeSecret);
+
+            const adminUserObj = {
+              ...buildAdminUser(firebaseUser),
+              ...data,
+              twoFactorEnabled: has2FaActive,
+              twoFactorSecret: activeSecret,
+              backupCodes: activeBackupCodes,
+            };
+
+            if (has2FaActive) {
+              setPendingUserSession(adminUserObj);
+              setTwoFactorSecret(activeSecret);
+              setGeneratedBackupCodes(activeBackupCodes);
+              setUser(null);
+              setTwoFactorRequired(true);
+              setAuthChecking(false);
+            } else {
+              setUser(adminUserObj);
+              setActiveTab("admin");
+              setAuthChecking(false);
+            }
           }
           return;
         }
 
-        const docRef = doc(db, "students", firebaseUser.uid);
-        const docSnap = await getDoc(docRef);
-        if (!docSnap.exists() || cancelled) {
+        if (!docSnap?.exists() || cancelled) {
           if (!cancelled) setAuthChecking(false);
           return;
         }
 
-        const data = docSnap.data();
         if (data.accountStatus === "deactivated" || data.accountStatus === "struckOff") {
           await auth.signOut();
           if (!cancelled) {
@@ -1701,10 +1866,6 @@ export default function PortalPage() {
             lectureProgress: data.lectureProgress || {},
             rollNo: data.rollNo || "C-26-HMT000",
           });
-
-          if (firebaseUser.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-            setActiveTab("admin");
-          }
           setAuthChecking(false);
         }
       } catch (err) {
@@ -2684,19 +2845,19 @@ export default function PortalPage() {
           return;
         }
 
-        await currentUser.getIdToken(true).catch((tokenErr) => {
-          console.warn("Could not refresh Firebase auth token after login.", tokenErr);
-        });
-
-        if (currentUser.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-          setUser(buildAdminUser(currentUser));
-          setActiveTab("admin");
-          setAuthChecking(false);
-          return;
-        }
+        const isMasterAdmin = currentUser.uid === OWNER_UID || currentUser.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
         const docRef = doc(db, "students", currentUser.uid);
-        const docSnap = await getDoc(docRef);
+        const docSnap = await getDoc(docRef).catch(() => null);
+        const data = docSnap?.exists() ? docSnap.data() : {};
+        const effectiveRole = getEffectiveRole({ ...data, uid: currentUser.uid, email: currentUser.email });
+        const isUserAdmin = isMasterAdmin || isAtLeastRole(effectiveRole, ROLES.ADMIN);
+
+        if (isUserAdmin) {
+          setLoading(false);
+          // onAuthStateChanged handles 2FA challenge enforcement
+          return;
+        }
 
         if (docSnap.exists()) {
           const data = docSnap.data();
@@ -3707,6 +3868,11 @@ export default function PortalPage() {
                 onClick={() => {
                   auth.signOut();
                   setUser(null);
+                  setPendingUserSession(null);
+                  setTwoFactorRequired(false);
+                  setTwoFactorVerified(false);
+                  setTwoFactorInput("");
+                  setUseBackupCodeMode(false);
                 }}
                 className="bg-white/10 hover:bg-white/20 text-white text-[11px] md:text-xs font-bold px-3 py-2 rounded-xl transition sm:col-span-2 md:col-span-1"
               >
@@ -5851,11 +6017,11 @@ export default function PortalPage() {
           </div>
         )}
         {show2FaSetupModal && (
-          <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 shadow-2xl border border-slate-100">
+          <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto">
+            <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-slate-100 my-8">
               <div className="flex items-center justify-between border-b pb-3">
                 <h3 className="font-black text-slate-900 text-lg flex items-center gap-2">
-                  <span>🔐 Setup Google 2FA</span>
+                  <span>🔐 Setup Google 2FA & Backup Codes</span>
                 </h3>
                 <button
                   type="button"
@@ -5866,20 +6032,20 @@ export default function PortalPage() {
                 </button>
               </div>
 
-              <div className="text-xs text-slate-600 space-y-2">
+              <div className="text-xs text-slate-600 space-y-1">
                 <p className="font-semibold">
-                  1. Open the <strong>Google Authenticator</strong> or <strong>Microsoft Authenticator</strong> app on your phone.
+                  1. Open <strong>Google Authenticator</strong> on your phone.
                 </p>
                 <p className="font-semibold">
-                  2. Scan the QR code below or enter the secret key manually:
+                  2. Scan QR code or enter secret key manually:
                 </p>
               </div>
 
               <div className="bg-slate-50 border rounded-2xl p-4 flex flex-col items-center justify-center gap-3">
                 <img
-                  src={`/api/qr?size=220x220&data=${encodeURIComponent(getOtpAuthUri(twoFactorSecret, user?.email || ADMIN_EMAIL, "HMT Success Academy"))}`}
+                  src={`/api/qr?size=200x200&data=${encodeURIComponent(getOtpAuthUri(twoFactorSecret, user?.email || ADMIN_EMAIL, "HMT Success Academy"))}`}
                   alt="2FA QR Code"
-                  className="w-48 h-48 rounded-xl border bg-white p-2 shadow-xs"
+                  className="w-44 h-44 rounded-xl border bg-white p-2 shadow-xs"
                 />
                 <div className="text-center">
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Secret Key (Manual Entry)</p>
@@ -5889,9 +6055,40 @@ export default function PortalPage() {
                 </div>
               </div>
 
+              {/* Emergency Backup Codes Section */}
+              <div className="bg-amber-50/80 border border-amber-200 rounded-2xl p-4 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black text-amber-950 flex items-center gap-1.5">
+                    🔑 Emergency Backup Recovery Codes (Save These!)
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (generatedBackupCodes.length > 0 && typeof window !== "undefined") {
+                        navigator.clipboard.writeText(generatedBackupCodes.join("\n"));
+                        alert("📋 Copied 10 Emergency Backup Codes to clipboard!\n\nSave them in a safe place or notes file.");
+                      }
+                    }}
+                    className="text-[11px] font-black bg-amber-200 hover:bg-amber-300 text-amber-950 px-2.5 py-1 rounded-lg border border-amber-300 transition"
+                  >
+                    📋 Copy All Codes
+                  </button>
+                </div>
+                <p className="text-[11px] font-semibold text-amber-800">
+                  If you ever lose your mobile phone, enter any of these 10 one-time codes to log in immediately:
+                </p>
+                <div className="grid grid-cols-2 gap-1.5 bg-white border border-amber-200 rounded-xl p-2 font-mono text-[11px] text-slate-900 font-bold text-center">
+                  {generatedBackupCodes.map((code, idx) => (
+                    <div key={idx} className="bg-slate-50 border rounded px-1.5 py-0.5 select-all">
+                      {code}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <label className="block text-xs font-black text-slate-700">
-                  3. Enter 6-Digit Code from Authenticator App:
+                  3. Enter 6-Digit Verification Code to Activate:
                 </label>
                 <input
                   type="text"
@@ -5903,21 +6100,33 @@ export default function PortalPage() {
                 />
               </div>
 
-              <div className="flex gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={handleConfirm2FaSetup}
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs py-3 rounded-2xl shadow-sm transition"
-                >
-                  Confirm & Enable 2FA
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShow2FaSetupModal(false)}
-                  className="px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-3 rounded-2xl transition"
-                >
-                  Cancel
-                </button>
+              <div className="flex flex-col gap-2 pt-2">
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handleConfirm2FaSetup}
+                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs py-3 rounded-2xl shadow-sm transition"
+                  >
+                    {user?.twoFactorEnabled ? "Update / Confirm 2FA" : "Confirm & Enable Mandatory 2FA"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShow2FaSetupModal(false)}
+                    className="px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-3 rounded-2xl transition"
+                  >
+                    Close
+                  </button>
+                </div>
+
+                {user?.twoFactorEnabled && (
+                  <button
+                    type="button"
+                    onClick={handleDisable2Fa}
+                    className="w-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs py-2.5 rounded-2xl transition"
+                  >
+                    🔓 Disable 2FA & Reset Authenticator Secret
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -5928,27 +6137,43 @@ export default function PortalPage() {
             <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-5 shadow-2xl border border-amber-200">
               <div className="text-center space-y-1">
                 <div className="w-16 h-16 bg-amber-100 text-amber-900 border border-amber-300 rounded-full flex items-center justify-center text-3xl mx-auto shadow-xs">
-                  🔐
+                  {useBackupCodeMode ? "🔑" : "🔐"}
                 </div>
-                <h3 className="font-black text-slate-900 text-xl pt-2">Google Authenticator 2FA</h3>
+                <h3 className="font-black text-slate-900 text-xl pt-2">
+                  {useBackupCodeMode ? "Emergency Backup Recovery Code" : "Google Authenticator 2FA"}
+                </h3>
                 <p className="text-xs font-semibold text-slate-500">
-                  Security check required for {pendingUserSession?.email || user?.email || ADMIN_EMAIL}
+                  Mandatory Security Verification for {pendingUserSession?.email || user?.email || ADMIN_EMAIL}
                 </p>
               </div>
 
               <div className="space-y-2 bg-slate-50 border p-4 rounded-2xl">
                 <label className="block text-xs font-black text-slate-700 text-center">
-                  Enter 6-Digit Code From Your Authenticator App:
+                  {useBackupCodeMode
+                    ? "Enter 14-Character Emergency Backup Code:"
+                    : "Enter 6-Digit Code From Google Authenticator App:"}
                 </label>
                 <input
                   type="text"
-                  maxLength={6}
+                  maxLength={useBackupCodeMode ? 14 : 6}
                   autoFocus
-                  placeholder="000000"
+                  placeholder={useBackupCodeMode ? "HMT-XXXX-XXXX" : "000000"}
                   value={twoFactorInput}
-                  onChange={(e) => setTwoFactorInput(e.target.value.replace(/\D/g, ""))}
-                  className="input text-center text-2xl font-mono tracking-widest font-black py-3 bg-white border-blue-400 shadow-inner"
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (useBackupCodeMode) {
+                      setTwoFactorInput(val.toUpperCase());
+                    } else {
+                      setTwoFactorInput(val.replace(/\D/g, ""));
+                    }
+                  }}
+                  className="input text-center text-xl font-mono tracking-widest font-black py-3 bg-white border-blue-400 shadow-inner"
                 />
+                <p className="text-[10px] text-center text-slate-400 font-semibold pt-1">
+                  {useBackupCodeMode
+                    ? "Tip: Format can be entered with or without dashes (e.g. HMT-8F2A-90BC)"
+                    : "Tip: Open Google Authenticator on your smartphone"}
+                </p>
               </div>
 
               <div className="flex flex-col gap-2">
@@ -5959,6 +6184,20 @@ export default function PortalPage() {
                 >
                   Verify & Sign In
                 </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUseBackupCodeMode(!useBackupCodeMode);
+                    setTwoFactorInput("");
+                  }}
+                  className="w-full bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 font-bold text-xs py-2.5 rounded-2xl transition"
+                >
+                  {useBackupCodeMode
+                    ? "📱 Switch to Google Authenticator 6-Digit Code"
+                    : "🔑 Lost your phone? Use Emergency Backup Code"}
+                </button>
+
                 <button
                   type="button"
                   onClick={() => {
@@ -5966,6 +6205,8 @@ export default function PortalPage() {
                     setUser(null);
                     setPendingUserSession(null);
                     setTwoFactorRequired(false);
+                    setTwoFactorInput("");
+                    setUseBackupCodeMode(false);
                   }}
                   className="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs py-2.5 rounded-2xl transition"
                 >
