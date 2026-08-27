@@ -1857,6 +1857,21 @@ export default function PortalPage() {
 
         if (cancelled) return;
 
+        // Ensure default student role and account type are explicitly assigned
+        if (data && (!data.role || !data.accountType)) {
+          data = {
+            ...data,
+            role: data.role || ROLES.STUDENT,
+            accountType: data.accountType || ROLES.STUDENT,
+            isAdmin: Boolean(data.isAdmin),
+            isTeacher: Boolean(data.isTeacher),
+          };
+          updateDoc(docRef, {
+            role: ROLES.STUDENT,
+            accountType: ROLES.STUDENT,
+          }).catch((err) => console.warn("Could not backfill student role:", err));
+        }
+
         if (data.accountStatus === "deactivated" || data.accountStatus === "struckOff") {
           await auth.signOut();
           if (!cancelled) {
@@ -2946,6 +2961,21 @@ export default function PortalPage() {
           );
           await upsertPublicStudentVerification(fallbackData).catch(() => null);
           data = fallbackData;
+        }
+
+        // Ensure default student role and account type are explicitly assigned
+        if (data && (!data.role || !data.accountType)) {
+          data = {
+            ...data,
+            role: data.role || ROLES.STUDENT,
+            accountType: data.accountType || ROLES.STUDENT,
+            isAdmin: Boolean(data.isAdmin),
+            isTeacher: Boolean(data.isTeacher),
+          };
+          updateDoc(docRef, {
+            role: ROLES.STUDENT,
+            accountType: ROLES.STUDENT,
+          }).catch((err) => console.warn("Could not backfill student role on login:", err));
         }
 
         const effectiveRole = getEffectiveRole({ ...data, uid: currentUser.uid, email: currentUser.email });
