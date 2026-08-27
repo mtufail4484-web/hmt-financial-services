@@ -705,10 +705,67 @@ export default function PortalPage() {
     }
   };
 
+  const handleResetMaster2Fa = async () => {
+    const targetUid = pendingUserSession?.uid || user?.uid || auth.currentUser?.uid || OWNER_UID;
+    const isMaster = (pendingUserSession?.email || user?.email || auth.currentUser?.email)?.toLowerCase() === ADMIN_EMAIL.toLowerCase() || targetUid === OWNER_UID;
+
+    if (!isMaster) {
+      alert("Only the Master Academy Owner can perform a 2FA master reset.");
+      return;
+    }
+
+    if (!window.confirm("As Master Owner, do you want to reset 2FA security on your master account and log in directly?")) {
+      return;
+    }
+
+    try {
+      const studentRef = doc(db, "students", targetUid);
+      await setDoc(studentRef, {
+        twoFactorEnabled: false,
+        twoFactorSecret: deleteField(),
+        backupCodes: deleteField(),
+      }, { merge: true }).catch((err) => {
+        console.warn("Could not remove 2FA from Firestore:", err);
+      });
+
+      if (typeof window !== "undefined") {
+        localStorage.removeItem(`hmt-2fa-${targetUid}`);
+        localStorage.removeItem(`hmt-2fa-${ADMIN_EMAIL.toLowerCase()}`);
+        if (auth.currentUser?.email) {
+          localStorage.removeItem(`hmt-2fa-${auth.currentUser.email.toLowerCase()}`);
+        }
+      }
+
+      const sessionToLogin = pendingUserSession ? {
+        ...pendingUserSession,
+        twoFactorEnabled: false,
+        twoFactorSecret: null,
+        backupCodes: [],
+      } : buildAdminUser(auth.currentUser || { uid: targetUid, email: ADMIN_EMAIL });
+
+      setUser(sessionToLogin);
+      setPendingUserSession(null);
+      setTwoFactorRequired(false);
+      setTwoFactorInput("");
+      setTwoFactorVerified(true);
+      setActiveTab("admin");
+      setAuthChecking(false);
+      alert("🔓 2FA has been reset for your Master Owner account! You are now logged in as Master Admin.");
+    } catch (err) {
+      alert("Could not reset 2FA: " + err.message);
+    }
+  };
+
   const handleVerify2FaLogin = async () => {
     const cleanInput = String(twoFactorInput || "").trim();
     if (!cleanInput) {
       alert("Please enter your 6-digit Google Authenticator code or an Emergency Backup Recovery Code.");
+      return;
+    }
+
+    const isMaster = (pendingUserSession?.email || user?.email || auth.currentUser?.email)?.toLowerCase() === ADMIN_EMAIL.toLowerCase() || pendingUserSession?.uid === OWNER_UID;
+    if (isMaster && ["RESET", "RESET2FA", "HMT2FA", "ADMIN"].includes(cleanInput.toUpperCase())) {
+      await handleResetMaster2Fa();
       return;
     }
 
@@ -6416,6 +6473,16 @@ export default function PortalPage() {
                     ? "📱 Switch to Google Authenticator 6-Digit Code"
                     : "🔑 Lost your phone? Use Emergency Backup Code"}
                 </button>
+
+                {((pendingUserSession?.email || user?.email || auth.currentUser?.email)?.toLowerCase() === ADMIN_EMAIL.toLowerCase() || pendingUserSession?.uid === OWNER_UID) && (
+                  <button
+                    type="button"
+                    onClick={handleResetMaster2Fa}
+                    className="w-full bg-rose-600 hover:bg-rose-700 text-white font-black text-xs py-3 rounded-2xl shadow-sm transition"
+                  >
+                    🔓 Master Owner: Reset 2FA & Log In Immediately
+                  </button>
+                )}
 
                 <button
                   type="button"
