@@ -2671,19 +2671,24 @@ export default function PortalPage() {
   };
 
   const getAuthErrorMessage = (err) => {
-    if (!err) return "We could not complete your request. Please try again.";
+    if (!err) return "Unable to sign in. Please check your email and password.";
 
     console.error("Auth error details:", err);
 
-    const code = err.code || "";
+    let code = err.code || "";
+    if (!code && typeof err.message === "string") {
+      const match = err.message.match(/\((auth\/[^)]+)\)/);
+      if (match?.[1]) code = match[1];
+    }
+
     const errorMessages = {
       "auth/email-already-in-use": "An account already exists with this email address. Please sign in instead or use Forgot Password.",
       "auth/invalid-email": "Please enter a valid email address.",
-      "auth/invalid-credential": "The email address or password is incorrect. Please check your credentials or use Forgot Password.",
-      "auth/user-not-found": "No account was found with this email address. Please create an account first.",
-      "auth/wrong-password": "The password is incorrect. Please check your password or use Forgot Password.",
+      "auth/invalid-credential": "The email address or password is incorrect. Please double-check your details or click Forgot Password.",
+      "auth/user-not-found": "No account was found with this email address. Please check your email or click Create an account below.",
+      "auth/wrong-password": "The password is incorrect. Please try again or click Forgot Password.",
       "auth/weak-password": "Your password is too weak. Use at least 8 characters with uppercase, lowercase, and a number.",
-      "auth/too-many-requests": "Too many failed login attempts. Please wait a few minutes and try again, or reset your password.",
+      "auth/too-many-requests": "Too many failed login attempts. Please wait 5 minutes and try again, or reset your password.",
       "auth/network-request-failed": "Connection failed. Please check your internet connection and try again.",
       "auth/user-disabled": "This account has been deactivated by academy admin. Please contact HMT Success Academy for support.",
       "auth/operation-not-allowed": "Email and password sign-in is disabled. Please contact HMT Success Academy.",
@@ -2693,7 +2698,7 @@ export default function PortalPage() {
       "unavailable": "Database service is temporarily offline or unavailable. Please check your internet connection.",
     };
 
-    if (errorMessages[code]) {
+    if (code && errorMessages[code]) {
       return errorMessages[code];
     }
 
@@ -2701,13 +2706,14 @@ export default function PortalPage() {
       const cleanMsg = err.message
         .replace(/^Firebase:\s*/i, "")
         .replace(/^Error\s*\([^)]+\):\s*/i, "")
-        .replace(/^Error:\s*/i, "");
+        .replace(/^Error:\s*/i, "")
+        .trim();
       if (cleanMsg && !cleanMsg.includes("http") && cleanMsg.length < 200) {
         return cleanMsg;
       }
     }
 
-    return "We could not complete your request. Please check your email and password, or try again. If the problem continues, contact HMT Success Academy.";
+    return "Sign-in failed. Please verify your email address and password, or click Forgot Password to reset your account.";
   };
 
   const showAuthError = (message) => {
