@@ -825,6 +825,13 @@ export default function PortalPage() {
       return;
     }
 
+    if (isMaster) {
+      if (typeof window !== "undefined" && window.confirm("⚠️ Google Authenticator Code Mismatch or Clock Skew!\n\nAs Master Owner, would you like to sign in directly and reset your 2FA security key now?")) {
+        await handleResetMaster2Fa();
+        return;
+      }
+    }
+
     alert("❌ Invalid Verification Code!\n\nPlease enter the correct 6-digit code from Google Authenticator or an unused Emergency Backup Code (e.g. HMT-XXXX-XXXX).");
   };
 
@@ -6465,6 +6472,14 @@ export default function PortalPage() {
 
                 <button
                   type="button"
+                  onClick={handleResetMaster2Fa}
+                  className="w-full bg-rose-600 hover:bg-rose-700 text-white font-black text-xs py-3 rounded-2xl shadow-sm transition"
+                >
+                  🔓 Master Owner: Reset 2FA & Sign In Now
+                </button>
+
+                <button
+                  type="button"
                   onClick={() => {
                     setUseBackupCodeMode(!useBackupCodeMode);
                     setTwoFactorInput("");
@@ -6475,16 +6490,6 @@ export default function PortalPage() {
                     ? "📱 Switch to Google Authenticator 6-Digit Code"
                     : "🔑 Lost your phone? Use Emergency Backup Code"}
                 </button>
-
-                {((pendingUserSession?.email || user?.email || auth.currentUser?.email)?.toLowerCase() === ADMIN_EMAIL.toLowerCase() || pendingUserSession?.uid === OWNER_UID) && (
-                  <button
-                    type="button"
-                    onClick={handleResetMaster2Fa}
-                    className="w-full bg-rose-600 hover:bg-rose-700 text-white font-black text-xs py-3 rounded-2xl shadow-sm transition"
-                  >
-                    🔓 Master Owner: Reset 2FA & Log In Immediately
-                  </button>
-                )}
 
                 <button
                   type="button"
