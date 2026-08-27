@@ -14,6 +14,7 @@ import {
 import {
   ROLES,
   getEffectiveRole,
+  isAtLeastRole,
   canManageStaff,
   canDownloadBackups,
   canManageLectures,
@@ -21,6 +22,7 @@ import {
   canReviewAssignments,
   canReplyQuestions,
   OWNER_UID,
+  OWNER_EMAIL,
 } from "../../lib/roles";
 import { generateSecret, verifyTOTP, getOtpAuthUri, generateBackupCodes, verifyBackupCode } from "../../lib/totp";
 import {
