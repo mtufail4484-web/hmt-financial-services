@@ -1786,8 +1786,8 @@ export default function PortalPage() {
 
         const docRef = doc(db, "students", firebaseUser.uid);
         const docSnap = await getDoc(docRef).catch(() => null);
-        const data = docSnap?.exists() ? docSnap.data() : {};
-        const effectiveRole = getEffectiveRole({ ...data, uid: firebaseUser.uid, email: firebaseUser.email });
+        let data = docSnap?.exists() ? docSnap.data() : null;
+        const effectiveRole = getEffectiveRole({ ...(data || {}), uid: firebaseUser.uid, email: firebaseUser.email });
         const isUserAdmin = isMasterAdmin || isAtLeastRole(effectiveRole, ROLES.ADMIN);
 
         if (isUserAdmin) {
@@ -1804,9 +1804,9 @@ export default function PortalPage() {
               }
             }
 
-            const activeSecret = data.twoFactorSecret || local2Fa?.twoFactorSecret;
-            const activeBackupCodes = data.backupCodes || local2Fa?.backupCodes || [];
-            const has2FaActive = (data.twoFactorEnabled === true || local2Fa?.twoFactorEnabled === true) && Boolean(activeSecret);
+            const activeSecret = data?.twoFactorSecret || local2Fa?.twoFactorSecret;
+            const activeBackupCodes = data?.backupCodes || local2Fa?.backupCodes || [];
+            const has2FaActive = (data?.twoFactorEnabled === true || local2Fa?.twoFactorEnabled === true) && Boolean(activeSecret);
 
             const adminUserObj = {
               ...buildAdminUser(firebaseUser),
@@ -1832,10 +1832,30 @@ export default function PortalPage() {
           return;
         }
 
-        if (!docSnap?.exists() || cancelled) {
-          if (!cancelled) setAuthChecking(false);
-          return;
+        if (!data && !cancelled) {
+          console.warn("Student doc missing in auth listener; creating fallback profile for user:", firebaseUser.uid);
+          const fallbackRollNo = `C-26-HMT${String(Date.now()).slice(-4)}`;
+          const fallbackData = {
+            uid: firebaseUser.uid,
+            rollNo: fallbackRollNo,
+            name: firebaseUser.displayName || firebaseUser.email?.split("@")[0] || "Student",
+            email: firebaseUser.email,
+            role: ROLES.STUDENT,
+            accountType: ROLES.STUDENT,
+            isAdmin: false,
+            isTeacher: false,
+            completedVideos: [],
+            lectureProgress: {},
+            watchTimeMinutes: 0,
+            createdAt: new Date().toISOString(),
+          };
+          await setDoc(docRef, fallbackData, { merge: true }).catch((err) =>
+            console.warn("Could not save fallback student doc in listener:", err)
+          );
+          data = fallbackData;
         }
+
+        if (cancelled) return;
 
         if (data.accountStatus === "deactivated" || data.accountStatus === "struckOff") {
           await auth.signOut();
@@ -1853,7 +1873,9 @@ export default function PortalPage() {
         const visitCount = (data.visitCount || 0) + (shouldCountVisit ? 1 : 0);
 
         if (shouldCountVisit) {
-          await updateDoc(docRef, { visitCount, lastVisitedAt: now });
+          await updateDoc(docRef, { visitCount, lastVisitedAt: now }).catch((err) =>
+            console.warn("Could not update visit count in auth state change:", err)
+          );
           window.sessionStorage.setItem(visitSessionKey, "1");
         }
 
@@ -2634,18 +2656,43 @@ export default function PortalPage() {
   };
 
   const getAuthErrorMessage = (err) => {
+    if (!err) return "We could not complete your request. Please try again.";
+
+    console.error("Auth error details:", err);
+
+    const code = err.code || "";
     const errorMessages = {
       "auth/email-already-in-use": "An account already exists with this email address. Please sign in instead or use Forgot Password.",
       "auth/invalid-email": "Please enter a valid email address.",
-      "auth/invalid-credential": "The email address or password is incorrect. Please try again or use Forgot Password.",
+      "auth/invalid-credential": "The email address or password is incorrect. Please check your credentials or use Forgot Password.",
       "auth/user-not-found": "No account was found with this email address. Please create an account first.",
-      "auth/wrong-password": "The password is incorrect. Please try again or use Forgot Password.",
+      "auth/wrong-password": "The password is incorrect. Please check your password or use Forgot Password.",
       "auth/weak-password": "Your password is too weak. Use at least 8 characters with uppercase, lowercase, and a number.",
-      "auth/too-many-requests": "Too many attempts were made. Please wait a few minutes, then try again or reset your password.",
-      "auth/network-request-failed": "We could not connect to the internet. Please check your connection and try again.",
+      "auth/too-many-requests": "Too many failed login attempts. Please wait a few minutes and try again, or reset your password.",
+      "auth/network-request-failed": "Connection failed. Please check your internet connection and try again.",
+      "auth/user-disabled": "This account has been deactivated by academy admin. Please contact HMT Success Academy for support.",
+      "auth/operation-not-allowed": "Email and password sign-in is disabled. Please contact HMT Success Academy.",
+      "auth/unverified-email": "Your email address is not verified yet. Please check your email inbox (and spam folder) for the verification link.",
+      "auth/requires-recent-login": "For security reasons, please sign out and sign in again before attempting this action.",
+      "permission-denied": "Database permission error. Please try signing in again or contact support.",
+      "unavailable": "Database service is temporarily offline or unavailable. Please check your internet connection.",
     };
 
-    return errorMessages[err?.code] || "We could not complete your request. Please try again. If the problem continues, contact HMT Success Academy.";
+    if (errorMessages[code]) {
+      return errorMessages[code];
+    }
+
+    if (typeof err.message === "string" && err.message.trim()) {
+      const cleanMsg = err.message
+        .replace(/^Firebase:\s*/i, "")
+        .replace(/^Error\s*\([^)]+\):\s*/i, "")
+        .replace(/^Error:\s*/i, "");
+      if (cleanMsg && !cleanMsg.includes("http") && cleanMsg.length < 200) {
+        return cleanMsg;
+      }
+    }
+
+    return "We could not complete your request. Please check your email and password, or try again. If the problem continues, contact HMT Success Academy.";
   };
 
   const showAuthError = (message) => {
@@ -2663,6 +2710,33 @@ export default function PortalPage() {
       alert("Password reset email sent. Please check your inbox.");
     } catch (err) {
       showAuthError(getAuthErrorMessage(err));
+    }
+  };
+
+  const handleResendVerificationEmail = async () => {
+    if (!email || !validateEmail(email)) {
+      showAuthError("Please enter your valid registered email address first, then click Resend Verification.");
+      return;
+    }
+    try {
+      setLoading(true);
+      if (auth.currentUser && auth.currentUser.email?.toLowerCase() === email.toLowerCase()) {
+        await sendEmailVerification(auth.currentUser);
+        alert(`Verification email sent to ${email}. Please check your inbox and spam folder.`);
+      } else {
+        if (!password) {
+          alert(`To resend the verification email to ${email}, please enter your account password as well.`);
+          return;
+        }
+        const credential = await signInWithEmailAndPassword(auth, email, password);
+        await sendEmailVerification(credential.user);
+        await auth.signOut();
+        alert(`Verification email sent to ${email}. Please check your inbox (and spam folder), then sign in after verifying.`);
+      }
+    } catch (err) {
+      showAuthError("Could not send verification email: " + getAuthErrorMessage(err));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -2829,19 +2903,17 @@ export default function PortalPage() {
 
         // Check if email is verified (skip for admin)
         if (currentUser.email?.toLowerCase() !== ADMIN_EMAIL.toLowerCase() && !currentUser.emailVerified) {
-          await auth.signOut();
-          showAuthError(`Your email (${currentUser.email}) has not been verified yet.\n\nPlease check your inbox for a verification email. If you don't see it, check your spam folder.\n\nA new verification email will be sent automatically.`);
-          setEmail(currentUser.email);
-          setLoading(false);
-
-          // Create a way to resend verification email
+          // Send verification email while user is still authenticated
           try {
             await sendEmailVerification(currentUser);
             console.log("Verification email sent to:", currentUser.email);
           } catch (err) {
             console.warn("Could not send verification email:", err);
           }
-
+          await auth.signOut();
+          showAuthError(`Your email (${currentUser.email}) has not been verified yet.\n\nPlease check your email inbox (and spam folder) for the verification link.\n\nA new verification email has been sent to your address automatically.`);
+          setEmail(currentUser.email);
+          setLoading(false);
           return;
         }
 
@@ -2849,7 +2921,33 @@ export default function PortalPage() {
 
         const docRef = doc(db, "students", currentUser.uid);
         const docSnap = await getDoc(docRef).catch(() => null);
-        const data = docSnap?.exists() ? docSnap.data() : {};
+        let data = docSnap?.exists() ? docSnap.data() : null;
+
+        // Auto-recover missing student profile doc if auth user exists but Firestore doc is missing
+        if (!data) {
+          console.warn("Student Firestore doc missing; creating fallback profile for user:", currentUser.uid);
+          const fallbackRollNo = `C-26-HMT${String(Date.now()).slice(-4)}`;
+          const fallbackData = {
+            uid: currentUser.uid,
+            rollNo: fallbackRollNo,
+            name: currentUser.displayName || currentUser.email?.split("@")[0] || "Student",
+            email: currentUser.email,
+            role: ROLES.STUDENT,
+            accountType: ROLES.STUDENT,
+            isAdmin: false,
+            isTeacher: false,
+            completedVideos: [],
+            lectureProgress: {},
+            watchTimeMinutes: 0,
+            createdAt: new Date().toISOString(),
+          };
+          await setDoc(docRef, fallbackData, { merge: true }).catch((err) =>
+            console.warn("Could not save fallback student doc:", err)
+          );
+          await upsertPublicStudentVerification(fallbackData).catch(() => null);
+          data = fallbackData;
+        }
+
         const effectiveRole = getEffectiveRole({ ...data, uid: currentUser.uid, email: currentUser.email });
         const isUserAdmin = isMasterAdmin || isAtLeastRole(effectiveRole, ROLES.ADMIN);
 
@@ -2859,40 +2957,38 @@ export default function PortalPage() {
           return;
         }
 
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          if (data.accountStatus === "deactivated" || data.accountStatus === "struckOff") {
-            await auth.signOut();
-            showAuthError(data.accountStatus === "struckOff" ? "Your account has been struck off by academy admin." : "Your account has been deactivated by academy admin.");
-            return;
-          }
-          const now = new Date().toISOString();
-          const visitSessionKey = `hmt-portal-visit-${currentUser.uid}`;
-          const shouldCountVisit = typeof window !== "undefined" && !window.sessionStorage.getItem(visitSessionKey);
-          const visitCount = (data.visitCount || 0) + (shouldCountVisit ? 1 : 0);
-          if (shouldCountVisit) {
-            await updateDoc(docRef, {
-              visitCount,
-              lastVisitedAt: now,
-            });
-            window.sessionStorage.setItem(visitSessionKey, "1");
-          }
-          setUser({
-            ...data,
-            visitCount,
-            lastVisitedAt: shouldCountVisit ? now : data.lastVisitedAt,
-            completedVideos: data.completedVideos || [],
-            lectureProgress: data.lectureProgress || {},
-            rollNo: data.rollNo || "C-26-HMT000",
-          });
-          if (currentUser.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
-            setActiveTab("admin");
-          }
-          setAuthChecking(false);
-        } else {
-          showAuthError("Your student profile could not be found. Please contact HMT Success Academy for help.");
-          setAuthChecking(false);
+        if (data.accountStatus === "deactivated" || data.accountStatus === "struckOff") {
+          await auth.signOut();
+          showAuthError(data.accountStatus === "struckOff" ? "Your account has been struck off by academy admin." : "Your account has been deactivated by academy admin.");
+          return;
         }
+
+        const now = new Date().toISOString();
+        const visitSessionKey = `hmt-portal-visit-${currentUser.uid}`;
+        const shouldCountVisit = typeof window !== "undefined" && !window.sessionStorage.getItem(visitSessionKey);
+        const visitCount = (data.visitCount || 0) + (shouldCountVisit ? 1 : 0);
+
+        if (shouldCountVisit) {
+          await updateDoc(docRef, {
+            visitCount,
+            lastVisitedAt: now,
+          }).catch((err) => console.warn("Could not update visit count on login:", err));
+          window.sessionStorage.setItem(visitSessionKey, "1");
+        }
+
+        setUser({
+          ...data,
+          visitCount,
+          lastVisitedAt: shouldCountVisit ? now : data.lastVisitedAt,
+          completedVideos: data.completedVideos || [],
+          lectureProgress: data.lectureProgress || {},
+          rollNo: data.rollNo || "C-26-HMT000",
+        });
+
+        if (currentUser.email?.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+          setActiveTab("admin");
+        }
+        setAuthChecking(false);
       }
     } catch (err) {
       showAuthError(getAuthErrorMessage(err));
@@ -6500,8 +6596,8 @@ export default function PortalPage() {
                   {showPassword ? "Hide" : "Show"}
                 </button>
               </div>
-              <div className="flex items-center justify-between gap-3 pt-1">
-                <span className="text-[11px] font-semibold text-slate-500">Email verification required</span>
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+                <button type="button" onClick={handleResendVerificationEmail} className="text-xs font-black text-amber-700 hover:underline">Resend verification email?</button>
                 <button type="button" onClick={handleResetPassword} className="text-xs font-black text-blue-600 hover:underline">Forgot password?</button>
               </div>
               <button type="submit" disabled={loading} className="auth-button bg-blue-600 hover:bg-blue-700 shadow-blue-600/20">
