@@ -321,6 +321,7 @@ export default function PortalPage() {
   const [staffSearchQuery, setStaffSearchQuery] = useState("");
   const [staffFilterRole, setStaffFilterRole] = useState("all");
   const [forumFilter, setForumFilter] = useState("unanswered");
+  const [mockTestCandidates, setMockTestCandidates] = useState([]);
 
   const [twoFactorSecret, setTwoFactorSecret] = useState("");
   const [show2FaSetupModal, setShow2FaSetupModal] = useState(false);
@@ -2516,6 +2517,17 @@ export default function PortalPage() {
         aiInterests = [];
       }
 
+      // Try to read Mock Test Candidates
+      try {
+        console.log("📥 Reading mock_test_students collection...");
+        const mockSnap = await getDocs(collection(db, "mock_test_students"));
+        const mockCandidates = mockSnap.docs.map((docItem) => ({ id: docItem.id, ...docItem.data() }));
+        setMockTestCandidates(mockCandidates);
+        console.log(`✅ Mock Test Candidates read: ${mockCandidates.length} records`);
+      } catch (err) {
+        console.error("⚠️ Mock Test candidates read failed (continuing):", err?.message);
+      }
+
       // Try to read metadata - continue on error
       try {
         console.log("📥 Reading metadata/student_counter...");
@@ -4347,6 +4359,15 @@ export default function PortalPage() {
               </button>
 
               <a
+                href="/mock-test"
+                target="_blank"
+                rel="noreferrer"
+                className="block w-full rounded-2xl bg-gradient-to-r from-purple-700 to-indigo-800 hover:from-purple-800 hover:to-indigo-900 py-2.5 text-center text-xs font-black text-white shadow-sm transition"
+              >
+                🎯 Mock Test Portal
+              </a>
+
+              <a
                 href="/tools"
                 className="block w-full rounded-2xl bg-cyan-600 hover:bg-cyan-700 py-2.5 text-center text-xs font-bold text-white transition"
               >
@@ -4439,6 +4460,13 @@ export default function PortalPage() {
                     className={`px-3.5 py-2 text-xs font-bold rounded-xl border transition ${adminSubTab === "ai" ? "bg-blue-600 text-white border-blue-600 font-black shadow-xs" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"}`}
                   >
                     AI Interest ({pendingAiInterests})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAdminSubTab("mock_test")}
+                    className={`px-3.5 py-2 text-xs font-bold rounded-xl border transition ${adminSubTab === "mock_test" ? "bg-purple-600 text-white border-purple-600 font-black shadow-xs" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"}`}
+                  >
+                    🎯 Mock Test Candidates ({mockTestCandidates.length})
                   </button>
                   <button
                     type="button"
@@ -5155,6 +5183,86 @@ export default function PortalPage() {
                                 >
                                   {interest.contacted ? "Contacted" : "Mark Contacted"}
                                 </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              ) : adminSubTab === "mock_test" ? (
+                <div className="bg-white rounded-3xl shadow-sm border p-4 md:p-5 space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b pb-4">
+                    <div>
+                      <h3 className="font-black text-slate-900 text-base flex items-center gap-2">
+                        🎯 Competitive Exam Mock Test Candidates ({mockTestCandidates.length})
+                      </h3>
+                      <p className="mt-0.5 text-xs font-semibold text-slate-500">
+                        Students who registered & entered the Mock Test Portal (ETEA, KPPSC, PPSC, FPSC, CSS).
+                      </p>
+                    </div>
+
+                    <a
+                      href="/mock-test"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-4 py-2.5 text-xs font-black rounded-xl bg-gradient-to-r from-purple-700 to-indigo-800 text-white shadow-sm hover:opacity-90 transition"
+                    >
+                      🚀 Open Mock Test Portal →
+                    </a>
+                  </div>
+
+                  {mockTestCandidates.length === 0 ? (
+                    <p className="rounded-2xl bg-slate-50 py-8 text-center text-xs font-semibold text-slate-400">
+                      No candidate registrations recorded in Firestore database yet.
+                    </p>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full min-w-[980px] text-left text-xs">
+                        <thead>
+                          <tr className="bg-slate-100 text-slate-700 font-bold">
+                            <th className="rounded-l-xl p-3">Roll No & Student Name</th>
+                            <th className="p-3">Phone / WhatsApp</th>
+                            <th className="p-3">City & Province</th>
+                            <th className="p-3">Target Exam</th>
+                            <th className="p-3">Qualification</th>
+                            <th className="rounded-r-xl p-3">Registration Date</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {mockTestCandidates.map((c) => (
+                            <tr key={c.id} className="hover:bg-slate-50">
+                              <td className="p-3">
+                                <div className="font-black text-slate-900">{c.fullName || c.name || "Candidate"}</div>
+                                <div className="mt-0.5 font-mono text-[10px] text-purple-700 font-bold">{c.rollNumber || "N/A"}</div>
+                              </td>
+                              <td className="p-3">
+                                {c.phone ? (
+                                  <a
+                                    href={`https://wa.me/${String(c.phone).replace(/\D/g, "")}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="font-bold text-emerald-700 underline flex items-center gap-1"
+                                  >
+                                    <span>💬 {c.phone}</span>
+                                  </a>
+                                ) : (
+                                  <span className="text-slate-400">No phone</span>
+                                )}
+                                {c.email && <div className="text-[10px] text-slate-400 font-mono">{c.email}</div>}
+                              </td>
+                              <td className="p-3 font-semibold text-slate-700">
+                                {c.city || "N/A"}, <span className="text-slate-500">{c.province || "KP"}</span>
+                              </td>
+                              <td className="p-3">
+                                <span className="px-2.5 py-1 rounded-full text-[10px] font-black bg-amber-100 text-amber-900 border border-amber-300">
+                                  {c.targetCommission || "General"}
+                                </span>
+                              </td>
+                              <td className="p-3 text-slate-600">{c.qualification || "N/A"}</td>
+                              <td className="p-3 font-mono text-slate-500 text-[10px]">
+                                {c.createdAt?.toDate ? c.createdAt.toDate().toLocaleDateString() : c.registeredAt ? c.registeredAt.split("T")[0] : "Recent"}
                               </td>
                             </tr>
                           ))}
@@ -6751,6 +6859,46 @@ export default function PortalPage() {
               </button>
               <p className="text-center text-[11px] font-semibold text-slate-500">A verification email will be sent after registration.</p>
             </form>
+          </div>
+
+          {/* OFFICIAL SOCIAL MEDIA CHANNELS BANNER */}
+          <div className="mt-8 pt-6 border-t border-slate-200">
+            <div className="bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 rounded-2xl p-5 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+              <div>
+                <h4 className="text-sm md:text-base font-black tracking-tight flex items-center gap-2">
+                  <span>📢 Connect with HMT Success Academy Official Channels</span>
+                </h4>
+                <p className="text-xs text-blue-200 mt-1">
+                  Subscribe to our YouTube Channel & Follow Facebook Page for daily lectures, exam updates & free test materials.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 shrink-0">
+                <a
+                  href="https://youtube.com/@hmtsuccessacademy"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-black text-xs flex items-center gap-2 shadow-md transition transform hover:scale-105"
+                >
+                  <span>▶ YouTube Channel</span>
+                </a>
+                <a
+                  href="https://www.facebook.com/HMTSuccessAcademy"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs flex items-center gap-2 shadow-md transition transform hover:scale-105"
+                >
+                  <span>📘 Facebook Page</span>
+                </a>
+                <a
+                  href="https://whatsapp.com/channel/0029Vb8QglDIHphB2UZcLW3H"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center gap-2 shadow-md transition transform hover:scale-105"
+                >
+                  <span>💬 WhatsApp Channel</span>
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </div>

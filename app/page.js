@@ -125,58 +125,68 @@ export default function HMTFinancialServices() {
 
   const services = [
     {
-      title: "Bookkeeping",
-      desc: "Professional bookkeeping services for accurate financial records.",
+      title: "Bookkeeping Services",
+      desc: "Professional bookkeeping and daily transaction recording for accurate financial records, general ledgers, and business tax compliance.",
       image: "/bookkeeping.jpg",
+      badge: "💼 Financial Service",
+      cta: "📝 Book Bookkeeping Service",
     },
     {
-      title: "Financial Reports",
-      desc: "Detailed reports for smarter business decisions.",
+      title: "Financial Reporting",
+      desc: "Comprehensive balance sheets, P&L income statements, cash flow statements, and executive financial reports for key decision makers.",
       image: "/financial Report.jpg",
+      badge: "📈 Reporting & Audits",
+      cta: "📄 Request Financial Report",
     },
     {
-      title: "Excel Automation",
-      desc: "Advanced Excel automation systems and dashboards.",
+      title: "Excel Automation Systems",
+      desc: "Custom automated Excel dashboards, financial macros, inventory management, automated billing, and custom reporting templates.",
       image: "/Excel Automation.jpg",
+      badge: "⚡ Business Automation",
+      cta: "📊 Request Excel System",
     },
     {
       title: "Bank Reconciliation",
-      desc: "Accurate bank reconciliation services to match your accounts and cash flow.",
+      desc: "Accurate bank statement reconciliation to match accounting ledgers, identify discrepancies, and ensure cash flow integrity.",
       image: "/Bank Reconciliation.png",
+      badge: "🔍 Audit & Integrity",
+      cta: "🏦 Reconcile Accounts",
     },
     {
       title: "Receivable & Payable Management",
-      desc: "Efficient management of accounts receivable and payable for better cash flow.",
+      desc: "Efficient tracking and management of customer receivables and vendor payables to optimize working capital and cash flow.",
       image: "/Recceivable and payable.png",
+      badge: "💵 Cash Flow Management",
+      cta: "💰 Manage Receivables",
     },
-
     {
       title: "Payroll Management",
-      desc: "Reliable payroll and salary handling services.",
+      desc: "Reliable staff salary calculations, tax deductions, overtime handling, direct disbursements, and monthly payslip generation.",
       image: "/Pay Roll Management.png",
+      badge: "👥 HR & Payroll",
+      cta: "📜 Setup Payroll System",
     },
     {
-      title: "ERP Management",
-      desc: "ERP accounting systems and business solutions.",
+      title: "ERP Management & Systems",
+      desc: "End-to-end ERP accounting system setup, module configuration, inventory synchronization, and enterprise workflow support.",
       image: "/ERP Management.jpg",
+      badge: "🏢 Enterprise Systems",
+      cta: "⚙️ Setup ERP System",
     },
     {
-      title: "Data Entry",
-      desc: "Fast and accurate financial data entry services.",
+      title: "Financial Data Entry",
+      desc: "Fast, accurate, and secure financial data entry, invoice processing, receipt scanning, and database digitizing.",
       image: "/Data Entry.jpg",
+      badge: "⌨️ Data Processing",
+      cta: "📥 Order Data Entry",
     },
-    
     {
-  title: "Digital Services",
-  desc: "Professional website development, mobile app development, e-commerce solutions, UI/UX design, and complete digital business solutions for modern brands.",
-  image: "/Digital Solution.png",
-},
-{
-  title: "Free Computer Course",
-  desc: "Join our FREE live computer classes starting from 30 May. Learn Computer Basics, MS Word, Excel, PowerPoint, CV Making and Office Skills through YouTube live sessions.",
-  image: "/computer-course.jpg",
-  link: "/computer-course",
-},
+      title: "Digital Business Solutions",
+      desc: "Professional website design, mobile apps, e-commerce solutions, UI/UX, SEO optimization, and complete online branding.",
+      image: "/Digital Solution.png",
+      badge: "🌐 Web & Tech Solutions",
+      cta: "💻 Request Web Solution",
+    },
   ];
 
   const businessTypes = [
@@ -907,20 +917,23 @@ export default function HMTFinancialServices() {
       </header>
 
       {/* Top feature bar */}
-      <section className="bg-white py-4 border-b border-slate-200 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6">
+      <section className="bg-gradient-to-r from-[#02132b] via-[#092652] to-[#02132b] py-3.5 border-y border-amber-500/40 shadow-2xl overflow-hidden relative">
+        <div className="max-w-7xl mx-auto px-4">
           <div className="feature-marquee overflow-hidden">
-            <div className="feature-track flex items-center gap-4">
+            <div className="feature-track flex items-center gap-5">
               {[...featureItems, ...featureItems].map((item, index) => (
-                <div key={`${item.label}-${index}`} className="flex min-w-[280px] items-center gap-3 rounded-[28px] border border-slate-200 bg-slate-50 px-4 py-3 shadow-sm">
-                  <span className="grid h-11 w-11 place-items-center rounded-2xl bg-gradient-to-br from-yellow-400 to-orange-400 text-white shadow-lg">
+                <div
+                  key={`${item.label}-${index}`}
+                  className="flex min-w-[290px] items-center gap-3.5 rounded-full border border-amber-400/30 bg-slate-900/80 px-5 py-2.5 shadow-lg shadow-black/40 backdrop-blur-md hover:border-amber-400 hover:bg-slate-900 transition-all duration-300 transform hover:scale-105 shrink-0 cursor-pointer"
+                >
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600 text-slate-950 shadow-md shadow-amber-500/30">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
                       <path d={item.icon} />
                     </svg>
                   </span>
-                  <div>
-                    <p className="text-[10px] uppercase tracking-[0.28em] text-slate-500">{item.subtitle}</p>
-                    <p className="text-sm font-semibold leading-5 text-slate-950">{item.label}</p>
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-black uppercase tracking-[0.22em] text-amber-300 truncate">{item.subtitle}</p>
+                    <p className="text-xs font-bold leading-tight text-white truncate">{item.label}</p>
                   </div>
                 </div>
               ))}
@@ -1063,52 +1076,63 @@ export default function HMTFinancialServices() {
 
           </div>
 
-          <div className="grid md:grid-cols-3 gap-10">
-
+          <div className="grid md:grid-cols-3 gap-8">
             {services.map((service, index) => (
-
-  <Link href={service.link || "#"} key={index}>
-
-  <div
+              <div
                 key={index}
-                className="group overflow-hidden rounded-[2rem] bg-gradient-to-br from-white via-slate-50 to-slate-100 shadow-2xl transition duration-500 hover:-translate-y-2 hover:shadow-blue-300/30"
+                onClick={() => handleBookService(service.title)}
+                className="group relative cursor-pointer overflow-hidden rounded-[2.5rem] bg-gradient-to-b from-slate-900 via-slate-900 to-[#03142e] text-white border border-slate-800 shadow-xl transition-all duration-500 hover:-translate-y-3 hover:shadow-2xl hover:border-amber-400/60 hover:shadow-amber-500/20"
+                title={`Click picture or card to request ${service.title}`}
               >
+                {/* Glowing Animated Top Border */}
+                <div className="h-1.5 w-full bg-gradient-to-r from-blue-600 via-amber-400 to-indigo-600 group-hover:from-amber-400 group-hover:to-yellow-400 transition-all duration-500" />
 
-                <div className="overflow-hidden">
+                {/* Service Picture Container - Click Redirects Immediately to Form */}
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleBookService(service.title);
+                  }}
+                  className="overflow-hidden relative h-56 w-full bg-slate-950 flex items-center justify-center p-4 cursor-pointer"
+                >
                   <img
                     src={service.image}
                     alt={service.title}
-                    className="h-60 w-full object-cover transition duration-500 group-hover:scale-105"
+                    className="h-full w-full object-contain transition-all duration-700 ease-out group-hover:scale-110"
                   />
+
+                  {/* Active Badge */}
+                  <div className="absolute top-4 right-4">
+                    <span className="inline-flex items-center gap-1.5 rounded-full px-3.5 py-1 text-xs font-black shadow-lg backdrop-blur-md bg-slate-900/90 text-amber-300 border border-amber-500/40">
+                      {service.badge || "Paid Service"}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="p-8">
-                  <span className="inline-flex rounded-full bg-slate-900/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-slate-600">
-                    {t("serviceBadge")}
-                  </span>
-
-                  <h3 className="mt-4 text-2xl font-black text-slate-950 mb-4">
+                {/* Card Details */}
+                <div className="p-7 space-y-4">
+                  <h3 className="text-xl font-black text-white tracking-tight group-hover:text-amber-300 transition-colors">
                     {service.title}
                   </h3>
 
-                  <p className="text-slate-600 leading-relaxed mb-6">
+                  <p className="text-xs text-slate-300 leading-relaxed min-h-[50px]">
                     {service.desc}
                   </p>
 
                   <button
                     type="button"
-                    onClick={() => handleBookService(service.title)}
-                    className="w-full rounded-2xl bg-yellow-400 px-5 py-3 text-sm font-bold text-black transition duration-300 hover:bg-yellow-500 hover:-translate-y-0.5"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleBookService(service.title);
+                    }}
+                    className="w-full rounded-2xl bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-black text-sm py-3.5 px-4 shadow-xl shadow-amber-500/20 transition-all duration-300 flex items-center justify-center gap-2 group-hover:shadow-amber-400/40 transform group-hover:scale-[1.02]"
                   >
-                    {t("bookThisService")}
+                    <span>{service.cta || t("bookThisService")}</span>
+                    <span className="text-base font-bold">→</span>
                   </button>
                 </div>
-
               </div>
-              </Link>
-
             ))}
-
           </div>
 
         </div>

@@ -4,7 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const navLinks = [
+  { href: "/free-services", label: "🎁 Free Hub" },
   { href: "/computer-course", label: "Computer Course" },
+  { href: "/mock-test", label: "Mock Tests" },
   { href: "/tools", label: "Free Tools" },
   { href: "/verify", label: "Verify Student" },
   { href: "/portal", label: "Student Portal", featured: true },
@@ -48,6 +50,27 @@ export default function HeaderNav() {
               </Link>
             );
           })}
+
+          <div className="col-span-2 flex items-center justify-center gap-1.5 pt-1 sm:pt-0 sm:ml-1">
+            <a
+              href="https://youtube.com/@hmtsuccessacademy"
+              target="_blank"
+              rel="noreferrer"
+              title="Subscribe to YouTube Channel"
+              className="px-2.5 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white font-bold text-[11px] flex items-center gap-1 shadow-sm transition"
+            >
+              <span>▶ YouTube</span>
+            </a>
+            <a
+              href="https://www.facebook.com/HMTSuccessAcademy"
+              target="_blank"
+              rel="noreferrer"
+              title="Follow Facebook Page"
+              className="px-2.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-[11px] flex items-center gap-1 shadow-sm transition"
+            >
+              <span>📘 Facebook</span>
+            </a>
+          </div>
         </nav>
       </div>
     </header>
