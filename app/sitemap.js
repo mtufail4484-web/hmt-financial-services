@@ -7,20 +7,32 @@ export default function sitemap() {
     {
       url: SITE_URL,
       lastModified: now,
+      changeFrequency: "daily",
+      priority: 1.0,
+    },
+    {
+      url: `${SITE_URL}/free-services`,
+      lastModified: now,
       changeFrequency: "weekly",
-      priority: 1,
+      priority: 0.95,
+    },
+    {
+      url: `${SITE_URL}/mock-test`,
+      lastModified: now,
+      changeFrequency: "daily",
+      priority: 0.95,
     },
     {
       url: `${SITE_URL}/portal`,
       lastModified: now,
-      changeFrequency: "weekly",
-      priority: 0.9,
+      changeFrequency: "daily",
+      priority: 0.90,
     },
     {
       url: `${SITE_URL}/computer-course`,
       lastModified: now,
       changeFrequency: "weekly",
-      priority: 0.8,
+      priority: 0.90,
     },
     {
       url: `${SITE_URL}/tools`,
@@ -29,22 +41,22 @@ export default function sitemap() {
       priority: 0.85,
     },
     {
+      url: `${SITE_URL}/verify`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.80,
+    },
+    {
       url: `${SITE_URL}/computer-course/cv-template`,
       lastModified: now,
       changeFrequency: "monthly",
-      priority: 0.6,
+      priority: 0.70,
     },
     {
       url: `${SITE_URL}/computer-course/microsoft-office`,
       lastModified: now,
       changeFrequency: "monthly",
-      priority: 0.6,
-    },
-    {
-      url: `${SITE_URL}/verify`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.5,
+      priority: 0.70,
     },
   ];
 }
