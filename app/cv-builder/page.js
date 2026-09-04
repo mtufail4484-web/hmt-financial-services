@@ -11,6 +11,8 @@ const SAMPLE_CV_DATA = {
   phone: "+92 300 1234567",
   city: "Peshawar, KPK, Pakistan",
   linkedin: "linkedin.com/in/mhamza-hmt",
+  photo: "/hmt-logo-new.png",
+  showPhoto: true,
   summary:
     "Detail-oriented and resourceful Computer Operator with certification from HMT Success Academy. Proficient in MS Office 2021 (Word, Excel, PowerPoint), data entry, automated result card generation, and document management. Seeking an office administration role in a dynamic organization.",
   education: [
@@ -57,6 +59,8 @@ export default function CvBuilderPage() {
     phone: "",
     city: "",
     linkedin: "",
+    photo: "/hmt-logo-new.png",
+    showPhoto: true,
     summary: "",
     education: [
       { degree: "", institute: "", year: "", details: "" },
@@ -73,6 +77,17 @@ export default function CvBuilderPage() {
 
   const loadSampleData = () => {
     setCv(SAMPLE_CV_DATA);
+  };
+
+  const handlePhotoUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCv((prev) => ({ ...prev, photo: reader.result, showPhoto: true }));
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handlePrint = () => {
@@ -262,6 +277,58 @@ export default function CvBuilderPage() {
                   onChange={(e) => setCv({ ...cv, linkedin: e.target.value })}
                   className="w-full rounded-xl bg-slate-950 border border-slate-800 p-2.5 text-white focus:border-amber-400 focus:outline-none"
                 />
+              </div>
+
+              {/* PROFILE PHOTO OPTIONAL INPUT */}
+              <div className="sm:col-span-2 p-3 bg-slate-950 rounded-2xl border border-slate-800 space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-slate-300 font-bold text-xs">📷 Profile Picture (Optional)</label>
+                  <label className="flex items-center gap-1.5 text-xs text-amber-400 font-semibold cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={cv.showPhoto}
+                      onChange={(e) => setCv({ ...cv, showPhoto: e.target.checked })}
+                      className="rounded border-slate-700 bg-slate-900 text-amber-400 focus:ring-0"
+                    />
+                    <span>Show Photo on CV</span>
+                  </label>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  {cv.photo && (
+                    <img
+                      src={cv.photo}
+                      alt="Preview"
+                      className="w-12 h-14 object-cover rounded-lg border border-slate-700 bg-slate-900 shrink-0"
+                    />
+                  )}
+
+                  <div className="flex-1 space-y-1.5 min-w-0">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePhotoUpload}
+                      className="w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500/20 file:text-amber-300 hover:file:bg-amber-500/30 cursor-pointer"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Or paste Image URL (e.g. /hmt-logo-new.png)"
+                      value={cv.photo}
+                      onChange={(e) => setCv({ ...cv, photo: e.target.value })}
+                      className="w-full rounded-xl bg-slate-900 border border-slate-800 p-2 text-white text-xs focus:border-amber-400 focus:outline-none"
+                    />
+                  </div>
+
+                  {cv.photo && (
+                    <button
+                      type="button"
+                      onClick={() => setCv({ ...cv, photo: "" })}
+                      className="px-2 py-1 text-xs font-bold text-rose-400 hover:text-rose-300"
+                    >
+                      ✕ Clear
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -502,21 +569,33 @@ export default function CvBuilderPage() {
             id="printable-cv"
             className="w-full bg-white text-slate-900 rounded-3xl p-8 shadow-2xl space-y-6 text-sm font-sans min-h-[800px] border border-slate-200 print:shadow-none print:border-none print:rounded-none print:p-0"
           >
-            {/* CV HEADER */}
-            <div className={`pb-4 border-b ${theme === "gold" ? "border-amber-500" : "border-slate-800"}`}>
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 uppercase tracking-tight">
-                {cv.fullName || "YOUR FULL NAME"}
-              </h1>
-              <p className={`text-base font-bold uppercase tracking-wide mt-1 ${theme === "gold" ? "text-amber-700" : "text-blue-800"}`}>
-                {cv.jobTitle || "Job Title / Target Post"}
-              </p>
+            {/* CV HEADER WITH OPTIONAL PHOTO */}
+            <div className={`pb-4 border-b ${theme === "gold" ? "border-amber-500" : "border-slate-800"} flex justify-between items-start gap-4`}>
+              <div className="flex-1">
+                <h1 className="text-2xl sm:text-3xl font-black text-slate-900 uppercase tracking-tight">
+                  {cv.fullName || "YOUR FULL NAME"}
+                </h1>
+                <p className={`text-base font-bold uppercase tracking-wide mt-1 ${theme === "gold" ? "text-amber-700" : "text-blue-800"}`}>
+                  {cv.jobTitle || "Job Title / Target Post"}
+                </p>
 
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600 font-semibold mt-3">
-                {cv.email && <span>📧 {cv.email}</span>}
-                {cv.phone && <span>📱 {cv.phone}</span>}
-                {cv.city && <span>📍 {cv.city}</span>}
-                {cv.linkedin && <span>🔗 {cv.linkedin}</span>}
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600 font-semibold mt-3">
+                  {cv.email && <span>📧 {cv.email}</span>}
+                  {cv.phone && <span>📱 {cv.phone}</span>}
+                  {cv.city && <span>📍 {cv.city}</span>}
+                  {cv.linkedin && <span>🔗 {cv.linkedin}</span>}
+                </div>
               </div>
+
+              {cv.showPhoto && cv.photo && (
+                <div className="shrink-0">
+                  <img
+                    src={cv.photo}
+                    alt={cv.fullName || "Profile Photo"}
+                    className="w-20 h-24 sm:w-24 sm:h-28 object-cover rounded-xl border-2 border-slate-300 shadow-sm"
+                  />
+                </div>
+              )}
             </div>
 
             {/* SUMMARY */}
@@ -623,6 +702,32 @@ export default function CvBuilderPage() {
           </div>
         </div>
       </footer>
+
+      {/* PRINT STYLING SPECIFIC TO CV BUILDER */}
+      <style jsx global>{`
+        @media print {
+          @page {
+            margin: 10mm;
+            size: A4;
+          }
+          body {
+            background: white !important;
+            color: black !important;
+          }
+          header, footer, nav, .print\:hidden {
+            display: none !important;
+          }
+          #printable-cv {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+            border: none !important;
+            min-height: auto !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

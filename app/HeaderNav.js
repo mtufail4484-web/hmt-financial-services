@@ -18,7 +18,7 @@ export default function HeaderNav() {
   const pathname = usePathname();
 
   return (
-    <header className="w-full bg-[#0b2c5f] text-white shadow-lg">
+    <header className="w-full bg-[#0b2c5f] text-white shadow-lg print:hidden">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-3 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <Link
           href="/"
