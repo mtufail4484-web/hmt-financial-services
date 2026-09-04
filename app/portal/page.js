@@ -323,6 +323,30 @@ export default function PortalPage() {
   const [forumFilter, setForumFilter] = useState("unanswered");
   const [mockTestCandidates, setMockTestCandidates] = useState([]);
 
+  // Past Papers & Daily Quizzes Admin state
+  const [allPastPapers, setAllPastPapers] = useState([]);
+  const [newPaperTitle, setNewPaperTitle] = useState("");
+  const [newPaperCategory, setNewPaperCategory] = useState("ETEA KP");
+  const [newPaperExamType, setNewPaperExamType] = useState("");
+  const [newPaperYear, setNewPaperYear] = useState("2026");
+  const [newPaperFormat, setNewPaperFormat] = useState("PDF");
+  const [newPaperUrl, setNewPaperUrl] = useState("");
+  const [newPaperDesc, setNewPaperDesc] = useState("");
+  const [paperSubmitting, setPaperSubmitting] = useState(false);
+
+  const [allDailyQuizzes, setAllDailyQuizzes] = useState([]);
+  const [quizDate, setQuizDate] = useState(() => new Date().toISOString().split("T")[0]);
+  const [quizTitle, setQuizTitle] = useState("Daily ETEA & KPPSC MCQ Quiz");
+  const [quizCategory, setQuizCategory] = useState("ETEA KP");
+  const [quizQuestions, setQuizQuestions] = useState([
+    { question: "", options: ["", "", "", ""], answer: 0, explanation: "" },
+    { question: "", options: ["", "", "", ""], answer: 0, explanation: "" },
+    { question: "", options: ["", "", "", ""], answer: 0, explanation: "" },
+    { question: "", options: ["", "", "", ""], answer: 0, explanation: "" },
+    { question: "", options: ["", "", "", ""], answer: 0, explanation: "" },
+  ]);
+  const [quizSubmitting, setQuizSubmitting] = useState(false);
+
   const [twoFactorSecret, setTwoFactorSecret] = useState("");
   const [show2FaSetupModal, setShow2FaSetupModal] = useState(false);
   const [setup2FaVerificationCode, setSetup2FaVerificationCode] = useState("");
@@ -523,6 +547,144 @@ export default function PortalPage() {
   const isOwner = activeUserRole === ROLES.OWNER;
   const isAdmin = activeUserRole === ROLES.OWNER || activeUserRole === ROLES.ADMIN;
   const isTeacher = activeUserRole === ROLES.OWNER || activeUserRole === ROLES.ADMIN || activeUserRole === ROLES.TEACHER;
+
+  // Listen for Past Papers in Admin
+  useEffect(() => {
+    if (!isAdmin) return;
+    try {
+      const q = query(collection(db, "past_papers"), orderBy("createdAt", "desc"));
+      const unsub = onSnapshot(q, (snap) => {
+        if (!snap.empty) {
+          setAllPastPapers(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        }
+      }, (err) => console.warn("Past papers admin listen error:", err));
+      return () => unsub();
+    } catch (e) {
+      console.warn("Firestore error past_papers listener:", e);
+    }
+  }, [isAdmin]);
+
+  // Listen for Daily Quizzes in Admin
+  useEffect(() => {
+    if (!isAdmin) return;
+    try {
+      const q = query(collection(db, "daily_quizzes"));
+      const unsub = onSnapshot(q, (snap) => {
+        if (!snap.empty) {
+          setAllDailyQuizzes(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        }
+      }, (err) => console.warn("Daily quizzes admin listen error:", err));
+      return () => unsub();
+    } catch (e) {
+      console.warn("Firestore error daily_quizzes listener:", e);
+    }
+  }, [isAdmin]);
+
+  const handleAddPastPaper = async (e) => {
+    e.preventDefault();
+    if (!newPaperTitle.trim() || !newPaperUrl.trim()) {
+      alert("Title and File/Download URL are required!");
+      return;
+    }
+    setPaperSubmitting(true);
+    try {
+      await addDoc(collection(db, "past_papers"), {
+        title: newPaperTitle.trim(),
+        category: newPaperCategory,
+        examType: newPaperExamType.trim() || newPaperCategory,
+        year: newPaperYear,
+        format: newPaperFormat,
+        fileUrl: newPaperUrl.trim(),
+        description: newPaperDesc.trim(),
+        downloadCount: 0,
+        createdAt: new Date().toISOString(),
+        uploadedBy: user?.email || ADMIN_EMAIL,
+      });
+      alert("🎉 Past Paper / Study Note published successfully!");
+      setNewPaperTitle("");
+      setNewPaperExamType("");
+      setNewPaperUrl("");
+      setNewPaperDesc("");
+    } catch (err) {
+      alert("Error adding past paper: " + err.message);
+    } finally {
+      setPaperSubmitting(false);
+    }
+  };
+
+  const handleDeletePastPaper = async (id) => {
+    if (!confirm("Are you sure you want to delete this past paper?")) return;
+    try {
+      await deleteDoc(doc(db, "past_papers", id));
+      alert("Deleted past paper successfully.");
+    } catch (err) {
+      alert("Error deleting: " + err.message);
+    }
+  };
+
+  const handleQuestionChange = (qIndex, field, value) => {
+    setQuizQuestions((prev) => {
+      const next = prev.map((item, idx) => {
+        if (idx !== qIndex) return item;
+        return {
+          ...item,
+          [field]: field === "answer" ? parseInt(value, 10) : value,
+        };
+      });
+      return next;
+    });
+  };
+
+  const handleOptionChange = (qIndex, optIndex, value) => {
+    setQuizQuestions((prev) => {
+      const next = prev.map((item, idx) => {
+        if (idx !== qIndex) return item;
+        const newOpts = [...item.options];
+        newOpts[optIndex] = value;
+        return { ...item, options: newOpts };
+      });
+      return next;
+    });
+  };
+
+  const handleSaveDailyQuiz = async (e) => {
+    e.preventDefault();
+    if (!quizDate || !quizTitle.trim()) {
+      alert("Quiz Date and Title are required!");
+      return;
+    }
+    const validQuestions = quizQuestions.filter((q) => q.question.trim().length > 0);
+    if (validQuestions.length === 0) {
+      alert("Please fill out at least 1 question for the daily quiz!");
+      return;
+    }
+    setQuizSubmitting(true);
+    try {
+      await setDoc(doc(db, "daily_quizzes", quizDate), {
+        date: quizDate,
+        title: quizTitle.trim(),
+        category: quizCategory,
+        questions: validQuestions,
+        updatedAt: new Date().toISOString(),
+        updatedBy: user?.email || ADMIN_EMAIL,
+      });
+      alert(`🎉 Daily Quiz for ${quizDate} saved successfully!`);
+    } catch (err) {
+      alert("Error saving daily quiz: " + err.message);
+    } finally {
+      setQuizSubmitting(false);
+    }
+  };
+
+  const handleDeleteDailyQuiz = async (dateId) => {
+    if (!confirm(`Are you sure you want to delete the daily quiz for ${dateId}?`)) return;
+    try {
+      await deleteDoc(doc(db, "daily_quizzes", dateId));
+      alert("Daily Quiz deleted.");
+    } catch (err) {
+      alert("Error deleting: " + err.message);
+    }
+  };
 
   const handleAssignUserRole = async (targetStudent, newRole) => {
     if (!isOwner) {
@@ -4482,6 +4644,20 @@ export default function PortalPage() {
                   >
                     👑 Staff & Roles ({allStudents.filter(s => getEffectiveRole(s) !== ROLES.STUDENT).length})
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => setAdminSubTab("past_papers")}
+                    className={`px-3.5 py-2 text-xs font-bold rounded-xl border transition ${adminSubTab === "past_papers" ? "bg-amber-500 text-slate-950 border-amber-500 font-black shadow-xs" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"}`}
+                  >
+                    📚 Past Papers ({allPastPapers.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAdminSubTab("daily_quiz")}
+                    className={`px-3.5 py-2 text-xs font-bold rounded-xl border transition ${adminSubTab === "daily_quiz" ? "bg-orange-500 text-white border-orange-500 font-black shadow-xs" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"}`}
+                  >
+                    ⚡ Daily Quiz ({allDailyQuizzes.length})
+                  </button>
                 </div>
               </div>
 
@@ -5384,6 +5560,283 @@ export default function PortalPage() {
                         })}
                       </tbody>
                     </table>
+                  </div>
+                </div>
+              ) : adminSubTab === "past_papers" ? (
+                <div className="bg-white rounded-3xl shadow-sm border p-4 md:p-5 space-y-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3">
+                    <div>
+                      <h3 className="font-black text-slate-900 text-base">📚 Past Papers & Study Notes Repository</h3>
+                      <p className="text-xs text-slate-500 mt-0.5">Upload new PDF study notes or past paper links for students.</p>
+                    </div>
+                    <span className="bg-amber-100 text-amber-900 px-3 py-1 rounded-full text-xs font-black">
+                      {allPastPapers.length} Papers Active
+                    </span>
+                  </div>
+
+                  {/* ADD NEW PAPER FORM */}
+                  <form onSubmit={handleAddPastPaper} className="bg-slate-50 p-4 rounded-2xl border space-y-3">
+                    <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide">+ Add New Past Paper / Study Note</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-600 block mb-1">Paper Title *</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. ETEA PST Solved Paper 2024"
+                          value={newPaperTitle}
+                          onChange={(e) => setNewPaperTitle(e.target.value)}
+                          className="input bg-white text-xs"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-600 block mb-1">Category *</label>
+                        <select
+                          value={newPaperCategory}
+                          onChange={(e) => setNewPaperCategory(e.target.value)}
+                          className="input bg-white text-xs font-bold"
+                        >
+                          <option value="ETEA KP">ETEA KP</option>
+                          <option value="KPPSC">KPPSC</option>
+                          <option value="FPSC">FPSC</option>
+                          <option value="PPSC">PPSC</option>
+                          <option value="CSS / PMS">CSS / PMS</option>
+                          <option value="Computer Science">Computer Science</option>
+                          <option value="General Knowledge">General Knowledge</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-600 block mb-1">Exam Type / Post</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Primary School Teacher (PST)"
+                          value={newPaperExamType}
+                          onChange={(e) => setNewPaperExamType(e.target.value)}
+                          className="input bg-white text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-600 block mb-1">Year</label>
+                        <input
+                          type="text"
+                          placeholder="2026"
+                          value={newPaperYear}
+                          onChange={(e) => setNewPaperYear(e.target.value)}
+                          className="input bg-white text-xs"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-600 block mb-1">PDF / Download URL *</label>
+                      <input
+                        type="url"
+                        placeholder="https://drive.google.com/file/d/... or direct PDF link"
+                        value={newPaperUrl}
+                        onChange={(e) => setNewPaperUrl(e.target.value)}
+                        className="input bg-white text-xs font-mono"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-600 block mb-1">Description & Topics Covered</label>
+                      <textarea
+                        rows={2}
+                        placeholder="Brief summary of what is included in this PDF paper..."
+                        value={newPaperDesc}
+                        onChange={(e) => setNewPaperDesc(e.target.value)}
+                        className="input bg-white text-xs"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={paperSubmitting}
+                      className="w-full py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs rounded-xl shadow-xs transition"
+                    >
+                      {paperSubmitting ? "Publishing..." : "➕ Publish Past Paper to Website"}
+                    </button>
+                  </form>
+
+                  {/* LIST OF PAST PAPERS */}
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-black text-slate-900 uppercase">Uploaded Papers Database ({allPastPapers.length})</h4>
+                    {allPastPapers.length === 0 ? (
+                      <p className="text-xs text-slate-400 italic py-4 text-center bg-slate-50 rounded-2xl">
+                        No custom past papers uploaded yet. Initial seed papers are active on /past-papers page.
+                      </p>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-2">
+                        {allPastPapers.map((paper) => (
+                          <div key={paper.id} className="p-3 bg-slate-50 border rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                            <div>
+                              <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-amber-100 text-amber-900">
+                                {paper.category}
+                              </span>
+                              <h5 className="font-black text-sm text-slate-900 mt-1">{paper.title}</h5>
+                              <p className="text-xs text-slate-500 mt-0.5">{paper.description}</p>
+                              <a href={paper.fileUrl} target="_blank" rel="noreferrer" className="text-[11px] font-mono text-blue-600 underline font-bold mt-1 block">
+                                🔗 Open PDF Link
+                              </a>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleDeletePastPaper(paper.id)}
+                              className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl transition shrink-0"
+                            >
+                              🗑️ Delete
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : adminSubTab === "daily_quiz" ? (
+                <div className="bg-white rounded-3xl shadow-sm border p-4 md:p-5 space-y-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3">
+                    <div>
+                      <h3 className="font-black text-slate-900 text-base">⚡ Daily MCQ Quiz Manager</h3>
+                      <p className="text-xs text-slate-500 mt-0.5">Set 5 fresh daily MCQs for any date to power the student daily streak engine.</p>
+                    </div>
+                    <span className="bg-orange-100 text-orange-900 px-3 py-1 rounded-full text-xs font-black">
+                      {allDailyQuizzes.length} Quizzes Saved
+                    </span>
+                  </div>
+
+                  {/* SET DAILY QUIZ FORM */}
+                  <form onSubmit={handleSaveDailyQuiz} className="bg-slate-50 p-4 rounded-2xl border space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-600 block mb-1">Target Date *</label>
+                        <input
+                          type="date"
+                          value={quizDate}
+                          onChange={(e) => setQuizDate(e.target.value)}
+                          className="input bg-white text-xs font-bold"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-600 block mb-1">Quiz Title *</label>
+                        <input
+                          type="text"
+                          value={quizTitle}
+                          onChange={(e) => setQuizTitle(e.target.value)}
+                          className="input bg-white text-xs"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-600 block mb-1">Category</label>
+                        <input
+                          type="text"
+                          value={quizCategory}
+                          onChange={(e) => setQuizCategory(e.target.value)}
+                          className="input bg-white text-xs"
+                        />
+                      </div>
+                    </div>
+
+                    {/* 5 QUESTIONS EDITOR */}
+                    <div className="space-y-4 pt-2">
+                      <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide">Enter 5 MCQs for {quizDate}:</h4>
+                      {quizQuestions.map((q, qIdx) => (
+                        <div key={qIdx} className="p-3 bg-white border rounded-2xl space-y-2">
+                          <span className="text-xs font-black text-orange-600 bg-orange-50 px-2 py-0.5 rounded-md">
+                            Question #{qIdx + 1}
+                          </span>
+                          <input
+                            type="text"
+                            placeholder={`Enter question #${qIdx + 1}...`}
+                            value={q.question}
+                            onChange={(e) => handleQuestionChange(qIdx, "question", e.target.value)}
+                            className="input bg-slate-50 text-xs font-bold w-full"
+                          />
+
+                          <div className="grid grid-cols-2 gap-2">
+                            {q.options.map((opt, optIdx) => (
+                              <div key={optIdx} className="flex items-center gap-1.5">
+                                <span className="text-[10px] font-bold text-slate-500 w-4">{String.fromCharCode(65 + optIdx)}:</span>
+                                <input
+                                  type="text"
+                                  placeholder={`Option ${String.fromCharCode(65 + optIdx)}`}
+                                  value={opt}
+                                  onChange={(e) => handleOptionChange(qIdx, optIdx, e.target.value)}
+                                  className="input bg-slate-50 text-xs flex-1"
+                                />
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
+                            <div>
+                              <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Correct Option:</label>
+                              <select
+                                value={q.answer}
+                                onChange={(e) => handleQuestionChange(qIdx, "answer", e.target.value)}
+                                className="input bg-slate-50 text-xs font-bold"
+                              >
+                                <option value={0}>Option A</option>
+                                <option value={1}>Option B</option>
+                                <option value={2}>Option C</option>
+                                <option value={3}>Option D</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="text-[10px] font-bold text-slate-500 block mb-0.5">Explanation:</label>
+                              <input
+                                type="text"
+                                placeholder="Why is this answer correct?"
+                                value={q.explanation}
+                                onChange={(e) => handleQuestionChange(qIdx, "explanation", e.target.value)}
+                                className="input bg-slate-50 text-xs"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={quizSubmitting}
+                      className="w-full py-3.5 bg-orange-500 hover:bg-orange-400 text-white font-black text-xs rounded-xl shadow-xs transition"
+                    >
+                      {quizSubmitting ? "Saving Quiz..." : `🔥 Save & Publish Daily Quiz for ${quizDate}`}
+                    </button>
+                  </form>
+
+                  {/* LIST OF SAVED QUIZZES */}
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-black text-slate-900 uppercase">Scheduled / Past Daily Quizzes ({allDailyQuizzes.length})</h4>
+                    {allDailyQuizzes.length === 0 ? (
+                      <p className="text-xs text-slate-400 italic py-4 text-center bg-slate-50 rounded-2xl">
+                        No custom daily quizzes set yet. Default ETEA past paper quiz is active on /daily-quiz page.
+                      </p>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-2">
+                        {allDailyQuizzes.map((quiz) => (
+                          <div key={quiz.id} className="p-3 bg-slate-50 border rounded-2xl flex items-center justify-between gap-3">
+                            <div>
+                              <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-orange-100 text-orange-900">
+                                📅 {quiz.date || quiz.id}
+                              </span>
+                              <h5 className="font-black text-sm text-slate-900 mt-1">{quiz.title}</h5>
+                              <p className="text-xs text-slate-500">{quiz.questions?.length || 0} Questions • Category: {quiz.category}</p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteDailyQuiz(quiz.id)}
+                              className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl transition shrink-0"
+                            >
+                              🗑️ Delete
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               ) : (

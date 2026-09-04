@@ -6,6 +6,26 @@ import HeaderNav from "../HeaderNav";
 export default function FreeServicesPage() {
   const freePortals = [
     {
+      title: "ETEA & Competitive Exam Past Papers",
+      subtitle: "ETEA KP • KPPSC • FPSC • Solved Notes PDF",
+      desc: "Free downloadable authentic solved past papers, PST/CT/SST revision notes, FPSC General Knowledge, and MS Office textbook guides.",
+      image: "/hmt-logo-new.png",
+      link: "/past-papers",
+      badge: "📚 PAST PAPERS REPOSITORY",
+      btnText: "📥 Browse & Download PDFs",
+      color: "from-amber-500 to-yellow-600",
+    },
+    {
+      title: "Daily MCQ Quiz of the Day",
+      subtitle: "5 Fresh Daily MCQs • 🔥 Streak Tracker",
+      desc: "Practice 5 fresh competitive exam MCQs daily, build your daily preparation streak, view detailed explanations, and earn score badges.",
+      image: "/hmt-logo-new.png",
+      link: "/daily-quiz",
+      badge: "⚡ DAILY PRACTICE QUIZ",
+      btnText: "🔥 Start Today's Quiz",
+      color: "from-orange-500 to-red-600",
+    },
+    {
       title: "ETEA & Competitive Exam Mock Tests",
       subtitle: "ETEA KP • KPPSC • PPSC • FPSC • CSS",
       desc: "Free real-time timed mock tests with authentic question banks, skip MCQ feature, live progress tracking, and instant scorecard certificates.",

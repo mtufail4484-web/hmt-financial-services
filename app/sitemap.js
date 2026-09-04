@@ -17,6 +17,18 @@ export default function sitemap() {
       priority: 0.95,
     },
     {
+      url: `${SITE_URL}/past-papers`,
+      lastModified: now,
+      changeFrequency: "daily",
+      priority: 0.95,
+    },
+    {
+      url: `${SITE_URL}/daily-quiz`,
+      lastModified: now,
+      changeFrequency: "daily",
+      priority: 0.95,
+    },
+    {
       url: `${SITE_URL}/mock-test`,
       lastModified: now,
       changeFrequency: "daily",
