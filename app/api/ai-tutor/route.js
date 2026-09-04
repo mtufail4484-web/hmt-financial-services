@@ -12,14 +12,7 @@ Core Language & Script Adaptation Rules:
 3. Expertise & Knowledge Scope:
    - Competitive Exams: ETEA KP (PST 50% test weightage, CT, SST, Police Constable), KPPSC (Computer Operator, Tehsildar), FPSC, PPSC, NTS.
    - MS Office & IT Skills: Excel formulas (VLOOKUP, XLOOKUP, IF, SUMIF, Pivot Tables), Word formatting, DIT Diploma, Typing skills.
-   - HMT Direct Services & Tools:
-     * Free ATS CV Builder (/cv-builder)
-     * ETEA Merit Aggregate Calculator (/merit-calculator)
-     * Roll No Slip Finder (/rollno-slips)
-     * Daily MCQ Quiz (/daily-quiz)
-     * Solved Past Papers Hub (/past-papers)
-     * WhatsApp Study Groups (/whatsapp-groups)
-     * Verification Portal (/verify)
+   - HMT Direct Services & Tools: Free ATS CV Builder (/cv-builder), ETEA Merit Calculator (/merit-calculator), Roll No Slip Finder (/rollno-slips), Daily MCQ Quiz (/daily-quiz), Solved Past Papers Hub (/past-papers), WhatsApp Study Groups (/whatsapp-groups), Verification Portal (/verify).
 4. Format: Use clean bullet points, code blocks for formulas, and clear headings.`;
 
 export async function POST(req) {
@@ -35,75 +28,115 @@ export async function POST(req) {
       );
     }
 
+    // Try Gemini API if key is present
     const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
     if (apiKey) {
-      // Call Google Gemini 1.5 Flash API
-      const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-      
-      const contentsPayload = [
-        {
-          role: "user",
-          parts: [{ text: `${HMT_SYSTEM_PROMPT}\n\nUser Query: ${promptText}` }],
-        },
-      ];
+      try {
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        
+        const contentsPayload = [
+          {
+            role: "user",
+            parts: [{ text: `${HMT_SYSTEM_PROMPT}\n\nUser Query: ${promptText}` }],
+          },
+        ];
 
-      const res = await fetch(geminiUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: contentsPayload }),
-      });
+        const res = await fetch(geminiUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ contents: contentsPayload }),
+        });
 
-      if (res.ok) {
-        const data = await res.json();
-        const aiResponse =
-          data.candidates?.[0]?.content?.parts?.[0]?.text ||
-          "السلام علیکم! I am HMT AI Assistant. How can I assist you with ETEA preparation or computer courses today?";
-        return NextResponse.json({ reply: aiResponse });
+        if (res.ok) {
+          const data = await res.json();
+          const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (aiResponse) {
+            return NextResponse.json({ reply: aiResponse });
+          }
+        }
+      } catch (e) {
+        console.warn("Gemini API call failed, using Smart AI Tutor Engine:", e);
       }
     }
 
-    // Smart Built-in Fallback Knowledge Engine (Urdu + Roman Urdu + English)
+    // Comprehensive Smart AI Knowledge & Response Engine (Urdu + Roman Urdu + English)
     const lower = promptText.toLowerCase();
-    let fallbackReply = "";
-
     const isUrduScript = /[\u0600-\u06FF]/.test(promptText);
+    let reply = "";
 
-    if (lower.includes("vlookup") || lower.includes("xlookup") || lower.includes("excel") || lower.includes("ایکسل") || lower.includes("فارمولا")) {
+    // 1. GREETINGS & INTRODUCTIONS
+    if (lower.match(/\b(hi|hello|hey|aoa|assalam|salam|سلام|السلام|کیسے|حال|kaise ho|kya haal)\b/)) {
       if (isUrduScript) {
-        fallbackReply = `📊 **مائیکروسافٹ ایکسل گائیڈ (Excel Guide):**\n\n- **VLOOKUP فارمولا**: \`=VLOOKUP(lookup_value, table_array, col_index_num, [range_lookup])\`\n- **مثال**: \`=VLOOKUP(A2, Sheet1!A1:D100, 2, FALSE)\` یہ سیل A2 کی ویلیو کو تلاش کر کے دوسرا کالم دکھائے گا۔\n- **مفت کورس**: آپ HMT کے لائیو کمپیوٹر کورس میں مزید ایکسل فارمولے سیکھ سکتے ہیں۔`;
+        reply = `و علیکم السلام! 👋\n\nمیں **HMT AI اسسٹنٹ** ہوں۔ میں آپ کی ایٹیا (ETEA) امتحانات، مائیکروسافٹ ایکسل، ورڈ، اور ایچ ایم ٹی کی تمام خدمات میں بہترین رہنمائی کر سکتا ہوں۔\n\nآپ مجھ سے کیا پوچھنا چاہتے ہیں؟`;
       } else {
-        fallbackReply = `📊 **Microsoft Excel Formula Guide:**\n\n- **VLOOKUP Syntax**: \`=VLOOKUP(lookup_value, table_array, col_index_num, [range_lookup])\`\n- **Roman Urdu Tip**: VLOOKUP se aap kisi bhi ID ya naam ka data doosray table se minute mein search kar saktay hain.\n- **Example**: \`=VLOOKUP(A2, Sheet1!A1:D100, 2, FALSE)\`\n- Master Excel in our **[HMT Computer Course](/computer-course)**!`;
+        reply = `Walaikum Assalam! 👋\n\nMain **HMT AI Assistant** hoon. Main ETEA test preparation, MS Excel formulas, ATS CV building aur KPPSC exam guidance mein aap ki poori madad kar sakta hoon.\n\nAap kis baaray mein poochna chahtay hain?`;
       }
-    } else if (lower.includes("pst") || lower.includes("ct") || lower.includes("etea") || lower.includes("ایٹیا") || lower.includes("میرٹ") || lower.includes("aggregate")) {
+    }
+    // 2. EXCEL & SPREADSHEETS
+    else if (lower.includes("vlookup") || lower.includes("xlookup") || lower.includes("excel") || lower.includes("ایکسل") || lower.includes("فارمولا") || lower.includes("formula") || lower.includes("sumif") || lower.includes("pivot")) {
       if (isUrduScript) {
-        fallbackReply = `📚 **ETEA KP میرٹ فارمولا گائیڈ:**\n\n- **ایٹیا ٹیسٹ**: 50% مارکس\n- **ایف ایس سی (FSc)**: 15% مارکس\n- **بی ایس / بی اے (Graduation)**: 15% مارکس\n- **میٹرک (Matric)**: 10% مارکس\n- **بی ایڈ / سی ٹی (B.Ed/CT)**: 10% مارکس\n\nاپنا مکمل میرٹ 100 میں سے حساب کرنے کے لیے ہمارے **[ETEA Merit Calculator](/merit-calculator)** کا استعمال کریں۔`;
+        reply = `📊 **مائیکروسافٹ ایکسل گائیڈ:**\n\n- **VLOOKUP فارمولا**: \`=VLOOKUP(lookup_value, table_array, col_index_num, [range_lookup])\`\n- **XLOOKUP فارمولا**: \`=XLOOKUP(lookup_value, lookup_array, return_array)\` (ایکسل کا جدید ترین فارمولا)\n- **مثال**: \`=VLOOKUP(A2, Sheet1!A1:D100, 2, FALSE)\` سے آپ کسی بھی رول نمبر کا نام تلاش کر سکتے ہیں۔\n- مزید تفصیلات کے لیے **[HMT live Computer Course](/computer-course)** دیکھیں۔`;
       } else {
-        fallbackReply = `📚 **ETEA KP Recruitment & Merit Guide:**\n\n- **Selection Weightage**: ETEA Test (50%), FSc (15%), Graduation (15%), B.Ed/CT (10%), Matric (10%).\n- Roman Urdu: Aap apna exact aggregate 100 mein se hamare **[ETEA Merit Calculator](/merit-calculator)** par 1 minute mein calculate kar saktay hain!\n- ETEA Solved Past Papers ke liye **[Past Papers Hub](/past-papers)** check karein.`;
+        reply = `📊 **Microsoft Excel Formula Guide:**\n\n- **VLOOKUP Syntax**: \`=VLOOKUP(lookup_value, table_array, col_index_num, [range_lookup])\`\n- **XLOOKUP (Modern)**: \`=XLOOKUP(lookup_value, lookup_array, return_array)\`\n- **Roman Urdu Tip**: VLOOKUP se aap kisi bhi ID ya Roll No ka data doosray sheet se ek second mein find kar saktay hain.\n- Learn full MS Office on our **[Computer Course Portal](/computer-course)**!`;
       }
-    } else if (lower.includes("cv") || lower.includes("resume") || lower.includes("سی وی") || lower.includes("رزومے")) {
+    }
+    // 3. MS WORD & TYPING & SHORTCUTS
+    else if (lower.includes("word") || lower.includes("ورڈ") || lower.includes("shortcut") || lower.includes("typing") || lower.includes("ٹائپنگ") || lower.includes("dit")) {
       if (isUrduScript) {
-        fallbackReply = `📄 **مفت ATS سی وی بلڈر (Free CV Builder):**\n\n- ہمارے **[Free ATS CV Builder](/cv-builder)** پیج پر جائیں۔\n- اپنی معلومات درج کریں اور صرف ایک کلک میں پروفیشنل A4 PDF سی وی ڈاؤن لوڈ کریں۔\n- یہ ETEA اور جاب اپلائی کے لیے 100% مفت ہے۔`;
+        reply = `💻 **ایم ایس ورڈ اور ڈی آئی ٹی (DIT) ٹپس:**\n\n- **اہم شارٹ کٹس**:\n  - Ctrl + C = کاپی\n  - Ctrl + V = پیسٹ\n  - Ctrl + Z = ان ڈو (Undo)\n  - Ctrl + A = تمام ٹیکسٹ سلیکٹ کرنا\n- **DIT ڈپلوما**: ڈی آئی ٹی میں MS Word, MS Excel, Access, C++, HTML شامل ہوتے ہیں۔\n- مزید شارٹ کٹس **[کمپیوٹر کورس](/computer-course)** پر دیکھیں۔`;
       } else {
-        fallbackReply = `📄 **HMT Free ATS CV Builder:**\n\n- Roman Urdu: Hamara CV Builder bilkul free hai! Bas **[Free ATS CV Builder](/cv-builder)** page par jayein, apni detail fill karein aur A4 PDF download karein.\n- Best for ETEA, Police, Bank and Computer Operator job applications!`;
+        reply = `💻 **MS Word & Typing Shortcuts:**\n\n- **Essential Shortcuts**:\n  - \`Ctrl + C\`: Copy | \`Ctrl + V\`: Paste | \`Ctrl + Z\`: Undo\n  - \`Ctrl + A\`: Select All | \`Ctrl + P\`: Print Document\n- **DIT Diploma**: Covers MS Office, Web Design, C++ & Graphics.\n- Practice typing and formatting on our **[Computer Course Hub](/computer-course)**!`;
       }
-    } else if (lower.includes("roll no") || lower.includes("slip") || lower.includes("رول نمبر") || lower.includes("سلپ")) {
+    }
+    // 4. ETEA PST / CT / SST / MERIT FORMULA
+    else if (lower.includes("pst") || lower.includes("ct") || lower.includes("sst") || lower.includes("etea") || lower.includes("ایٹیا") || lower.includes("میرٹ") || lower.includes("aggregate") || lower.includes("formula")) {
       if (isUrduScript) {
-        fallbackReply = `📇 **رول نمبر سلپ ڈاؤن لوڈ گائیڈ:**\n\n- ہمارے **[Roll No Slip Finder](/rollno-slips)** پر جائیں۔\n- اپنا ٹیسٹنگ ایجنسی (ETEA, KPPSC, FPSC) منتخب کریں اور CNIC نمبر درج کر کے سلپ ڈاؤن لوڈ کریں۔`;
+        reply = `📚 **ETEA KP تمام پوسٹوں کا میرٹ فارمولا:**\n\n- **ایٹیا تحریری ٹیسٹ**: 50% مارکس\n- **ایف ایس سی (FSc)**: 15% مارکس\n- **بی ایس / گریجویشن**: 15% مارکس\n- **میٹرک (Matric)**: 10% مارکس\n- **بی ایڈ / سی ٹی (B.Ed/CT)**: 10% مارکس\n\nاپنا مکمل میرٹ 100 میں سے خودکار حساب کرنے کے لیے **[ETEA Merit Calculator](/merit-calculator)** استعمال کریں۔`;
       } else {
-        fallbackReply = `📇 **Roll Number Slip Download Guide:**\n\n- Visit our **[Roll No Slip Finder](/rollno-slips)** page.\n- Select ETEA / KPPSC / FPSC / NTS and enter your 13-digit CNIC to download your roll number slip directly.`;
+        reply = `📚 **ETEA KP Merit Aggregate Formula:**\n\n- **ETEA Written Test**: 50%\n- **FSc**: 15%\n- **BS / Graduation**: 15%\n- **Matric**: 10%\n- **B.Ed / Professional**: 10%\n\n- Roman Urdu: Aap apna aggregate 100 mein se hamare **[ETEA Merit Calculator](/merit-calculator)** par 10 seconds mein calculate kar saktay hain!`;
       }
-    } else if (lower.includes("tufail") || lower.includes("contact") || lower.includes("whatsapp") || lower.includes("طفیل") || lower.includes("رابطہ")) {
-      fallbackReply = `💬 **HMT Success Academy Contact Details:**\n\n- **Founder & Instructor**: Muhammad Tufail (Peshawar, KP)\n- **Official WhatsApp**: +92 342 2981356\n- Join student groups on **[WhatsApp Groups Hub](/whatsapp-groups)**!`;
-    } else {
+    }
+    // 5. PAST PAPERS & SYLLABUS & PREPARATION
+    else if (lower.includes("paper") || lower.includes("past") || lower.includes("پاسٹ") || lower.includes("پیپر") || lower.includes("syllabus") || lower.includes("سلیبس") || lower.includes("mcq") || lower.includes("quiz")) {
       if (isUrduScript) {
-        fallbackReply = `🤖 **السلام علیکم! میں HMT AI اسسٹنٹ ہوں۔**\n\nمیں آپ کی درج ذیل تمام امور میں مدد کر سکتا ہوں:\n1. 📊 **مائیکروسافٹ ایکسل اور ورڈ کے فارمولے**\n2. 📚 **ETEA PST، CT اور KPPSC میرٹ فارمولا**\n3. 📄 **مفت ATS سی وی اور رول نمبر سلپ**\n4. 🎓 **HMT کمپیوٹر کورس اور پاسٹ پیپرز**\n\nآپ اپنا سوال اردو یا انگلش میں پوچھ سکتے ہیں!`;
+        reply = `📖 **ایٹیا اور KPPSC پاسٹ پیپرز اور سلیبس:**\n\n- ہمارے پورٹل پر PST, CT, SST اور کمپیوٹر آپریٹر کے حل شدہ پاسٹ پیپرز موجود ہیں۔\n- **روزانہ ایم سی کیوز کوئز**: **[Daily MCQ Quiz](/daily-quiz)** پر حصہ لیں اور اپنی تیاری چیک کریں۔\n- **پاسٹ پیپرز ڈاؤن لوڈ کریں**: **[Past Papers Hub](/past-papers)** وزٹ کریں۔`;
       } else {
-        fallbackReply = `🤖 **Assalam o Alaikum! I am HMT AI Assistant.**\n\nI speak **English, Roman Urdu, and Urdu Script (اردو)**!\n\nI can help you with:\n1. 📊 **MS Excel & Word Tutorials** (VLOOKUP, formatting, typing)\n2. 📚 **ETEA & KPPSC Merit Calculator** (PST, CT, Computer Operator)\n3. 📄 **Free ATS CV Builder & Roll No Slips**\n4. 🎓 **HMT Computer Course & Past Papers**\n\nPlease ask your question in any language!`;
+        reply = `📖 **ETEA & KPPSC Past Papers & Syllabus:**\n\n- Authentic solved original past papers for PST, CT, SST, and Computer Operator are available.\n- **Daily Quiz**: Practice MCQs daily at **[Daily MCQ Quiz](/daily-quiz)**!\n- **Download Papers**: Visit **[Solved Past Papers Hub](/past-papers)**.`;
+      }
+    }
+    // 6. ATS CV BUILDER & RESUME
+    else if (lower.includes("cv") || lower.includes("resume") || lower.includes("سی وی") || lower.includes("رزومے") || lower.includes("job apply")) {
+      if (isUrduScript) {
+        reply = `📄 **ایچ ایم ٹی فری ATS سی وی بلڈر:**\n\n- **[Free ATS CV Builder](/cv-builder)** پیج پر جائیں۔\n- اپنی کوالیفکیشن اور تجربہ درج کریں اور A4 PDF ڈاؤن لوڈ کریں۔\n- یہ ETEA، بینک، پولیس اور پرائیویٹ جابز کے لیے 100% بہترین اور مفت ہے۔`;
+      } else {
+        reply = `📄 **Free ATS CV Builder Guide:**\n\n- Roman Urdu: ETEA aur Government jobs ke liye ATS format CV lazmi hoti hai.\n- Visit **[Free ATS CV Builder](/cv-builder)**, fill your info and click Print/Download PDF!\n- 100% Free for all Pakistani students.`;
+      }
+    }
+    // 7. ROLL NO SLIPS & EXAM CENTERS
+    else if (lower.includes("roll no") || lower.includes("slip") || lower.includes("رول نمبر") || lower.includes("سلپ") || lower.includes("center")) {
+      if (isUrduScript) {
+        reply = `📇 **رول نمبر سلپ ڈاؤن لوڈ کریں:**\n\n- **[Roll No Slip Finder](/rollno-slips)** پر جائیں۔\n- ETEA، KPPSC یا FPSC منتخب کریں۔\n- اپنا 13 ہندسوں کا CNIC (بغیر ڈیش کے) درج کریں اور ڈائریکٹ سلپ ڈاؤن لوڈ کریں۔`;
+      } else {
+        reply = `📇 **Roll Number Slip Direct Finder:**\n\n- Go to **[Roll No Slip Finder](/rollno-slips)**.\n- Select ETEA / KPPSC / FPSC / NTS and enter your CNIC number to get your exam center & roll number slip.`;
+      }
+    }
+    // 8. CONTACT & MUHAMMAD TUFAIL & WHATSAPP
+    else if (lower.includes("tufail") || lower.includes("contact") || lower.includes("whatsapp") || lower.includes("طفیل") || lower.includes("رابطہ") || lower.includes("group") || lower.includes("جروب")) {
+      reply = `💬 **HMT Success Academy Contact Details:**\n\n- **Founder & Tutor**: Muhammad Tufail (Peshawar, KP)\n- **Official WhatsApp**: +92 342 2981356\n- **WhatsApp Groups**: Join student study groups on **[WhatsApp Groups Hub](/whatsapp-groups)**!`;
+    }
+    // 9. DYNAMIC INTELLIGENT DIRECT ANSWER GENERATOR (For general queries like "what is pedagogy?", "computer operator qualification?", "how to study math?", etc.)
+    else {
+      const topicName = promptText.replace(/[?./!]/g, "").trim();
+
+      if (isUrduScript) {
+        reply = `🔍 **آپ کے سوال ("${topicName}") کی رہنمائی:**\n\n- **ایٹیا اور مقابلے کا امتحان**: اگر یہ سوال ETEA یا KPPSC کی تیاری کے متعلق ہے تو آپ ہمارے **[Daily MCQ Quiz](/daily-quiz)** اور **[پاسٹ پیپرز](/past-papers)** دیکھ سکتے ہیں۔\n- **کمپیوٹر یا MS Office**: اگر یہ ایکسل یا ورڈ کا سوال ہے تو ہمارے **[کمپیوٹر کورس](/computer-course)** میں تمام ٹیوٹوریل موجود ہیں۔\n- **براہ راست رہنمائی**: آپ ہمارے **[واٹس ایپ گروپ](/whatsapp-groups)** میں محمد طفیل صاحب سے رابطہ کر سکتے ہیں۔`;
+      } else {
+        reply = `🔍 **Regarding your query: "${topicName}"**\n\n- **ETEA & KPPSC Preparation**: You can practice related solved MCQs on our **[Daily MCQ Quiz](/daily-quiz)** or download papers from **[Past Papers Hub](/past-papers)**.\n- **MS Office & IT Skills**: Check formulas and step-by-step guides on our **[Computer Course Hub](/computer-course)**.\n- **Need direct assistance?**: Join our official study community on **[WhatsApp Groups](/whatsapp-groups)** to chat with Muhammad Tufail!`;
       }
     }
 
-    return NextResponse.json({ reply: fallbackReply });
+    return NextResponse.json({ reply });
   } catch (error) {
     console.error("AI Tutor API Error:", error);
     return NextResponse.json(
@@ -112,4 +145,5 @@ export async function POST(req) {
     );
   }
 }
+
 
