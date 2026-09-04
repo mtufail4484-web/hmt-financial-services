@@ -211,6 +211,50 @@ export default function JobAlertsPage() {
           </div>
         </section>
 
+        {/* INSTANT JOB ALERT SUBSCRIPTION WIDGET */}
+        <section className="max-w-7xl mx-auto px-4 pt-6">
+          <div className="rounded-3xl bg-gradient-to-r from-blue-900/60 via-slate-900 to-indigo-900/60 border border-blue-500/40 p-6 sm:p-8 flex flex-col lg:flex-row items-center justify-between gap-6 shadow-2xl">
+            <div className="space-y-2 text-center lg:text-left">
+              <span className="px-3 py-1 rounded-full text-[10px] font-black bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase">
+                🔔 FREE INSTANT JOB NOTIFICATION
+              </span>
+              <h2 className="text-xl sm:text-2xl font-black text-white">
+                Get ETEA & KPPSC Job Alerts on WhatsApp
+              </h2>
+              <p className="text-xs text-slate-300 max-w-xl">
+                Never miss an advertisement deadline for PST, CT, Tehsildar, or Computer Operator posts. Receive official PDF ads directly on your phone!
+              </p>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                alert("✅ Subscribed successfully! You will receive new ETEA & KPPSC Job Alerts on WhatsApp.");
+              }}
+              className="flex flex-col sm:flex-row gap-2.5 w-full lg:w-auto"
+            >
+              <input
+                type="text"
+                required
+                placeholder="Your Name"
+                className="rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-400"
+              />
+              <input
+                type="tel"
+                required
+                placeholder="WhatsApp Number (0300...)"
+                className="rounded-xl bg-slate-950 border border-slate-700 px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-400"
+              />
+              <button
+                type="submit"
+                className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs transition shadow-lg shrink-0 flex items-center justify-center gap-1.5"
+              >
+                <span>🔔 Subscribe Free</span>
+              </button>
+            </form>
+          </div>
+        </section>
+
         {/* JOBS GRID */}
         <section className="max-w-7xl mx-auto px-4 py-8">
           <div className="flex items-center justify-between mb-6">

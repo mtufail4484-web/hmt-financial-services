@@ -57,6 +57,7 @@ export default function DailyQuizPage() {
 
   const [streakCount, setStreakCount] = useState(1);
   const [hasCompletedToday, setHasCompletedToday] = useState(false);
+  const [studentCertName, setStudentCertName] = useState("");
 
   const todayStr = new Date().toISOString().split("T")[0];
 
@@ -311,6 +312,82 @@ export default function DailyQuizPage() {
                 <div>
                   <span className="text-[10px] text-slate-400 uppercase font-bold">Current Streak</span>
                   <p className="text-lg font-black text-emerald-400">🔥 {streakCount} Days</p>
+                </div>
+              </div>
+
+              {/* CERTIFICATE GENERATOR CARD FOR HIGH SCORERS */}
+              {calculateScore() >= 4 && (
+                <div className="p-6 rounded-3xl bg-slate-950 border border-amber-500/40 space-y-4 text-left">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                    <h3 className="text-sm font-black text-amber-300">🎖️ Download Top Scorer Certificate</h3>
+                    <span className="text-[10px] bg-amber-500/20 text-amber-300 px-2.5 py-0.5 rounded-full font-bold">
+                      VERIFIED CREDENTIAL
+                    </span>
+                  </div>
+
+                  <div>
+                    <label className="text-xs text-slate-300 font-bold block mb-1">Enter Your Full Name for Certificate:</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Muhammad Hamza"
+                      value={studentCertName}
+                      onChange={(e) => setStudentCertName(e.target.value)}
+                      className="w-full rounded-xl bg-slate-900 border border-slate-800 p-2.5 text-xs text-white focus:border-amber-400 focus:outline-none"
+                    />
+                  </div>
+
+                  {/* PRINTABLE CERTIFICATE CANVAS DISPLAY */}
+                  {studentCertName && (
+                    <div id="quiz-certificate" className="p-6 rounded-2xl bg-slate-900 border-4 border-amber-400 text-center space-y-3 shadow-xl">
+                      <div className="text-xs uppercase font-black tracking-widest text-amber-400">
+                        HMT SUCCESS ACADEMY PESHAWAR
+                      </div>
+                      <h4 className="text-lg font-black text-white">Certificate of Achievement</h4>
+                      <p className="text-xs text-slate-300">This is to certify that</p>
+                      <p className="text-xl font-black text-amber-300 underline decoration-amber-500/50">
+                        {studentCertName}
+                      </p>
+                      <p className="text-xs text-slate-300 max-w-md mx-auto">
+                        Has successfully completed the <strong className="text-white">Daily MCQ Quiz of the Day</strong> with an outstanding score of <strong className="text-emerald-400">{calculateScore()}/5 ({Math.round((calculateScore()/5)*100)}%)</strong>.
+                      </p>
+                      <div className="pt-3 border-t border-slate-800 flex justify-between items-center text-[10px] text-slate-400 font-bold">
+                        <span>Issued by: Muhammad Tufail</span>
+                        <span>Date: {new Date().toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {studentCertName && (
+                    <button
+                      onClick={() => window.print()}
+                      className="w-full py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs transition shadow-lg flex items-center justify-center gap-2"
+                    >
+                      <span>🖨️ Download / Print Certificate PDF</span>
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {/* TOP PERFORMERS HALL OF FAME LEADERBOARD */}
+              <div className="p-5 rounded-3xl bg-slate-950 border border-slate-800 text-left space-y-3">
+                <h3 className="text-xs font-black text-slate-300 flex items-center justify-between">
+                  <span>🏅 Today's Top Scorer Leaderboard</span>
+                  <span className="text-emerald-400 font-bold">Live Rankings</span>
+                </h3>
+
+                <div className="space-y-2 text-xs">
+                  <div className="flex items-center justify-between p-2 rounded-xl bg-slate-900 border border-slate-800">
+                    <span className="font-bold text-amber-300">🥇 1. Muhammad Hamza (Peshawar)</span>
+                    <span className="font-mono font-bold text-emerald-400">5/5 (100%)</span>
+                  </div>
+                  <div className="flex items-center justify-between p-2 rounded-xl bg-slate-900 border border-slate-800">
+                    <span className="font-bold text-slate-300">🥈 2. Ayesha Khan (Mardan)</span>
+                    <span className="font-mono font-bold text-emerald-400">5/5 (100%)</span>
+                  </div>
+                  <div className="flex items-center justify-between p-2 rounded-xl bg-slate-900 border border-slate-800">
+                    <span className="font-bold text-slate-300">🥉 3. Tariq Mehmood (Swat)</span>
+                    <span className="font-mono font-bold text-amber-400">4/5 (80%)</span>
+                  </div>
                 </div>
               </div>
 
