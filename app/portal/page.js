@@ -347,6 +347,29 @@ export default function PortalPage() {
   ]);
   const [quizSubmitting, setQuizSubmitting] = useState(false);
 
+  // Job Alerts & WhatsApp Groups Admin state
+  const [allJobAlerts, setAllJobAlerts] = useState([]);
+  const [jobTitle, setJobTitle] = useState("");
+  const [jobAgency, setJobAgency] = useState("ETEA KP");
+  const [jobPostName, setJobPostName] = useState("");
+  const [jobTotalPosts, setJobTotalPosts] = useState("");
+  const [jobLocation, setJobLocation] = useState("KPK");
+  const [jobDeadline, setJobDeadline] = useState("");
+  const [jobPdfUrl, setJobPdfUrl] = useState("");
+  const [jobApplyUrl, setJobApplyUrl] = useState("");
+  const [jobCategory, setJobCategory] = useState("ETEA Jobs");
+  const [jobDesc, setJobDesc] = useState("");
+  const [jobSubmitting, setJobSubmitting] = useState(false);
+
+  const [allWhatsappGroups, setAllWhatsappGroups] = useState([]);
+  const [groupTitle, setGroupTitle] = useState("");
+  const [groupCategory, setGroupCategory] = useState("ETEA KP");
+  const [groupMembers, setGroupMembers] = useState("1,000+ Members");
+  const [groupDesc, setGroupDesc] = useState("");
+  const [groupLink, setGroupLink] = useState("");
+  const [groupBadge, setGroupBadge] = useState("🔥 ACTIVE GROUP");
+  const [groupSubmitting, setGroupSubmitting] = useState(false);
+
   const [twoFactorSecret, setTwoFactorSecret] = useState("");
   const [show2FaSetupModal, setShow2FaSetupModal] = useState(false);
   const [setup2FaVerificationCode, setSetup2FaVerificationCode] = useState("");
