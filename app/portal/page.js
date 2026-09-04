@@ -370,6 +370,14 @@ export default function PortalPage() {
   const [groupBadge, setGroupBadge] = useState("🔥 ACTIVE GROUP");
   const [groupSubmitting, setGroupSubmitting] = useState(false);
 
+  const [allRollNoSlips, setAllRollNoSlips] = useState([]);
+  const [slipAgency, setSlipAgency] = useState("ETEA KP");
+  const [slipTitle, setSlipTitle] = useState("");
+  const [slipDesc, setSlipDesc] = useState("");
+  const [slipLink, setSlipLink] = useState("");
+  const [slipBadge, setSlipBadge] = useState("🟢 ACTIVE DOWNLOAD");
+  const [slipSubmitting, setSlipSubmitting] = useState(false);
+
   const [twoFactorSecret, setTwoFactorSecret] = useState("");
   const [show2FaSetupModal, setShow2FaSetupModal] = useState(false);
   const [setup2FaVerificationCode, setSetup2FaVerificationCode] = useState("");
@@ -602,6 +610,178 @@ export default function PortalPage() {
       console.warn("Firestore error daily_quizzes listener:", e);
     }
   }, [isAdmin]);
+
+  // Listen for Job Alerts in Admin
+  useEffect(() => {
+    if (!isAdmin) return;
+    try {
+      const q = query(collection(db, "job_alerts"), orderBy("createdAt", "desc"));
+      const unsub = onSnapshot(q, (snap) => {
+        if (!snap.empty) {
+          setAllJobAlerts(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        }
+      }, (err) => console.warn("Job alerts admin listen error:", err));
+      return () => unsub();
+    } catch (e) {
+      console.warn("Firestore error job_alerts listener:", e);
+    }
+  }, [isAdmin]);
+
+  // Listen for WhatsApp Groups in Admin
+  useEffect(() => {
+    if (!isAdmin) return;
+    try {
+      const q = query(collection(db, "whatsapp_groups"), orderBy("createdAt", "desc"));
+      const unsub = onSnapshot(q, (snap) => {
+        if (!snap.empty) {
+          setAllWhatsappGroups(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        }
+      }, (err) => console.warn("Whatsapp groups admin listen error:", err));
+      return () => unsub();
+    } catch (e) {
+      console.warn("Firestore error whatsapp_groups listener:", e);
+    }
+  }, [isAdmin]);
+
+  // Listen for Roll No Slips in Admin
+  useEffect(() => {
+    if (!isAdmin) return;
+    try {
+      const q = query(collection(db, "rollno_slips"), orderBy("createdAt", "desc"));
+      const unsub = onSnapshot(q, (snap) => {
+        if (!snap.empty) {
+          setAllRollNoSlips(snap.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        }
+      }, (err) => console.warn("Roll no slips admin listen error:", err));
+      return () => unsub();
+    } catch (e) {
+      console.warn("Firestore error rollno_slips listener:", e);
+    }
+  }, [isAdmin]);
+
+  const handleAddJobAlert = async (e) => {
+    e.preventDefault();
+    if (!jobTitle.trim() || !jobPdfUrl.trim()) {
+      alert("Job Title and PDF Advertisement URL are required!");
+      return;
+    }
+    setJobSubmitting(true);
+    try {
+      await addDoc(collection(db, "job_alerts"), {
+        title: jobTitle.trim(),
+        agency: jobAgency,
+        postName: jobPostName.trim() || jobTitle.trim(),
+        totalPosts: jobTotalPosts.trim() || "Multiple Posts",
+        location: jobLocation.trim() || "KPK",
+        deadline: jobDeadline || "Open",
+        pdfUrl: jobPdfUrl.trim(),
+        applyUrl: jobApplyUrl.trim() || jobPdfUrl.trim(),
+        category: jobCategory,
+        description: jobDesc.trim(),
+        createdAt: new Date().toISOString(),
+        createdBy: user?.email || ADMIN_EMAIL,
+      });
+      alert("🎉 Job Alert published successfully!");
+      setJobTitle("");
+      setJobPostName("");
+      setJobTotalPosts("");
+      setJobPdfUrl("");
+      setJobApplyUrl("");
+      setJobDesc("");
+    } catch (err) {
+      alert("Error adding job alert: " + err.message);
+    } finally {
+      setJobSubmitting(false);
+    }
+  };
+
+  const handleDeleteJobAlert = async (id) => {
+    if (!confirm("Are you sure you want to delete this job alert?")) return;
+    try {
+      await deleteDoc(doc(db, "job_alerts", id));
+      alert("Job Alert deleted.");
+    } catch (err) {
+      alert("Error deleting: " + err.message);
+    }
+  };
+
+  const handleAddWhatsappGroup = async (e) => {
+    e.preventDefault();
+    if (!groupTitle.trim() || !groupLink.trim()) {
+      alert("Group Title and Invite Link are required!");
+      return;
+    }
+    setGroupSubmitting(true);
+    try {
+      await addDoc(collection(db, "whatsapp_groups"), {
+        title: groupTitle.trim(),
+        category: groupCategory,
+        members: groupMembers.trim() || "1,000+ Members",
+        desc: groupDesc.trim(),
+        link: groupLink.trim(),
+        badge: groupBadge,
+        createdAt: new Date().toISOString(),
+        createdBy: user?.email || ADMIN_EMAIL,
+      });
+      alert("🎉 WhatsApp Group added successfully!");
+      setGroupTitle("");
+      setGroupDesc("");
+      setGroupLink("");
+    } catch (err) {
+      alert("Error adding group: " + err.message);
+    } finally {
+      setGroupSubmitting(false);
+    }
+  };
+
+  const handleDeleteWhatsappGroup = async (id) => {
+    if (!confirm("Are you sure you want to delete this group?")) return;
+    try {
+      await deleteDoc(doc(db, "whatsapp_groups", id));
+      alert("Group deleted.");
+    } catch (err) {
+      alert("Error deleting: " + err.message);
+    }
+  };
+
+  const handleAddRollNoSlip = async (e) => {
+    e.preventDefault();
+    if (!slipTitle.trim() || !slipLink.trim()) {
+      alert("Title and Download/Official URL are required!");
+      return;
+    }
+    setSlipSubmitting(true);
+    try {
+      await addDoc(collection(db, "rollno_slips"), {
+        agency: slipAgency,
+        title: slipTitle.trim(),
+        desc: slipDesc.trim(),
+        link: slipLink.trim(),
+        status: "🟢 ACTIVE DOWNLOAD",
+        badge: slipBadge,
+        createdAt: new Date().toISOString(),
+        createdBy: user?.email || ADMIN_EMAIL,
+      });
+      alert("🎉 Roll No Slip link added successfully!");
+      setSlipTitle("");
+      setSlipDesc("");
+      setSlipLink("");
+    } catch (err) {
+      alert("Error adding roll no slip: " + err.message);
+    } finally {
+      setSlipSubmitting(false);
+    }
+  };
+
+  const handleDeleteRollNoSlip = async (id) => {
+    if (!confirm("Are you sure you want to delete this Roll No Slip link?")) return;
+    try {
+      await deleteDoc(doc(doc(db, "rollno_slips", id)));
+      alert("Roll No Slip link deleted.");
+    } catch (err) {
+      alert("Error deleting: " + err.message);
+    }
+  };
 
   const handleAddPastPaper = async (e) => {
     e.preventDefault();
@@ -4681,6 +4861,27 @@ export default function PortalPage() {
                   >
                     ⚡ Daily Quiz ({allDailyQuizzes.length})
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => setAdminSubTab("job_alerts")}
+                    className={`px-3.5 py-2 text-xs font-bold rounded-xl border transition ${adminSubTab === "job_alerts" ? "bg-blue-600 text-white border-blue-600 font-black shadow-xs" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"}`}
+                  >
+                    📢 Job Alerts ({allJobAlerts.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAdminSubTab("whatsapp_groups")}
+                    className={`px-3.5 py-2 text-xs font-bold rounded-xl border transition ${adminSubTab === "whatsapp_groups" ? "bg-emerald-600 text-white border-emerald-600 font-black shadow-xs" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"}`}
+                  >
+                    💬 WhatsApp Groups ({allWhatsappGroups.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setAdminSubTab("rollno_slips")}
+                    className={`px-3.5 py-2 text-xs font-bold rounded-xl border transition ${adminSubTab === "rollno_slips" ? "bg-indigo-600 text-white border-indigo-600 font-black shadow-xs" : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"}`}
+                  >
+                    📇 Roll No Slips ({allRollNoSlips.length})
+                  </button>
                 </div>
               </div>
 
@@ -5852,6 +6053,388 @@ export default function PortalPage() {
                             <button
                               type="button"
                               onClick={() => handleDeleteDailyQuiz(quiz.id)}
+                              className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl transition shrink-0"
+                            >
+                              🗑️ Delete
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : adminSubTab === "job_alerts" ? (
+                <div className="bg-white rounded-3xl shadow-sm border p-4 md:p-5 space-y-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3">
+                    <div>
+                      <h3 className="font-black text-slate-900 text-base">📢 Govt & ETEA Job Alerts Manager</h3>
+                      <p className="text-xs text-slate-500 mt-0.5">Publish new active job advertisements directly to the /job-alerts page.</p>
+                    </div>
+                    <span className="bg-blue-100 text-blue-900 px-3 py-1 rounded-full text-xs font-black">
+                      {allJobAlerts.length} Job Alerts Published
+                    </span>
+                  </div>
+
+                  <form onSubmit={handleAddJobAlert} className="bg-slate-50 p-4 rounded-2xl border space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-600 block mb-1">Job Title *</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. ETEA PST & CT Teacher Jobs 2026"
+                          value={jobTitle}
+                          onChange={(e) => setJobTitle(e.target.value)}
+                          className="input bg-white text-xs font-bold"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-600 block mb-1">Testing Agency / Dept *</label>
+                        <select
+                          value={jobAgency}
+                          onChange={(e) => setJobAgency(e.target.value)}
+                          className="input bg-white text-xs font-bold"
+                        >
+                          <option value="ETEA KP">ETEA KP</option>
+                          <option value="KPPSC">KPPSC</option>
+                          <option value="FPSC">FPSC</option>
+                          <option value="PPSC">PPSC</option>
+                          <option value="State Bank">State Bank</option>
+                          <option value="Govt Dept">Govt Dept</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-600 block mb-1">Post Name(s)</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. PST, CT, Computer Operator"
+                          value={jobPostName}
+                          onChange={(e) => setJobPostName(e.target.value)}
+                          className="input bg-white text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-600 block mb-1">Total Posts / Vacancies</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. 4,500+ Posts"
+                          value={jobTotalPosts}
+                          onChange={(e) => setJobTotalPosts(e.target.value)}
+                          className="input bg-white text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-600 block mb-1">Location / Cadre</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. KPK (All Districts)"
+                          value={jobLocation}
+                          onChange={(e) => setJobLocation(e.target.value)}
+                          className="input bg-white text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-600 block mb-1">Application Deadline</label>
+                        <input
+                          type="date"
+                          value={jobDeadline}
+                          onChange={(e) => setJobDeadline(e.target.value)}
+                          className="input bg-white text-xs font-bold"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-600 block mb-1">PDF Advertisement URL *</label>
+                        <input
+                          type="url"
+                          placeholder="https://..."
+                          value={jobPdfUrl}
+                          onChange={(e) => setJobPdfUrl(e.target.value)}
+                          className="input bg-white text-xs font-mono"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-600 block mb-1">Online Apply URL</label>
+                        <input
+                          type="url"
+                          placeholder="https://..."
+                          value={jobApplyUrl}
+                          onChange={(e) => setJobApplyUrl(e.target.value)}
+                          className="input bg-white text-xs font-mono"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-600 block mb-1">Job Description</label>
+                      <textarea
+                        rows={2}
+                        placeholder="Brief summary of eligibility criteria, age limit, and application process..."
+                        value={jobDesc}
+                        onChange={(e) => setJobDesc(e.target.value)}
+                        className="input bg-white text-xs"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={jobSubmitting}
+                      className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-black text-xs rounded-xl shadow-xs transition"
+                    >
+                      {jobSubmitting ? "Publishing..." : "📢 Publish Job Alert to Website"}
+                    </button>
+                  </form>
+
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-black text-slate-900 uppercase">Active Job Announcements ({allJobAlerts.length})</h4>
+                    {allJobAlerts.length === 0 ? (
+                      <p className="text-xs text-slate-400 italic py-4 text-center bg-slate-50 rounded-2xl">
+                        No custom job alerts added yet. Default ETEA & KPPSC listings active on /job-alerts.
+                      </p>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-2">
+                        {allJobAlerts.map((job) => (
+                          <div key={job.id} className="p-3 bg-slate-50 border rounded-2xl flex items-center justify-between gap-3">
+                            <div>
+                              <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-blue-100 text-blue-900">
+                                {job.agency} • {job.deadline || "Open"}
+                              </span>
+                              <h5 className="font-black text-sm text-slate-900 mt-1">{job.title}</h5>
+                              <p className="text-xs text-slate-500">{job.postName} ({job.totalPosts}) • {job.location}</p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteJobAlert(job.id)}
+                              className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl transition shrink-0"
+                            >
+                              🗑️ Delete
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : adminSubTab === "whatsapp_groups" ? (
+                <div className="bg-white rounded-3xl shadow-sm border p-4 md:p-5 space-y-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3">
+                    <div>
+                      <h3 className="font-black text-slate-900 text-base">💬 WhatsApp & Telegram Groups Manager</h3>
+                      <p className="text-xs text-slate-500 mt-0.5">Add official WhatsApp study group and broadcast channel invite links.</p>
+                    </div>
+                    <span className="bg-emerald-100 text-emerald-900 px-3 py-1 rounded-full text-xs font-black">
+                      {allWhatsappGroups.length} Groups Active
+                    </span>
+                  </div>
+
+                  <form onSubmit={handleAddWhatsappGroup} className="bg-slate-50 p-4 rounded-2xl border space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-600 block mb-1">Group Title *</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. ETEA KP PST / CT Official Group 03"
+                          value={groupTitle}
+                          onChange={(e) => setGroupTitle(e.target.value)}
+                          className="input bg-white text-xs font-bold"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-600 block mb-1">Category</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. ETEA KP / KPPSC / Computer Course"
+                          value={groupCategory}
+                          onChange={(e) => setGroupCategory(e.target.value)}
+                          className="input bg-white text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-600 block mb-1">Members Count Label</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. 1,500+ Members"
+                          value={groupMembers}
+                          onChange={(e) => setGroupMembers(e.target.value)}
+                          className="input bg-white text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-600 block mb-1">Badge Label</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. 🔥 ACTIVE GROUP"
+                          value={groupBadge}
+                          onChange={(e) => setGroupBadge(e.target.value)}
+                          className="input bg-white text-xs"
+                        />
+                      </div>
+                      <div className="md:col-span-2">
+                        <label className="text-[11px] font-bold text-slate-600 block mb-1">WhatsApp Invite Link *</label>
+                        <input
+                          type="url"
+                          placeholder="https://chat.whatsapp.com/invite/..."
+                          value={groupLink}
+                          onChange={(e) => setGroupLink(e.target.value)}
+                          className="input bg-white text-xs font-mono"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-600 block mb-1">Group Description</label>
+                      <textarea
+                        rows={2}
+                        placeholder="Brief summary of who should join this group..."
+                        value={groupDesc}
+                        onChange={(e) => setGroupDesc(e.target.value)}
+                        className="input bg-white text-xs"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={groupSubmitting}
+                      className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs rounded-xl shadow-xs transition"
+                    >
+                      {groupSubmitting ? "Publishing..." : "💬 Add WhatsApp Group Link"}
+                    </button>
+                  </form>
+
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-black text-slate-900 uppercase">Active Study Groups ({allWhatsappGroups.length})</h4>
+                    {allWhatsappGroups.length === 0 ? (
+                      <p className="text-xs text-slate-400 italic py-4 text-center bg-slate-50 rounded-2xl">
+                        No custom WhatsApp groups added yet. Default groups active on /whatsapp-groups.
+                      </p>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-2">
+                        {allWhatsappGroups.map((group) => (
+                          <div key={group.id} className="p-3 bg-slate-50 border rounded-2xl flex items-center justify-between gap-3">
+                            <div>
+                              <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-900">
+                                {group.badge} • {group.members}
+                              </span>
+                              <h5 className="font-black text-sm text-slate-900 mt-1">{group.title}</h5>
+                              <p className="text-xs text-slate-500">{group.desc}</p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteWhatsappGroup(group.id)}
+                              className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl transition shrink-0"
+                            >
+                              🗑️ Delete
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : adminSubTab === "rollno_slips" ? (
+                <div className="bg-white rounded-3xl shadow-sm border p-4 md:p-5 space-y-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3">
+                    <div>
+                      <h3 className="font-black text-slate-900 text-base">📇 Roll No Slips & Exam Center Manager</h3>
+                      <p className="text-xs text-slate-500 mt-0.5">Manage official Roll No Slip download links for ETEA, KPPSC, FPSC, NTS.</p>
+                    </div>
+                    <span className="bg-indigo-100 text-indigo-900 px-3 py-1 rounded-full text-xs font-black">
+                      {allRollNoSlips.length} Links Active
+                    </span>
+                  </div>
+
+                  <form onSubmit={handleAddRollNoSlip} className="bg-slate-50 p-4 rounded-2xl border space-y-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-600 block mb-1">Testing Agency *</label>
+                        <select
+                          value={slipAgency}
+                          onChange={(e) => setSlipAgency(e.target.value)}
+                          className="input bg-white text-xs font-bold"
+                        >
+                          <option value="ETEA KP">ETEA KP</option>
+                          <option value="KPPSC">KPPSC</option>
+                          <option value="FPSC">FPSC</option>
+                          <option value="NTS">NTS</option>
+                          <option value="PPSC">PPSC</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-600 block mb-1">Title *</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. ETEA PST & CT Test Roll No Slips 2026"
+                          value={slipTitle}
+                          onChange={(e) => setSlipTitle(e.target.value)}
+                          className="input bg-white text-xs font-bold"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-600 block mb-1">Badge Label</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. ETEA OFFICIAL"
+                          value={slipBadge}
+                          onChange={(e) => setSlipBadge(e.target.value)}
+                          className="input bg-white text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-600 block mb-1">Official Download URL *</label>
+                        <input
+                          type="url"
+                          placeholder="https://etea.edu.pk or direct slip link"
+                          value={slipLink}
+                          onChange={(e) => setSlipLink(e.target.value)}
+                          className="input bg-white text-xs font-mono"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-600 block mb-1">Description / Instructions</label>
+                      <textarea
+                        rows={2}
+                        placeholder="Brief guide on how candidates should enter CNIC to get slip..."
+                        value={slipDesc}
+                        onChange={(e) => setSlipDesc(e.target.value)}
+                        className="input bg-white text-xs"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={slipSubmitting}
+                      className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-black text-xs rounded-xl shadow-xs transition"
+                    >
+                      {slipSubmitting ? "Publishing..." : "📇 Publish Roll No Slip Link"}
+                    </button>
+                  </form>
+
+                  <div className="space-y-3">
+                    <h4 className="text-xs font-black text-slate-900 uppercase">Roll No Slip Links ({allRollNoSlips.length})</h4>
+                    {allRollNoSlips.length === 0 ? (
+                      <p className="text-xs text-slate-400 italic py-4 text-center bg-slate-50 rounded-2xl">
+                        No custom Roll No Slip links added yet. Default listings active on /rollno-slips.
+                      </p>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-2">
+                        {allRollNoSlips.map((slip) => (
+                          <div key={slip.id} className="p-3 bg-slate-50 border rounded-2xl flex items-center justify-between gap-3">
+                            <div>
+                              <span className="text-[10px] font-black px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-900">
+                                {slip.agency} • {slip.badge}
+                              </span>
+                              <h5 className="font-black text-sm text-slate-900 mt-1">{slip.title}</h5>
+                              <p className="text-xs text-slate-500">{slip.desc}</p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteRollNoSlip(slip.id)}
                               className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl transition shrink-0"
                             >
                               🗑️ Delete

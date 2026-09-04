@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import HeaderNav from "../HeaderNav";
+import { db } from "../../firebase";
+import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 
-const ROLL_NO_PORTALS = [
+const INITIAL_ROLL_NO_PORTALS = [
   {
+    id: "etea-rollno-slip-2026",
     agency: "ETEA KP",
     title: "ETEA PST, CT, SST & Police Constable Roll No Slips",
     desc: "Direct link to print official ETEA candidate test slip using CNIC number without dash.",
@@ -14,6 +17,7 @@ const ROLL_NO_PORTALS = [
     badge: "ETEA OFFICIAL",
   },
   {
+    id: "kppsc-rollno-slip-2026",
     agency: "KPPSC",
     title: "KPPSC Computer Operator & Assistant Screening Test Slip",
     desc: "Download official Khyber Pakhtunkhwa Public Service Commission examination admission slip.",
@@ -22,6 +26,7 @@ const ROLL_NO_PORTALS = [
     badge: "KPPSC OFFICIAL",
   },
   {
+    id: "fpsc-rollno-slip-2026",
     agency: "FPSC",
     title: "FPSC General Recruitment & CSS Admission Certificates",
     desc: "Federal Public Service Commission online roll number slip and exam venue locator.",
@@ -30,6 +35,7 @@ const ROLL_NO_PORTALS = [
     badge: "FPSC ISLAMABAD",
   },
   {
+    id: "nts-rollno-slip-2026",
     agency: "NTS",
     title: "NTS Screening & National Test Roll Number Slip",
     desc: "National Testing Service student roll number slip verification and result portal.",
@@ -40,10 +46,39 @@ const ROLL_NO_PORTALS = [
 ];
 
 export default function RollNoSlipsPage() {
+  const [portals, setPortals] = useState(INITIAL_ROLL_NO_PORTALS);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAgency, setSelectedAgency] = useState("ALL");
 
-  const filteredPortals = ROLL_NO_PORTALS.filter((item) => {
+  useEffect(() => {
+    try {
+      const q = query(collection(db, "rollno_slips"), orderBy("createdAt", "desc"));
+      const unsubscribe = onSnapshot(
+        q,
+        (snapshot) => {
+          if (!snapshot.empty) {
+            const fetched = snapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
+            const combined = [...fetched];
+            INITIAL_ROLL_NO_PORTALS.forEach((item) => {
+              if (!combined.some((p) => p.id === item.id || p.title === item.title)) {
+                combined.push(item);
+              }
+            });
+            setPortals(combined);
+          }
+        },
+        (err) => console.warn("Firestore rollno_slips listener warning:", err)
+      );
+      return () => unsubscribe();
+    } catch (e) {
+      console.warn("Firestore error:", e);
+    }
+  }, []);
+
+  const filteredPortals = portals.filter((item) => {
     const matchesSearch =
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.desc.toLowerCase().includes(searchQuery.toLowerCase());
