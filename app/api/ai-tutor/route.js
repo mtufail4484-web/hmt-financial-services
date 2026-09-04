@@ -65,8 +65,16 @@ export async function POST(req) {
     const isUrduScript = /[\u0600-\u06FF]/.test(promptText);
     let reply = "";
 
-    // 1. GREETINGS & INTRODUCTIONS
-    if (lower.match(/\b(hi|hello|hey|aoa|assalam|salam|سلام|السلام|کیسے|حال|kaise ho|kya haal)\b/)) {
+    // 1. IDENTITY & WHO ARE YOU
+    if (lower.match(/\b(aap kon|kon ho|who are you|tum kon|ap kon|who r u|naam kya|your name|کون ہو|آپ کون)\b/i)) {
+      if (isUrduScript) {
+        reply = `🤖 **میں HMT AI اسسٹنٹ (ایچ ایم ٹی اے آئی اسسٹنٹ) ہوں۔**\n\nمیں HMT Success Academy اور محمد طفیل (پشاور) کا آفیشل ورچوئل ٹیوشن اسسٹنٹ ہوں۔\n\nمیں آپ کی درج ذیل تمام امور میں 100% مفت رہنمائی کر سکتا ہوں:\n- 📚 **ETEA KP اور KPPSC امتحانات کی تیاری**\n- 📊 **مائیکروسافٹ ایکسل (VLOOKUP) اور ورڈ**\n- 📄 **مفت ATS سی وی اور رول نمبر سلپ**\n\nآپ مجھ سے کوئی بھی سوال پوچھ سکتے ہیں!`;
+      } else {
+        reply = `🤖 **Main HMT AI Assistant (ایچ ایم ٹی اے آئی اسسٹنٹ) hoon!**\n\nMain HMT Success Academy aur **Muhammad Tufail** (Peshawar, KP) ka official virtual study tutor hoon.\n\nMain aap ki in tamam cheezon mein 100% free madad kar sakta hoon:\n- 📚 **ETEA KP (PST, CT, SST) & KPPSC Merit Calculator**\n- 📊 **MS Excel Formulas (VLOOKUP, XLOOKUP) & Word**\n- 📄 **Free ATS CV Builder & Roll No Slips Download**\n\nAap Roman Urdu, Urdu Script ya English mein koi bhi sawal pooch saktay hain!`;
+      }
+    }
+    // 2. GREETINGS & INTRODUCTIONS
+    else if (lower.match(/\b(hi|hello|hey|aoa|assalam|salam|سلام|السلام|کیسے|حال|kaise ho|kya haal)\b/)) {
       if (isUrduScript) {
         reply = `و علیکم السلام! 👋\n\nمیں **HMT AI اسسٹنٹ** ہوں۔ میں آپ کی ایٹیا (ETEA) امتحانات، مائیکروسافٹ ایکسل، ورڈ، اور ایچ ایم ٹی کی تمام خدمات میں بہترین رہنمائی کر سکتا ہوں۔\n\nآپ مجھ سے کیا پوچھنا چاہتے ہیں؟`;
       } else {
