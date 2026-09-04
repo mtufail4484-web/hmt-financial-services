@@ -4,11 +4,11 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 
 const QUICK_PROMPTS = [
-  "📊 Explain Excel VLOOKUP formula",
-  "📚 ETEA PST & CT Merit Formula",
-  "📄 How to build ATS CV for free?",
-  "📇 How to download ETEA Roll No Slip?",
-  "🎓 Tell me about HMT Computer Course",
+  "🇵🇰 ETEA PST میرٹ فارمولا",
+  "📊 Excel VLOOKUP (Urdu/English)",
+  "📄 Free ATS CV Kaise Banayein?",
+  "📇 ETEA Roll No Slip Guide",
+  "🎓 HMT Computer Course Details",
 ];
 
 export default function AiTutorWidget() {
@@ -16,7 +16,7 @@ export default function AiTutorWidget() {
   const [messages, setMessages] = useState([
     {
       sender: "ai",
-      text: "Assalam o Alaikum! 👋 I am **HMT AI Assistant**, your 24/7 virtual tutor created by **Muhammad Tufail**.\n\nAsk me anything about ETEA KP exams, MS Office (Excel/Word), ATS CV building, or HMT courses!",
+      text: "Assalam o Alaikum! 👋 I am **HMT AI Assistant** (ایچ ایم ٹی اے آئی اسسٹنٹ).\n\nI speak **English, Roman Urdu, and Urdu Script (اردو)**!\n\nAsk me anything about ETEA KP exams, MS Office (Excel/Word), ATS CV building, or HMT courses!",
     },
   ]);
   const [inputMsg, setInputMsg] = useState("");
@@ -66,7 +66,7 @@ export default function AiTutorWidget() {
           ...prev,
           {
             sender: "ai",
-            text: "I am HMT AI Assistant. How can I help you with your ETEA or computer course preparation today?",
+            text: "Assalam o Alaikum! How can I help you with ETEA, Excel, or ATS CV building today?",
           },
         ]);
       }
@@ -88,7 +88,7 @@ export default function AiTutorWidget() {
     setMessages([
       {
         sender: "ai",
-        text: "Chat cleared! How can I assist you now?",
+        text: "Chat cleared! How can I assist you now? (آپ اپنا سوال اردو میں بھی پوچھ سکتے ہیں)",
       },
     ]);
   };
@@ -107,7 +107,7 @@ export default function AiTutorWidget() {
           </span>
           <div className="text-left hidden sm:block">
             <span className="block text-[10px] font-black text-amber-200 uppercase tracking-widest leading-none">
-              100% FREE AI TUTOR
+              URDU & ENGLISH AI TUTOR
             </span>
             <span className="block text-sm font-black text-white mt-0.5 leading-none">
               HMT AI Assistant
@@ -133,11 +133,11 @@ export default function AiTutorWidget() {
                 <h3 className="font-black text-sm text-white flex items-center gap-1.5">
                   <span>HMT AI Assistant</span>
                   <span className="text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded-full font-bold">
-                    FREE 24/7
+                    اردو & English
                   </span>
                 </h3>
                 <p className="text-[10px] text-slate-400 font-semibold">
-                  Powered by HMT Success Academy & Google Gemini
+                  Powered by HMT Success Academy & Gemini
                 </p>
               </div>
             </div>
@@ -177,6 +177,7 @@ export default function AiTutorWidget() {
                 )}
 
                 <div
+                  dir="auto"
                   className={`p-3 rounded-2xl max-w-[85%] leading-relaxed whitespace-pre-wrap ${
                     msg.sender === "user"
                       ? "bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-tr-none shadow-md"
@@ -194,7 +195,7 @@ export default function AiTutorWidget() {
                   🤖
                 </div>
                 <div className="p-3 bg-slate-900 rounded-2xl border border-slate-800 flex items-center gap-1.5">
-                  <span className="animate-pulse">Thinking...</span>
+                  <span className="animate-pulse">Thinking / سوچ رہا ہے...</span>
                   <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-ping"></span>
                 </div>
               </div>
@@ -227,7 +228,8 @@ export default function AiTutorWidget() {
           >
             <input
               type="text"
-              placeholder="Ask ETEA, Excel formula, or course query..."
+              dir="auto"
+              placeholder="Ask in English, Roman Urdu, or اردو script..."
               value={inputMsg}
               onChange={(e) => setInputMsg(e.target.value)}
               disabled={loading}
@@ -246,3 +248,4 @@ export default function AiTutorWidget() {
     </div>
   );
 }
+
