@@ -9,7 +9,7 @@ const SAMPLE_CV_DATA = {
   jobTitle: "Computer Operator & Office Assistant",
   email: "hamza.office@gmail.com",
   phone: "+92 300 1234567",
-  city: "Peshawar, KPK, Pakistan",
+  city: "Pakistan",
   linkedin: "linkedin.com/in/mhamza-hmt",
   photo: "/hmt-logo-new.png",
   showPhoto: true,
@@ -280,55 +280,99 @@ export default function CvBuilderPage() {
               </div>
 
               {/* PROFILE PHOTO OPTIONAL INPUT */}
-              <div className="sm:col-span-2 p-3 bg-slate-950 rounded-2xl border border-slate-800 space-y-2">
+              <div className="sm:col-span-2 p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-3">
                 <div className="flex items-center justify-between">
-                  <label className="text-slate-300 font-bold text-xs">📷 Profile Picture (Optional)</label>
-                  <label className="flex items-center gap-1.5 text-xs text-amber-400 font-semibold cursor-pointer">
+                  <label className="text-slate-200 font-bold text-xs flex items-center gap-1.5">
+                    <span>📷 Profile Picture</span>
+                    <span className="text-[10px] text-slate-400 font-normal">(Optional for ATS)</span>
+                  </label>
+                  <label className="flex items-center gap-2 text-xs text-amber-400 font-bold cursor-pointer select-none">
                     <input
                       type="checkbox"
                       checked={cv.showPhoto}
                       onChange={(e) => setCv({ ...cv, showPhoto: e.target.checked })}
-                      className="rounded border-slate-700 bg-slate-900 text-amber-400 focus:ring-0"
+                      className="rounded border-slate-700 bg-slate-900 text-amber-400 focus:ring-0 w-4 h-4 cursor-pointer"
                     />
-                    <span>Show Photo on CV</span>
+                    <span>Include Photo on CV</span>
                   </label>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  {cv.photo && (
-                    <img
-                      src={cv.photo}
-                      alt="Preview"
-                      className="w-12 h-14 object-cover rounded-lg border border-slate-700 bg-slate-900 shrink-0"
-                    />
-                  )}
+                {cv.showPhoto && (
+                  <div className="space-y-3 pt-1">
+                    <div className="flex items-center gap-3">
+                      {cv.photo ? (
+                        <img
+                          src={cv.photo}
+                          alt="Preview"
+                          className="w-14 h-16 object-cover rounded-xl border-2 border-amber-500/50 bg-slate-900 shrink-0 shadow-md"
+                        />
+                      ) : (
+                        <div className="w-14 h-16 rounded-xl border-2 border-dashed border-slate-700 bg-slate-900 flex items-center justify-center text-slate-500 text-xs font-bold shrink-0">
+                          No Photo
+                        </div>
+                      )}
 
-                  <div className="flex-1 space-y-1.5 min-w-0">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handlePhotoUpload}
-                      className="w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500/20 file:text-amber-300 hover:file:bg-amber-500/30 cursor-pointer"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Or paste Image URL (e.g. /hmt-logo-new.png)"
-                      value={cv.photo}
-                      onChange={(e) => setCv({ ...cv, photo: e.target.value })}
-                      className="w-full rounded-xl bg-slate-900 border border-slate-800 p-2 text-white text-xs focus:border-amber-400 focus:outline-none"
-                    />
+                      <div className="flex-1 space-y-2 min-w-0">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handlePhotoUpload}
+                          className="w-full text-xs text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500/20 file:text-amber-300 hover:file:bg-amber-500/30 cursor-pointer"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Or paste Image URL (e.g. https://...)"
+                          value={cv.photo}
+                          onChange={(e) => setCv({ ...cv, photo: e.target.value })}
+                          className="w-full rounded-xl bg-slate-900 border border-slate-800 p-2 text-white text-xs focus:border-amber-400 focus:outline-none"
+                        />
+                      </div>
+
+                      {cv.photo && (
+                        <button
+                          type="button"
+                          onClick={() => setCv({ ...cv, photo: "" })}
+                          className="px-2.5 py-1.5 bg-rose-500/20 text-rose-300 border border-rose-500/30 rounded-xl text-xs font-bold hover:bg-rose-500/30 shrink-0"
+                        >
+                          ✕ Clear
+                        </button>
+                      )}
+                    </div>
+
+                    {/* QUICK AVATARS SELECTOR */}
+                    <div className="pt-2 border-t border-slate-800/80 flex items-center gap-2 overflow-x-auto">
+                      <span className="text-[10px] text-slate-400 font-bold shrink-0">Quick Avatars:</span>
+                      <button
+                        type="button"
+                        onClick={() => setCv({ ...cv, photo: "/hmt-logo-new.png", showPhoto: true })}
+                        className="px-2 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg text-[10px] text-amber-300 font-bold shrink-0"
+                      >
+                        🎓 HMT Badge
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCv({ ...cv, photo: "https://api.dicebear.com/7.x/bottts/svg?seed=Hamza", showPhoto: true })}
+                        className="px-2 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg text-[10px] text-slate-300 font-bold shrink-0"
+                      >
+                        👤 Avatar 1
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCv({ ...cv, photo: "https://api.dicebear.com/7.x/avataaars/svg?seed=Student", showPhoto: true })}
+                        className="px-2 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg text-[10px] text-slate-300 font-bold shrink-0"
+                      >
+                        👨‍🎓 Male Student
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCv({ ...cv, photo: "https://api.dicebear.com/7.x/avataaars/svg?seed=Fatima", showPhoto: true })}
+                        className="px-2 py-1 bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-lg text-[10px] text-slate-300 font-bold shrink-0"
+                      >
+                        👩‍🎓 Female Student
+                      </button>
+                    </div>
                   </div>
-
-                  {cv.photo && (
-                    <button
-                      type="button"
-                      onClick={() => setCv({ ...cv, photo: "" })}
-                      className="px-2 py-1 text-xs font-bold text-rose-400 hover:text-rose-300"
-                    >
-                      ✕ Clear
-                    </button>
-                  )}
-                </div>
+                )}
               </div>
             </div>
 

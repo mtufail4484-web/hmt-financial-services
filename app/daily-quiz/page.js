@@ -340,7 +340,7 @@ export default function DailyQuizPage() {
                   {studentCertName && (
                     <div id="quiz-certificate" className="p-6 rounded-2xl bg-slate-900 border-4 border-amber-400 text-center space-y-3 shadow-xl">
                       <div className="text-xs uppercase font-black tracking-widest text-amber-400">
-                        HMT SUCCESS ACADEMY PESHAWAR
+                        HMT SUCCESS ACADEMY
                       </div>
                       <h4 className="text-lg font-black text-white">Certificate of Achievement</h4>
                       <p className="text-xs text-slate-300">This is to certify that</p>
