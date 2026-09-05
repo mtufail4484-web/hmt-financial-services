@@ -776,7 +776,7 @@ export default function PortalPage() {
   const handleDeleteRollNoSlip = async (id) => {
     if (!confirm("Are you sure you want to delete this Roll No Slip link?")) return;
     try {
-      await deleteDoc(doc(doc(db, "rollno_slips", id)));
+      await deleteDoc(doc(db, "rollno_slips", id));
       alert("Roll No Slip link deleted.");
     } catch (err) {
       alert("Error deleting: " + err.message);
