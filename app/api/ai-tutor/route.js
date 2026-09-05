@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const HMT_SYSTEM_PROMPT = `You are HMT AI Assistant (ایچ ایم ٹی اے آئی اسسٹنٹ), the official virtual study tutor and support assistant for HMT Success Academy & HMT Financial Services, hosted by Muhammad Tufail in Peshawar, KP, Pakistan.
+const HMT_SYSTEM_PROMPT = `You are HMT AI Assistant (ایچ ایم ٹی اے آئی اسسٹنٹ), the official virtual study tutor and support assistant for HMT Success Academy & HMT Financial Services, founded by Muhammad Tufail.
 
 Core Language & Script Adaptation Rules:
 1. SCRIPT MATCHING:
@@ -9,11 +9,14 @@ Core Language & Script Adaptation Rules:
    - If the user asks in English, reply in English.
 2. Tone & Identity:
    - Always be polite, respectful (use "Assalam o Alaikum" / "السلام علیکم"), encouraging, and direct.
-3. Expertise & Knowledge Scope:
+3. FOUNDER PROFILE & LOCATION RULES:
+   - In general intros or website descriptions for HMT Success Academy and HMT Financial Services, state only the founder's name "Muhammad Tufail" without mentioning any district.
+   - IF someone explicitly asks about Muhammad Tufail's background, origin, or current location, explain: Muhammad Tufail is originally from District Buner, KP, and is currently living in Lahore.
+4. Expertise & Knowledge Scope:
    - Competitive Exams: ETEA KP (PST 50% test weightage, CT, SST, Police Constable), KPPSC (Computer Operator, Tehsildar), FPSC, PPSC, NTS.
    - MS Office & IT Skills: Excel formulas (VLOOKUP, XLOOKUP, IF, SUMIF, Pivot Tables), Word formatting, DIT Diploma, Typing skills.
    - HMT Direct Services & Tools: Free ATS CV Builder (/cv-builder), ETEA Merit Calculator (/merit-calculator), Roll No Slip Finder (/rollno-slips), Daily MCQ Quiz (/daily-quiz), Solved Past Papers Hub (/past-papers), WhatsApp Study Groups (/whatsapp-groups), Verification Portal (/verify).
-4. Format: Use clean bullet points, code blocks for formulas, and clear headings.`;
+5. Format: Use clean bullet points, code blocks for formulas, and clear headings.`;
 
 export async function POST(req) {
   try {
@@ -69,12 +72,20 @@ export async function POST(req) {
     const isUrduScript = /[\u0600-\u06FF]/.test(promptText);
     let reply = "";
 
-    // 1. IDENTITY & WHO ARE YOU
-    if (lower.match(/\b(aap kon|kon ho|who are you|tum kon|ap kon|who r u|naam kya|your name|کون ہو|آپ کون)\b/i)) {
+    // 0. SPECIFIC FOUNDER INQUIRY (Buner origin & Lahore residence)
+    if (lower.includes("buner") || lower.includes("lahore") || lower.match(/\b(tufail kon|who is tufail|tufail background|tufail location|tufail address|طفیل کون|ضلع بنیر|بونیر)\b/i)) {
       if (isUrduScript) {
-        reply = `🤖 **میں HMT AI اسسٹنٹ (ایچ ایم ٹی اے آئی اسسٹنٹ) ہوں۔**\n\nمیں HMT Success Academy اور محمد طفیل (پشاور) کا آفیشل ورچوئل ٹیوشن اسسٹنٹ ہوں۔\n\nمیں آپ کی درج ذیل تمام امور میں 100% مفت رہنمائی کر سکتا ہوں:\n- 📚 **ETEA KP اور KPPSC امتحانات کی تیاری**\n- 📊 **مائیکروسافٹ ایکسل (VLOOKUP) اور ورڈ**\n- 📄 **مفت ATS سی وی اور رول نمبر سلپ**\n\nآپ مجھ سے کوئی بھی سوال پوچھ سکتے ہیں!`;
+        reply = `👤 **محمد طفیل کا تعارف:**\n\n- **بانی**: محمد طفیل HMT Success Academy اور HMT Financial & Digital Services کے بانی ہیں۔\n- **آبائی علاقہ**: ان کا تعلق اصل میں **ضلع بنیر (خیبر پختونخوا)** سے ہے۔\n- **موجودہ رہائش**: وہ اس وقت **لاہور** میں مقیم ہیں۔\n- **رابطہ**: آپ واٹس ایپ +92 342 2981356 پر براہ راست رابطہ کر سکتے ہیں۔`;
       } else {
-        reply = `🤖 **Main HMT AI Assistant (ایچ ایم ٹی اے آئی اسسٹنٹ) hoon!**\n\nMain HMT Success Academy aur **Muhammad Tufail** (Peshawar, KP) ka official virtual study tutor hoon.\n\nMain aap ki in tamam cheezon mein 100% free madad kar sakta hoon:\n- 📚 **ETEA KP (PST, CT, SST) & KPPSC Merit Calculator**\n- 📊 **MS Excel Formulas (VLOOKUP, XLOOKUP) & Word**\n- 📄 **Free ATS CV Builder & Roll No Slips Download**\n\nAap Roman Urdu, Urdu Script ya English mein koi bhi sawal pooch saktay hain!`;
+        reply = `👤 **Muhammad Tufail Profile:**\n\n- **Founder**: Muhammad Tufail is the founder of HMT Success Academy and HMT Financial & Digital Services.\n- **Hometown**: He is originally from **District Buner, KP**.\n- **Current Residence**: He is currently living in **Lahore**.\n- **Official WhatsApp**: +92 342 2981356`;
+      }
+    }
+    // 1. IDENTITY & WHO ARE YOU (General Intro - No District)
+    else if (lower.match(/\b(aap kon|kon ho|who are you|tum kon|ap kon|who r u|naam kya|your name|کون ہو|آپ کون)\b/i)) {
+      if (isUrduScript) {
+        reply = `🤖 **میں HMT AI اسسٹنٹ (ایچ ایم ٹی اے آئی اسسٹنٹ) ہوں۔**\n\nمیں HMT Success Academy اور HMT Financial Services کا آفیشل ورچوئل ٹیوشن اسسٹنٹ ہوں، جسے **محمد طفیل** نے قائم کیا ہے۔\n\nمیں آپ کی درج ذیل تمام امور میں 100% مفت رہنمائی کر سکتا ہوں:\n- 📚 **ETEA KP اور KPPSC امتحانات کی تیاری**\n- 📊 **مائیکروسافٹ ایکسل (VLOOKUP) اور ورڈ**\n- 📄 **مفت ATS سی وی اور رول نمبر سلپ**\n\nآپ مجھ سے کوئی بھی سوال پوچھ سکتے ہیں!`;
+      } else {
+        reply = `🤖 **Main HMT AI Assistant (ایچ ایم ٹی اے آئی اسسٹنٹ) hoon!**\n\nMain HMT Success Academy aur HMT Financial Services ka official virtual study tutor hoon, founded by **Muhammad Tufail**.\n\nMain aap ki in tamam cheezon mein 100% free madad kar sakta hoon:\n- 📚 **ETEA KP (PST, CT, SST) & KPPSC Merit Calculator**\n- 📊 **MS Excel Formulas (VLOOKUP, XLOOKUP) & Word**\n- 📄 **Free ATS CV Builder & Roll No Slips Download**\n\nAap Roman Urdu, Urdu Script ya English mein koi bhi sawal pooch saktay hain!`;
       }
     }
     // 2. GREETINGS & INTRODUCTIONS
@@ -85,7 +96,7 @@ export async function POST(req) {
         reply = `Walaikum Assalam! 👋\n\nMain **HMT AI Assistant** hoon. Main ETEA test preparation, MS Excel formulas, ATS CV building aur KPPSC exam guidance mein aap ki poori madad kar sakta hoon.\n\nAap kis baaray mein poochna chahtay hain?`;
       }
     }
-    // 2. EXCEL & SPREADSHEETS
+    // 3. EXCEL & SPREADSHEETS
     else if (lower.includes("vlookup") || lower.includes("xlookup") || lower.includes("excel") || lower.includes("ایکسل") || lower.includes("فارمولا") || lower.includes("formula") || lower.includes("sumif") || lower.includes("pivot")) {
       if (isUrduScript) {
         reply = `📊 **مائیکروسافٹ ایکسل گائیڈ:**\n\n- **VLOOKUP فارمولا**: \`=VLOOKUP(lookup_value, table_array, col_index_num, [range_lookup])\`\n- **XLOOKUP فارمولا**: \`=XLOOKUP(lookup_value, lookup_array, return_array)\` (ایکسل کا جدید ترین فارمولا)\n- **مثال**: \`=VLOOKUP(A2, Sheet1!A1:D100, 2, FALSE)\` سے آپ کسی بھی رول نمبر کا نام تلاش کر سکتے ہیں۔\n- مزید تفصیلات کے لیے **[HMT live Computer Course](/computer-course)** دیکھیں۔`;
@@ -93,7 +104,7 @@ export async function POST(req) {
         reply = `📊 **Microsoft Excel Formula Guide:**\n\n- **VLOOKUP Syntax**: \`=VLOOKUP(lookup_value, table_array, col_index_num, [range_lookup])\`\n- **XLOOKUP (Modern)**: \`=XLOOKUP(lookup_value, lookup_array, return_array)\`\n- **Roman Urdu Tip**: VLOOKUP se aap kisi bhi ID ya Roll No ka data doosray sheet se ek second mein find kar saktay hain.\n- Learn full MS Office on our **[Computer Course Portal](/computer-course)**!`;
       }
     }
-    // 3. MS WORD & TYPING & SHORTCUTS
+    // 4. MS WORD & TYPING & SHORTCUTS
     else if (lower.includes("word") || lower.includes("ورڈ") || lower.includes("shortcut") || lower.includes("typing") || lower.includes("ٹائپنگ") || lower.includes("dit")) {
       if (isUrduScript) {
         reply = `💻 **ایم ایس ورڈ اور ڈی آئی ٹی (DIT) ٹپس:**\n\n- **اہم شارٹ کٹس**:\n  - Ctrl + C = کاپی\n  - Ctrl + V = پیسٹ\n  - Ctrl + Z = ان ڈو (Undo)\n  - Ctrl + A = تمام ٹیکسٹ سلیکٹ کرنا\n- **DIT ڈپلوما**: ڈی آئی ٹی میں MS Word, MS Excel, Access, C++, HTML شامل ہوتے ہیں۔\n- مزید شارٹ کٹس **[کمپیوٹر کورس](/computer-course)** پر دیکھیں۔`;
@@ -101,7 +112,7 @@ export async function POST(req) {
         reply = `💻 **MS Word & Typing Shortcuts:**\n\n- **Essential Shortcuts**:\n  - \`Ctrl + C\`: Copy | \`Ctrl + V\`: Paste | \`Ctrl + Z\`: Undo\n  - \`Ctrl + A\`: Select All | \`Ctrl + P\`: Print Document\n- **DIT Diploma**: Covers MS Office, Web Design, C++ & Graphics.\n- Practice typing and formatting on our **[Computer Course Hub](/computer-course)**!`;
       }
     }
-    // 4. ETEA PST / CT / SST / MERIT FORMULA
+    // 5. ETEA PST / CT / SST / MERIT FORMULA
     else if (lower.includes("pst") || lower.includes("ct") || lower.includes("sst") || lower.includes("etea") || lower.includes("ایٹیا") || lower.includes("میرٹ") || lower.includes("aggregate") || lower.includes("formula")) {
       if (isUrduScript) {
         reply = `📚 **ETEA KP تمام پوسٹوں کا میرٹ فارمولا:**\n\n- **ایٹیا تحریری ٹیسٹ**: 50% مارکس\n- **ایف ایس سی (FSc)**: 15% مارکس\n- **بی ایس / گریجویشن**: 15% مارکس\n- **میٹرک (Matric)**: 10% مارکس\n- **بی ایڈ / سی ٹی (B.Ed/CT)**: 10% مارکس\n\nاپنا مکمل میرٹ 100 میں سے خودکار حساب کرنے کے لیے **[ETEA Merit Calculator](/merit-calculator)** استعمال کریں۔`;
@@ -109,7 +120,7 @@ export async function POST(req) {
         reply = `📚 **ETEA KP Merit Aggregate Formula:**\n\n- **ETEA Written Test**: 50%\n- **FSc**: 15%\n- **BS / Graduation**: 15%\n- **Matric**: 10%\n- **B.Ed / Professional**: 10%\n\n- Roman Urdu: Aap apna aggregate 100 mein se hamare **[ETEA Merit Calculator](/merit-calculator)** par 10 seconds mein calculate kar saktay hain!`;
       }
     }
-    // 5. PAST PAPERS & SYLLABUS & PREPARATION
+    // 6. PAST PAPERS & SYLLABUS & PREPARATION
     else if (lower.includes("paper") || lower.includes("past") || lower.includes("پاسٹ") || lower.includes("پیپر") || lower.includes("syllabus") || lower.includes("سلیبس") || lower.includes("mcq") || lower.includes("quiz")) {
       if (isUrduScript) {
         reply = `📖 **ایٹیا اور KPPSC پاسٹ پیپرز اور سلیبس:**\n\n- ہمارے پورٹل پر PST, CT, SST اور کمپیوٹر آپریٹر کے حل شدہ پاسٹ پیپرز موجود ہیں۔\n- **روزانہ ایم سی کیوز کوئز**: **[Daily MCQ Quiz](/daily-quiz)** پر حصہ لیں اور اپنی تیاری چیک کریں۔\n- **پاسٹ پیپرز ڈاؤن لوڈ کریں**: **[Past Papers Hub](/past-papers)** وزٹ کریں۔`;
@@ -117,7 +128,7 @@ export async function POST(req) {
         reply = `📖 **ETEA & KPPSC Past Papers & Syllabus:**\n\n- Authentic solved original past papers for PST, CT, SST, and Computer Operator are available.\n- **Daily Quiz**: Practice MCQs daily at **[Daily MCQ Quiz](/daily-quiz)**!\n- **Download Papers**: Visit **[Solved Past Papers Hub](/past-papers)**.`;
       }
     }
-    // 6. ATS CV BUILDER & RESUME
+    // 7. ATS CV BUILDER & RESUME
     else if (lower.includes("cv") || lower.includes("resume") || lower.includes("سی وی") || lower.includes("رزومے") || lower.includes("job apply")) {
       if (isUrduScript) {
         reply = `📄 **ایچ ایم ٹی فری ATS سی وی بلڈر:**\n\n- **[Free ATS CV Builder](/cv-builder)** پیج پر جائیں۔\n- اپنی کوالیفکیشن اور تجربہ درج کریں اور A4 PDF ڈاؤن لوڈ کریں۔\n- یہ ETEA، بینک، پولیس اور پرائیویٹ جابز کے لیے 100% بہترین اور مفت ہے۔`;
@@ -125,7 +136,7 @@ export async function POST(req) {
         reply = `📄 **Free ATS CV Builder Guide:**\n\n- Roman Urdu: ETEA aur Government jobs ke liye ATS format CV lazmi hoti hai.\n- Visit **[Free ATS CV Builder](/cv-builder)**, fill your info and click Print/Download PDF!\n- 100% Free for all Pakistani students.`;
       }
     }
-    // 7. ROLL NO SLIPS & EXAM CENTERS
+    // 8. ROLL NO SLIPS & EXAM CENTERS
     else if (lower.includes("roll no") || lower.includes("slip") || lower.includes("رول نمبر") || lower.includes("سلپ") || lower.includes("center")) {
       if (isUrduScript) {
         reply = `📇 **رول نمبر سلپ ڈاؤن لوڈ کریں:**\n\n- **[Roll No Slip Finder](/rollno-slips)** پر جائیں۔\n- ETEA، KPPSC یا FPSC منتخب کریں۔\n- اپنا 13 ہندسوں کا CNIC (بغیر ڈیش کے) درج کریں اور ڈائریکٹ سلپ ڈاؤن لوڈ کریں۔`;
@@ -133,11 +144,11 @@ export async function POST(req) {
         reply = `📇 **Roll Number Slip Direct Finder:**\n\n- Go to **[Roll No Slip Finder](/rollno-slips)**.\n- Select ETEA / KPPSC / FPSC / NTS and enter your CNIC number to get your exam center & roll number slip.`;
       }
     }
-    // 8. CONTACT & MUHAMMAD TUFAIL & WHATSAPP
+    // 9. CONTACT & MUHAMMAD TUFAIL & WHATSAPP
     else if (lower.includes("tufail") || lower.includes("contact") || lower.includes("whatsapp") || lower.includes("طفیل") || lower.includes("رابطہ") || lower.includes("group") || lower.includes("جروب")) {
-      reply = `💬 **HMT Success Academy Contact Details:**\n\n- **Founder & Tutor**: Muhammad Tufail (Peshawar, KP)\n- **Official WhatsApp**: +92 342 2981356\n- **WhatsApp Groups**: Join student study groups on **[WhatsApp Groups Hub](/whatsapp-groups)**!`;
+      reply = `💬 **HMT Success Academy Contact Details:**\n\n- **Founder & Tutor**: Muhammad Tufail\n- **Official WhatsApp**: +92 342 2981356\n- **WhatsApp Groups**: Join student study groups on **[WhatsApp Groups Hub](/whatsapp-groups)**!`;
     }
-    // 9. DYNAMIC INTELLIGENT DIRECT ANSWER GENERATOR (For general queries like "what is pedagogy?", "computer operator qualification?", "how to study math?", etc.)
+    // 10. DYNAMIC INTELLIGENT DIRECT ANSWER GENERATOR
     else {
       const topicName = promptText.replace(/[?./!]/g, "").trim();
 
