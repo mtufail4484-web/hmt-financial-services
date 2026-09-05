@@ -28,35 +28,39 @@ export async function POST(req) {
       );
     }
 
-    // Try Gemini API if key is present
+    // Try Gemini API (with env GEMINI_API_KEY)
     const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
     if (apiKey) {
-      try {
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-        
-        const contentsPayload = [
-          {
-            role: "user",
-            parts: [{ text: `${HMT_SYSTEM_PROMPT}\n\nUser Query: ${promptText}` }],
-          },
-        ];
+      const modelsToTry = ["gemini-flash-latest", "gemini-2.0-flash", "gemini-1.5-flash"];
+      
+      for (const model of modelsToTry) {
+        try {
+          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+          
+          const contentsPayload = [
+            {
+              role: "user",
+              parts: [{ text: `${HMT_SYSTEM_PROMPT}\n\nUser Query: ${promptText}` }],
+            },
+          ];
 
-        const res = await fetch(geminiUrl, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ contents: contentsPayload }),
-        });
+          const res = await fetch(geminiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ contents: contentsPayload }),
+          });
 
-        if (res.ok) {
-          const data = await res.json();
-          const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (aiResponse) {
-            return NextResponse.json({ reply: aiResponse });
+          if (res.ok) {
+            const data = await res.json();
+            const aiResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (aiResponse) {
+              return NextResponse.json({ reply: aiResponse });
+            }
           }
+        } catch (e) {
+          console.warn(`Gemini model ${model} call failed, trying next:`, e);
         }
-      } catch (e) {
-        console.warn("Gemini API call failed, using Smart AI Tutor Engine:", e);
       }
     }
 
