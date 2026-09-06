@@ -92,6 +92,7 @@ export default function JobAlertsPage() {
   const [jobs, setJobs] = useState(INITIAL_JOB_ALERTS);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [activePdfModal, setActivePdfModal] = useState(null);
 
   useEffect(() => {
     try {
@@ -336,14 +337,13 @@ export default function JobAlertsPage() {
                       </div>
 
                       <div className="grid grid-cols-2 gap-2">
-                        <a
-                          href={job.pdfUrl}
-                          target="_blank"
-                          rel="noreferrer"
+                        <button
+                          type="button"
+                          onClick={() => setActivePdfModal(job)}
                           className="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs text-center border border-slate-700 transition flex items-center justify-center gap-1"
                         >
-                          <span>📄 PDF Ad</span>
-                        </a>
+                          <span>📄 Preview PDF Ad</span>
+                        </button>
                         <a
                           href={job.applyUrl}
                           target="_blank"
@@ -368,6 +368,44 @@ export default function JobAlertsPage() {
             </div>
           )}
         </section>
+
+        {/* EMBEDDED PDF MODAL PREVIEW */}
+        {activePdfModal && (
+          <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-slate-700 rounded-3xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+              <div className="p-4 border-b border-slate-800 flex items-center justify-between bg-slate-950">
+                <div>
+                  <h3 className="font-black text-white text-sm">{activePdfModal.title}</h3>
+                  <p className="text-xs text-amber-400">Official {activePdfModal.agency} Advertisement</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={activePdfModal.pdfUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-3 py-1.5 rounded-xl bg-amber-400 text-slate-950 font-bold text-xs hover:bg-amber-300 transition"
+                  >
+                    Open in New Tab ↗
+                  </a>
+                  <button
+                    onClick={() => setActivePdfModal(null)}
+                    className="px-3 py-1.5 rounded-xl bg-slate-800 text-white font-bold text-xs hover:bg-slate-700 transition"
+                  >
+                    Close ✖
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex-1 bg-slate-950 p-2 overflow-hidden">
+                <iframe
+                  src={activePdfModal.pdfUrl}
+                  className="w-full h-full min-h-[500px] rounded-2xl border border-slate-800"
+                  title="Job Advertisement PDF"
+                />
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* FOOTER */}
@@ -385,3 +423,4 @@ export default function JobAlertsPage() {
     </div>
   );
 }
+

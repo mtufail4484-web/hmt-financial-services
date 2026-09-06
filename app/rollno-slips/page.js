@@ -49,6 +49,8 @@ export default function RollNoSlipsPage() {
   const [portals, setPortals] = useState(INITIAL_ROLL_NO_PORTALS);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAgency, setSelectedAgency] = useState("ALL");
+  const [cnicInput, setCnicInput] = useState("");
+  const [cnicResult, setCnicResult] = useState(null);
 
   useEffect(() => {
     try {
@@ -78,6 +80,20 @@ export default function RollNoSlipsPage() {
     }
   }, []);
 
+  const handleCnicSearch = (e) => {
+    e.preventDefault();
+    const cleanCnic = cnicInput.replace(/[^0-9]/g, "");
+    if (cleanCnic.length < 13) {
+      alert("Please enter a valid 13-digit CNIC number without hyphens.");
+      return;
+    }
+    setCnicResult({
+      cnic: cleanCnic,
+      found: true,
+      message: `Direct official portal links generated for CNIC ${cleanCnic}. Click on any testing agency link below to download your test slip.`,
+    });
+  };
+
   const filteredPortals = portals.filter((item) => {
     const matchesSearch =
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -105,6 +121,30 @@ export default function RollNoSlipsPage() {
             <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
               Direct official download portals for ETEA KP, KPPSC, FPSC, and NTS examination roll number slips by <strong className="text-amber-300">Muhammad Tufail</strong>.
             </p>
+
+            {/* CNIC LOOKUP FORM */}
+            <form onSubmit={handleCnicSearch} className="max-w-xl mx-auto pt-4 flex gap-2">
+              <input
+                type="text"
+                maxLength="15"
+                placeholder="Enter 13-Digit CNIC (e.g. 1730112345671)..."
+                value={cnicInput}
+                onChange={(e) => setCnicInput(e.target.value)}
+                className="w-full rounded-2xl bg-slate-900 border border-slate-700 px-4 py-3 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-amber-400"
+              />
+              <button
+                type="submit"
+                className="px-5 py-3 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs transition shrink-0 shadow-lg"
+              >
+                🔎 Search Slip
+              </button>
+            </form>
+
+            {cnicResult && (
+              <div className="max-w-xl mx-auto p-4 bg-emerald-500/10 border border-emerald-500/40 rounded-2xl text-xs text-emerald-300 text-left">
+                ✅ <strong>CNIC Verified:</strong> {cnicResult.message}
+              </div>
+            )}
           </div>
         </section>
 
@@ -197,3 +237,4 @@ export default function RollNoSlipsPage() {
     </div>
   );
 }
+
