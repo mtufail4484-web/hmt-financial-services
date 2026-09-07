@@ -139,6 +139,15 @@ export default function ComputerCourse() {
               <p className="mt-1 text-xs font-semibold text-slate-300">Join the official WhatsApp channel for academy announcements and new course updates.</p>
             </div>
             <div className="flex flex-wrap gap-2">
+              <a
+                href="https://library.hmtfinancialservices.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="rounded-xl bg-purple-700 px-4 py-3 text-sm font-black text-white hover:bg-purple-800 transition flex items-center gap-1.5 shadow"
+              >
+                <span>📚 HMT Digital Library</span>
+                <span>↗</span>
+              </a>
               <a href={WHATSAPP_CHANNEL_URL} target="_blank" rel="noreferrer" className="rounded-xl bg-emerald-600 px-4 py-3 text-sm font-black text-white hover:bg-emerald-700">
                 WhatsApp Channel
               </a>

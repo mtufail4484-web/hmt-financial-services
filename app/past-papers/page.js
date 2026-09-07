@@ -214,6 +214,28 @@ export default function PastPapersPage() {
                 )}
               </div>
             </div>
+
+            {/* DIGITAL LIBRARY INTERLINK BANNER */}
+            <div className="pt-4 max-w-2xl mx-auto">
+              <div className="rounded-2xl bg-gradient-to-r from-purple-950/80 via-indigo-950/80 to-slate-900 border border-purple-500/30 p-3.5 flex flex-col sm:flex-row items-center justify-between gap-3 text-left shadow-lg">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl shrink-0">📖</span>
+                  <div>
+                    <h3 className="text-xs font-black text-white">Looking for complete Books & Study Notes?</h3>
+                    <p className="text-[11px] text-purple-200">Access full IT textbooks, MS Office guides, and competitive exam books on the official HMT Digital Library.</p>
+                  </div>
+                </div>
+                <a
+                  href="https://library.hmtfinancialservices.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="shrink-0 px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs transition shadow-md flex items-center gap-1"
+                >
+                  <span>📚 Open Digital Library</span>
+                  <span>↗</span>
+                </a>
+              </div>
+            </div>
           </div>
         </section>
 

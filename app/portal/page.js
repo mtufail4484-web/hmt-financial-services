@@ -4780,10 +4780,42 @@ export default function PortalPage() {
               </button>
             </div>
 
+            <div className="rounded-3xl border border-purple-200 bg-gradient-to-br from-slate-950 via-purple-950 to-indigo-900 p-4 text-white shadow-lg">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <span className="rounded-full bg-purple-400/20 text-purple-200 border border-purple-400/30 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider">
+                    📖 Official Digital Library
+                  </span>
+                  <h3 className="mt-2 text-base font-black text-white">HMT Digital Library</h3>
+                </div>
+                <span className="text-xl">📚</span>
+              </div>
+              <p className="mt-2 text-[11px] font-semibold leading-relaxed text-purple-100">
+                Access computer course textbooks, MS Office guides, ETEA & KPPSC solved books, and IT e-books.
+              </p>
+              <a
+                href="https://library.hmtfinancialservices.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 flex items-center justify-center gap-1.5 w-full rounded-2xl bg-amber-400 hover:bg-amber-300 py-2.5 text-xs font-black text-slate-950 transition shadow-md"
+              >
+                <span>🚀 Open Digital Library</span>
+                <span className="text-xs">↗</span>
+              </a>
+            </div>
+
             <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
               <p className="text-[10px] font-black uppercase tracking-wide text-blue-600">Help & Links</p>
               <h3 className="mt-1 text-base font-black text-slate-900">Stay connected with HMT</h3>
               <div className="mt-3 grid gap-2">
+                <a
+                  href="https://library.hmtfinancialservices.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center justify-center gap-1.5 rounded-xl bg-purple-700 py-2.5 text-xs font-black text-white transition hover:bg-purple-800 shadow-sm"
+                >
+                  📚 HMT Digital Library
+                </a>
                 <button type="button" onClick={openYouTube} className="w-full rounded-xl bg-red-600 py-2.5 text-xs font-black text-white transition hover:bg-red-700">
                   YouTube Channel
                 </button>
@@ -4840,7 +4872,7 @@ export default function PortalPage() {
             </div>
 
             <div className="bg-white rounded-3xl shadow-sm border p-4 md:p-5 space-y-2">
-              <h3 className="text-xs md:text-sm font-black text-gray-800">Academic Documents</h3>
+              <h3 className="text-xs md:text-sm font-black text-gray-800">Academic Documents & Links</h3>
 
               <button type="button" onClick={() => setShowCardModal(true)} className="w-full bg-slate-900 hover:bg-slate-800 text-white rounded-2xl py-2.5 text-xs font-bold transition">
                 Student ID Card
@@ -4868,17 +4900,26 @@ export default function PortalPage() {
               </button>
 
               <a
+                href="https://library.hmtfinancialservices.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full rounded-2xl bg-gradient-to-r from-purple-700 to-indigo-800 hover:from-purple-800 hover:to-indigo-900 py-2.5 text-center text-xs font-black text-white shadow-sm transition"
+              >
+                📚 HMT Digital Library
+              </a>
+
+              <a
                 href="/mock-test"
                 target="_blank"
                 rel="noreferrer"
-                className="block w-full rounded-2xl bg-gradient-to-r from-purple-700 to-indigo-800 hover:from-purple-800 hover:to-indigo-900 py-2.5 text-center text-xs font-black text-white shadow-sm transition"
+                className="block w-full rounded-2xl bg-cyan-700 hover:bg-cyan-800 py-2.5 text-center text-xs font-black text-white shadow-sm transition"
               >
                 🎯 Mock Test Portal
               </a>
 
               <a
                 href="/tools"
-                className="block w-full rounded-2xl bg-cyan-600 hover:bg-cyan-700 py-2.5 text-center text-xs font-bold text-white transition"
+                className="block w-full rounded-2xl bg-slate-800 hover:bg-slate-900 py-2.5 text-center text-xs font-bold text-white transition"
               >
                 Free Student Tools
               </a>

@@ -6,6 +6,17 @@ import HeaderNav from "../HeaderNav";
 export default function FreeServicesPage() {
   const freePortals = [
     {
+      title: "HMT Digital Library Portal",
+      subtitle: "e-Books • Course Textbooks • Solved PDF Notes",
+      desc: "Explore the official HMT Digital Library for downloadable IT e-books, computer course textbooks, ETEA/KPPSC guidebooks, and study references.",
+      image: "/hmt-logo-new.png",
+      link: "https://library.hmtfinancialservices.com",
+      badge: "📖 DIGITAL LIBRARY PORTAL",
+      btnText: "📚 Open Digital Library ↗",
+      color: "from-purple-600 to-indigo-700",
+      isExternal: true,
+    },
+    {
       title: "ETEA & Competitive Exam Past Papers",
       subtitle: "ETEA KP • KPPSC • FPSC • Solved Notes PDF",
       desc: "Free downloadable authentic solved past papers, PST/CT/SST revision notes, FPSC General Knowledge, and MS Office textbook guides.",
@@ -142,7 +153,7 @@ export default function FreeServicesPage() {
               HMT Free Services & Student Resources Hub
             </h1>
             <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
-              Empowering students and job candidates across Pakistan with free competitive exam mock test suites, live computer courses, CV creation tools, and official certificate verification.
+              Empowering students and job candidates across Pakistan with free digital library textbooks, competitive exam mock tests, live computer courses, CV creation tools, and official certificate verification.
             </p>
           </div>
         </section>
@@ -150,50 +161,101 @@ export default function FreeServicesPage() {
         {/* PORTALS & SERVICES GRID */}
         <section className="max-w-7xl mx-auto px-4 py-14">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {freePortals.map((item, idx) => (
-              <Link
-                key={idx}
-                href={item.link}
-                className="group relative overflow-hidden rounded-[2.5rem] bg-slate-900 border border-slate-800 p-6 flex flex-col justify-between shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:border-amber-400/60 hover:shadow-amber-500/20"
-              >
-                <div>
-                  {/* Top Badge & Header */}
-                  <div className="flex items-center justify-between gap-2 mb-4">
-                    <span className="text-[11px] font-black px-3 py-1 rounded-full bg-slate-950 text-amber-300 border border-amber-500/30">
-                      {item.badge}
-                    </span>
-                    <span className="text-xs text-emerald-400 font-bold">100% FREE</span>
+            {freePortals.map((item, idx) => {
+              if (item.isExternal) {
+                return (
+                  <a
+                    key={idx}
+                    href={item.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group relative overflow-hidden rounded-[2.5rem] bg-slate-900 border border-slate-800 p-6 flex flex-col justify-between shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:border-amber-400/60 hover:shadow-amber-500/20"
+                  >
+                    <div>
+                      {/* Top Badge & Header */}
+                      <div className="flex items-center justify-between gap-2 mb-4">
+                        <span className="text-[11px] font-black px-3 py-1 rounded-full bg-slate-950 text-amber-300 border border-amber-500/30">
+                          {item.badge}
+                        </span>
+                        <span className="text-xs text-emerald-400 font-bold">100% FREE</span>
+                      </div>
+
+                      {/* Image Display */}
+                      <div className="h-44 w-full rounded-2xl overflow-hidden bg-slate-950 mb-5 flex items-center justify-center p-3">
+                        <img
+                          src={item.image}
+                          alt={item.title}
+                          className="h-full w-full object-contain group-hover:scale-105 transition-all duration-500"
+                        />
+                      </div>
+
+                      <h2 className="text-xl font-black text-white group-hover:text-amber-300 transition-colors">
+                        {item.title}
+                      </h2>
+                      <p className="text-xs font-semibold text-amber-400/90 mt-1">
+                        {item.subtitle}
+                      </p>
+
+                      <p className="text-xs text-slate-300 mt-3 leading-relaxed">
+                        {item.desc}
+                      </p>
+                    </div>
+
+                    <div className="pt-6">
+                      <div className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 font-black text-xs text-center shadow-lg group-hover:shadow-amber-400/30 transition-all duration-300 flex items-center justify-center gap-2">
+                        <span>{item.btnText}</span>
+                        <span className="text-sm">→</span>
+                      </div>
+                    </div>
+                  </a>
+                );
+              }
+
+              return (
+                <Link
+                  key={idx}
+                  href={item.link}
+                  className="group relative overflow-hidden rounded-[2.5rem] bg-slate-900 border border-slate-800 p-6 flex flex-col justify-between shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:border-amber-400/60 hover:shadow-amber-500/20"
+                >
+                  <div>
+                    {/* Top Badge & Header */}
+                    <div className="flex items-center justify-between gap-2 mb-4">
+                      <span className="text-[11px] font-black px-3 py-1 rounded-full bg-slate-950 text-amber-300 border border-amber-500/30">
+                        {item.badge}
+                      </span>
+                      <span className="text-xs text-emerald-400 font-bold">100% FREE</span>
+                    </div>
+
+                    {/* Image Display */}
+                    <div className="h-44 w-full rounded-2xl overflow-hidden bg-slate-950 mb-5 flex items-center justify-center p-3">
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="h-full w-full object-contain group-hover:scale-105 transition-all duration-500"
+                      />
+                    </div>
+
+                    <h2 className="text-xl font-black text-white group-hover:text-amber-300 transition-colors">
+                      {item.title}
+                    </h2>
+                    <p className="text-xs font-semibold text-amber-400/90 mt-1">
+                      {item.subtitle}
+                    </p>
+
+                    <p className="text-xs text-slate-300 mt-3 leading-relaxed">
+                      {item.desc}
+                    </p>
                   </div>
 
-                  {/* Image Display */}
-                  <div className="h-44 w-full rounded-2xl overflow-hidden bg-slate-950 mb-5 flex items-center justify-center p-3">
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="h-full w-full object-contain group-hover:scale-105 transition-all duration-500"
-                    />
+                  <div className="pt-6">
+                    <div className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 font-black text-xs text-center shadow-lg group-hover:shadow-amber-400/30 transition-all duration-300 flex items-center justify-center gap-2">
+                      <span>{item.btnText}</span>
+                      <span className="text-sm">→</span>
+                    </div>
                   </div>
-
-                  <h2 className="text-xl font-black text-white group-hover:text-amber-300 transition-colors">
-                    {item.title}
-                  </h2>
-                  <p className="text-xs font-semibold text-amber-400/90 mt-1">
-                    {item.subtitle}
-                  </p>
-
-                  <p className="text-xs text-slate-300 mt-3 leading-relaxed">
-                    {item.desc}
-                  </p>
-                </div>
-
-                <div className="pt-6">
-                  <div className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 font-black text-xs text-center shadow-lg group-hover:shadow-amber-400/30 transition-all duration-300 flex items-center justify-center gap-2">
-                    <span>{item.btnText}</span>
-                    <span className="text-sm">→</span>
-                  </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              );
+            })}
           </div>
         </section>
       </div>
