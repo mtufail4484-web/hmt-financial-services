@@ -1150,6 +1150,10 @@ export default function PortalPage() {
     const backupResult = verifyBackupCode(cleanInput, backupCodesToCheck);
 
     if (isValidTOTP) {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("hmt_admin_exit_timestamp");
+        localStorage.setItem("hmt_admin_last_active", String(Date.now()));
+      }
       setUser(pendingUserSession);
       setPendingUserSession(null);
       setTwoFactorRequired(false);
@@ -1163,6 +1167,10 @@ export default function PortalPage() {
     }
 
     if (backupResult.valid) {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("hmt_admin_exit_timestamp");
+        localStorage.setItem("hmt_admin_last_active", String(Date.now()));
+      }
       // Consume the used backup code in Firestore
       if (pendingUserSession?.uid) {
         try {
@@ -2223,6 +2231,29 @@ export default function PortalPage() {
         const isUserAdmin = isMasterAdmin || isAtLeastRole(effectiveRole, ROLES.ADMIN);
 
         if (isUserAdmin) {
+          if (typeof window !== "undefined") {
+            const exitTime = Number(localStorage.getItem("hmt_admin_exit_timestamp") || 0);
+            const lastActiveTime = Number(localStorage.getItem("hmt_admin_last_active") || 0);
+            const lastTime = Math.max(exitTime, lastActiveTime);
+            const now = Date.now();
+            if (lastTime > 0 && (now - lastTime) >= 15000) {
+              console.log("🔒 Admin exit timeout exceeded (>15s). Signing out admin automatically on startup.");
+              localStorage.removeItem("hmt_admin_exit_timestamp");
+              localStorage.removeItem("hmt_admin_last_active");
+              await auth.signOut();
+              if (!cancelled) {
+                setUser(null);
+                setPendingUserSession(null);
+                setTwoFactorRequired(false);
+                setError("🔒 Admin session expired after exiting for 15 seconds. Logged out automatically to protect student data.");
+                setAuthChecking(false);
+              }
+              return;
+            } else {
+              localStorage.setItem("hmt_admin_last_active", String(now));
+            }
+          }
+
           if (!cancelled) {
             let local2Fa = null;
             if (typeof window !== "undefined") {
@@ -2348,6 +2379,115 @@ export default function PortalPage() {
       unsubscribe();
     };
   }, [normalizeLectures]);
+
+  // Admin Exit Security Auto-Logout (15s Timeout)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const isMasterAdmin =
+      (user?.email || pendingUserSession?.email || auth.currentUser?.email)?.toLowerCase() === ADMIN_EMAIL.toLowerCase() ||
+      (user?.uid || pendingUserSession?.uid || auth.currentUser?.uid) === OWNER_UID;
+    const effectiveRole = getEffectiveRole(user || pendingUserSession || {});
+    const isAdminSession = isMasterAdmin || isAtLeastRole(effectiveRole, ROLES.ADMIN) || Boolean(user?.isAdmin) || Boolean(pendingUserSession?.isAdmin);
+
+    if (!isAdminSession) return;
+
+    const ADMIN_EXIT_TIMEOUT_MS = 15000; // 15 seconds limit (within requested 10-20 seconds range)
+    let exitTimer = null;
+
+    const performAutoLogout = async () => {
+      console.log("🔒 Admin exit duration exceeded 15s. Executing automatic logout for student data security.");
+      try {
+        await auth.signOut();
+      } catch (err) {
+        console.warn("Could not sign out admin automatically:", err);
+      }
+      setUser(null);
+      setPendingUserSession(null);
+      setTwoFactorRequired(false);
+      setTwoFactorVerified(false);
+      setTwoFactorInput("");
+      setUseBackupCodeMode(false);
+      localStorage.removeItem("hmt_admin_exit_timestamp");
+      localStorage.removeItem("hmt_admin_last_active");
+      setError("🔒 Security Auto-Logout: Admin email was automatically logged out after exiting for 15 seconds to protect student data.");
+    };
+
+    const updateLastActive = () => {
+      localStorage.setItem("hmt_admin_last_active", String(Date.now()));
+    };
+
+    updateLastActive();
+
+    const heartbeatInterval = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        updateLastActive();
+      }
+    }, 3000);
+
+    const handleExitStart = () => {
+      const exitTime = Date.now();
+      localStorage.setItem("hmt_admin_exit_timestamp", String(exitTime));
+      if (exitTimer) clearTimeout(exitTimer);
+      exitTimer = setTimeout(() => {
+        performAutoLogout();
+      }, ADMIN_EXIT_TIMEOUT_MS);
+    };
+
+    const handleExitReturn = () => {
+      const exitTimeStr = localStorage.getItem("hmt_admin_exit_timestamp");
+      if (exitTimeStr) {
+        const exitTime = Number(exitTimeStr);
+        const elapsed = Date.now() - exitTime;
+        if (elapsed >= ADMIN_EXIT_TIMEOUT_MS) {
+          performAutoLogout();
+          return;
+        }
+      }
+      if (exitTimer) {
+        clearTimeout(exitTimer);
+        exitTimer = null;
+      }
+      localStorage.removeItem("hmt_admin_exit_timestamp");
+      updateLastActive();
+    };
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        handleExitStart();
+      } else if (document.visibilityState === "visible") {
+        handleExitReturn();
+      }
+    };
+
+    const onWindowBlur = () => {
+      handleExitStart();
+    };
+
+    const onWindowFocus = () => {
+      handleExitReturn();
+    };
+
+    const onPageUnload = () => {
+      localStorage.setItem("hmt_admin_exit_timestamp", String(Date.now()));
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("blur", onWindowBlur);
+    window.addEventListener("focus", onWindowFocus);
+    window.addEventListener("beforeunload", onPageUnload);
+    window.addEventListener("pagehide", onPageUnload);
+
+    return () => {
+      clearInterval(heartbeatInterval);
+      if (exitTimer) clearTimeout(exitTimer);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("blur", onWindowBlur);
+      window.removeEventListener("focus", onWindowFocus);
+      window.removeEventListener("beforeunload", onPageUnload);
+      window.removeEventListener("pagehide", onPageUnload);
+    };
+  }, [user, pendingUserSession]);
 
   useEffect(() => {
     if (!user?.uid) return undefined;
@@ -3357,6 +3497,10 @@ export default function PortalPage() {
           return;
         }
 
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("hmt_admin_exit_timestamp");
+          localStorage.setItem("hmt_admin_last_active", String(Date.now()));
+        }
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const currentUser = userCredential.user;
 
