@@ -6571,7 +6571,7 @@ export default function PortalPage() {
                         <label className="text-[11px] font-bold text-slate-600 block mb-1">Official Download URL *</label>
                         <input
                           type="url"
-                          placeholder="https://etea.edu.pk or direct slip link"
+                          placeholder="https://etea.edu.pk/applicants or direct slip link"
                           value={slipLink}
                           onChange={(e) => setSlipLink(e.target.value)}
                           className="input bg-white text-xs font-mono"

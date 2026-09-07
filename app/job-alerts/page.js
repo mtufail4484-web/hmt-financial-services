@@ -16,7 +16,7 @@ const INITIAL_JOB_ALERTS = [
     location: "Khyber Pakhtunkhwa (All Districts)",
     deadline: "2026-09-25",
     pdfUrl: "https://drive.google.com/file/d/11-Qk552kmKxK56-TWgi5afMQQv9Ej40O/view",
-    applyUrl: "https://www.etea.edu.pk",
+    applyUrl: "https://etea.edu.pk/applicants",
     category: "ETEA Jobs",
     description: "Official ETEA advertisement for recruitment of Primary School Teachers (PST) and Certified Teachers (CT) across all district cadres in KPK.",
     featured: true,

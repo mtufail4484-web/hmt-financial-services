@@ -12,7 +12,7 @@ const INITIAL_ROLL_NO_PORTALS = [
     agency: "ETEA KP",
     title: "ETEA PST, CT, SST & Police Constable Roll No Slips",
     desc: "Direct link to print official ETEA candidate test slip using CNIC number without dash.",
-    link: "https://etea.edu.pk",
+    link: "https://etea.edu.pk/applicants",
     status: "🟢 ACTIVE DOWNLOAD",
     badge: "ETEA OFFICIAL",
   },
