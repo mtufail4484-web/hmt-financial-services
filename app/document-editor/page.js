@@ -4,19 +4,56 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import HeaderNav from "../HeaderNav";
 
+// TEMPLATE CATEGORIES AND SUB-TEMPLATES
+const TEMPLATE_CATEGORIES = [
+  { id: "application", label: "📝 Formal Applications (درخواستیں)" },
+  { id: "letter", label: "✉️ Formal Letters (خطوط و مراسلات)" },
+  { id: "report", label: "📋 Reports & Certificates (رپورٹ و سرٹیفکیٹ)" },
+  { id: "custom", label: "🎨 Custom Blank Document (کسٹم یا خالی صفحہ)" },
+];
+
+const SUB_TEMPLATES = {
+  application: [
+    { id: "sick_leave_urdu", label: "🤒 Sick Leave Application (درخواست برائے بیماری کی رخصت - اردو)" },
+    { id: "urgent_leave_urdu", label: "🏠 Urgent Work Leave Application (درخواست برائے ضروری کام - اردو)" },
+    { id: "cert_request_urdu", label: "🎓 Certificate Issuance Application (درخواست برائے اجراء سرٹیفکیٹ - اردو)" },
+    { id: "fee_concession_urdu", label: "💰 Fee Concession Application (درخواست برائے رعایت فیس - اردو)" },
+    { id: "leave_english", label: "🏥 Official Leave Application (English - Times New Roman)" },
+    { id: "job_application_english", label: "💼 Job Application & Cover Letter (English)" },
+  ],
+  letter: [
+    { id: "recommendation_english", label: "📜 Recommendation Letter (English)" },
+    { id: "experience_cert_urdu", label: "💼 Experience Certificate Letter (تجربہ کار سرٹیفکیٹ - اردو)" },
+    { id: "formal_inquiry_english", label: "✉️ Business Inquiry Letter (English)" },
+    { id: "inquiry_urdu", label: "📩 سرکاری معلوماتی مراسلہ (اردو)" },
+  ],
+  report: [
+    { id: "meeting_minutes", label: "📝 Meeting Minutes Document (رودادِ اجلاس)" },
+    { id: "noc_certificate", label: "📜 No Objection Certificate (NOC - عدم اعتراض سرٹیفکیٹ)" },
+    { id: "progress_report", label: "📊 Academic Progress Report (کارکردگی رپورٹ)" },
+  ],
+  custom: [
+    { id: "blank_urdu", label: "🇵🇰 Blank Urdu Canvas (جمیل نوری نستعلیق)" },
+    { id: "blank_english", label: "🇬🇧 Blank English Canvas (Times New Roman)" },
+    { id: "blank_arabic", label: "🇸🇦 Blank Arabic Canvas (صقل مجلة / أميري)" },
+  ],
+};
+
+// FULL DATA DEFINITION FOR TEMPLATES
 const PRESET_TEMPLATES = {
-  urdu_app: {
-    docTitle: "درخواست برای گرانٹنگ سرٹیفکیٹ",
+  // SICK LEAVE URDU
+  sick_leave_urdu: {
+    docTitle: "درخواست برائے بیماری کی رخصت",
     docSubtitle: "ایچ ایم ٹی سکسیس اکیڈمی / تعلیمی ادارہ",
-    authorName: "محمد حمزہ (طالب علم)",
-    docDate: "2026-09-11",
+    authorName: "محمد علی (طالب علم)",
+    docDate: new Date().toISOString().split("T")[0],
     globalFont: "urdu",
     direction: "rtl",
     blocks: [
       {
         id: "1",
         type: "heading1",
-        content: "بخدمت جناب پرنسپل صاحب",
+        content: "بخدمت جناب پرنسپل صاحب / ہیڈ ماسٹر صاحب",
         font: "urdu",
         align: "right",
         bold: true,
@@ -40,7 +77,7 @@ const PRESET_TEMPLATES = {
       {
         id: "3",
         type: "heading2",
-        content: "عنوان: درخواست برائے اجراء کمپیوٹر کورس سرٹیفکیٹ",
+        content: "عنوان: درخواست برائے رخصت بوجہ بیماری (دو ایام)",
         font: "urdu",
         align: "right",
         bold: true,
@@ -53,7 +90,7 @@ const PRESET_TEMPLATES = {
         id: "4",
         type: "paragraph",
         content:
-          "مودبانہ گزارش ہے کہ فدوی نے ایچ ایم ٹی سکسیس اکیڈمی کے تحت فری کمپیوٹر کورس بیچ 02 کامیابی کے ساتھ مکمل کر لیا ہے۔ تمام پریکٹیکل اسائنمنٹس اور فائنل موک ٹیسٹ مکمل کر لیے گئے ہیں۔",
+          "جناب عالی!\nمودبانہ گزارش ہے کہ فدوی کو گزشتہ رات سے تیز بخار اور جسمانی علالت لاحق ہے۔ معالج ڈاکٹر صاحب نے دو دن مکمل آرام کا مشورہ دیا ہے۔ جس کی بنا پر فدوی حاضرِ کلاس ہونے سے قاصر ہے۔",
         font: "urdu",
         align: "justify",
         bold: false,
@@ -66,7 +103,7 @@ const PRESET_TEMPLATES = {
         id: "5",
         type: "paragraph",
         content:
-          "لہٰذا التماس ہے کہ فدوی کو کورس مکمل کرنے کا رسمی تصدیق شدہ سرٹیفکیٹ جاری فرمایا جائے تاکہ فدوی آئندہ ملازمت کے لیے درخواست دے سکے۔ آپ کی عین نوازش ہوگی۔",
+          "لہٰذا التماس ہے کہ فدوی کو دو یوم کی رخصتِ بیماری منظور فرمائی جائے۔ آپ کی عین نوازش ہوگی۔",
         font: "urdu",
         align: "justify",
         bold: false,
@@ -78,7 +115,7 @@ const PRESET_TEMPLATES = {
       {
         id: "6",
         type: "signature",
-        content: "العارض:\nمحمد حمزہ\nرول نمبر: HMT-2026-889\nبیچ: 02 فری کمپیوٹر کورس",
+        content: "العارض:\nمحمد علی\nرول نمبر: HMT-4092\nکلاس: فری کمپیوٹر کورس بیچ 02\nتاریخ: " + new Date().toISOString().split("T")[0],
         font: "urdu",
         align: "right",
         bold: true,
@@ -89,30 +126,252 @@ const PRESET_TEMPLATES = {
       },
     ],
   },
-  english_letter: {
-    docTitle: "OFFICIAL RECOMMENDATION & CERTIFICATE REQUEST",
-    docSubtitle: "HMT Financial Services & Success Academy",
+
+  // URGENT WORK LEAVE URDU
+  urgent_leave_urdu: {
+    docTitle: "درخواست برائے ضروری کام",
+    docSubtitle: "ایچ ایم ٹی سکسیس اکیڈمی / ادارہ",
+    authorName: "عمر فاروق",
+    docDate: new Date().toISOString().split("T")[0],
+    globalFont: "urdu",
+    direction: "rtl",
+    blocks: [
+      {
+        id: "1",
+        type: "heading1",
+        content: "بخدمت جناب ڈائریکٹر صاحب / ہیڈ آف ڈیپارٹمنٹ",
+        font: "urdu",
+        align: "right",
+        bold: true,
+        italic: false,
+        underline: false,
+        fontSize: "22px",
+        color: "#0f172a",
+      },
+      {
+        id: "2",
+        type: "heading2",
+        content: "عنوان: درخواست برائے رخصت بوجہ ضروری کام (ایک یوم)",
+        font: "urdu",
+        align: "right",
+        bold: true,
+        italic: false,
+        underline: true,
+        fontSize: "18px",
+        color: "#1e3a8a",
+      },
+      {
+        id: "3",
+        type: "paragraph",
+        content:
+          "مودبانہ التماس ہے کہ فدوی کو گھر پر انتہائی ضروری کام درپیش ہے جس کی وجہ سے فدوی آج ادارے میں حاضر ہونے سے قاصر ہے۔",
+        font: "urdu",
+        align: "justify",
+        bold: false,
+        italic: false,
+        underline: false,
+        fontSize: "16px",
+        color: "#1e293b",
+      },
+      {
+        id: "4",
+        type: "paragraph",
+        content: "مہربانی فرما کر فدوی کو ایک یوم کی رخصت عنایت فرمائی جائے۔ ممنون ہوں گا۔",
+        font: "urdu",
+        align: "justify",
+        bold: false,
+        italic: false,
+        underline: false,
+        fontSize: "16px",
+        color: "#1e293b",
+      },
+      {
+        id: "5",
+        type: "signature",
+        content: "العارض:\nعمر فاروق\nرول نمبر / شناختی نمبر: HMT-8821\nشعبہ: کمپیوٹر سائنس",
+        font: "urdu",
+        align: "right",
+        bold: true,
+        italic: false,
+        underline: false,
+        fontSize: "15px",
+        color: "#0f172a",
+      },
+    ],
+  },
+
+  // CERTIFICATE REQUEST URDU
+  cert_request_urdu: {
+    docTitle: "درخواست برائے اجراء کمپیوٹر کورس سرٹیفکیٹ",
+    docSubtitle: "ایچ ایم ٹی سکسیس اکیڈمی",
+    authorName: "محمد حمزہ",
+    docDate: new Date().toISOString().split("T")[0],
+    globalFont: "urdu",
+    direction: "rtl",
+    blocks: [
+      {
+        id: "1",
+        type: "heading1",
+        content: "بخدمت جناب پرنسپل صاحب",
+        font: "urdu",
+        align: "right",
+        bold: true,
+        italic: false,
+        underline: false,
+        fontSize: "22px",
+        color: "#0f172a",
+      },
+      {
+        id: "2",
+        type: "heading2",
+        content: "عنوان: درخواست برائے اجراء تصدیق شدہ سرٹیفکیٹ",
+        font: "urdu",
+        align: "right",
+        bold: true,
+        italic: false,
+        underline: true,
+        fontSize: "18px",
+        color: "#1e3a8a",
+      },
+      {
+        id: "3",
+        type: "paragraph",
+        content:
+          "گزارش ہے کہ فدوی نے ایچ ایم ٹی سکسیس اکیڈمی کے تحت فری کمپیوٹر کورس بیچ 02 کامیابی کے ساتھ مکمل کر لیا ہے۔ تمام عملی اسائنمنٹس اور موک ٹیسٹ کلیئر کر لیے گئے ہیں۔",
+        font: "urdu",
+        align: "justify",
+        bold: false,
+        italic: false,
+        underline: false,
+        fontSize: "16px",
+        color: "#1e293b",
+      },
+      {
+        id: "4",
+        type: "paragraph",
+        content:
+          "لہٰذا التماس ہے کہ فدوی کو رسمی سرٹیفکیٹ جاری فرمایا جائے تا کہ میں نوکری کے لیے اپلائی کر سکوں۔ آپ کی نوازش ہوگی۔",
+        font: "urdu",
+        align: "justify",
+        bold: false,
+        italic: false,
+        underline: false,
+        fontSize: "16px",
+        color: "#1e293b",
+      },
+      {
+        id: "5",
+        type: "signature",
+        content: "العارض:\nمحمد حمزہ\nرول نمبر: HMT-2026-889",
+        font: "urdu",
+        align: "right",
+        bold: true,
+        italic: false,
+        underline: false,
+        fontSize: "15px",
+        color: "#0f172a",
+      },
+    ],
+  },
+
+  // FEE CONCESSION URDU
+  fee_concession_urdu: {
+    docTitle: "درخواست برائے رعایت فیس",
+    docSubtitle: "ایچ ایم ٹی سکسیس اکیڈمی",
+    authorName: "سلمان خان",
+    docDate: new Date().toISOString().split("T")[0],
+    globalFont: "urdu",
+    direction: "rtl",
+    blocks: [
+      {
+        id: "1",
+        type: "heading1",
+        content: "بخدمت جناب پرنسپل صاحب",
+        font: "urdu",
+        align: "right",
+        bold: true,
+        italic: false,
+        underline: false,
+        fontSize: "22px",
+        color: "#0f172a",
+      },
+      {
+        id: "2",
+        type: "heading2",
+        content: "عنوان: درخواست برائے خصوصی رعایتِ فیس",
+        font: "urdu",
+        align: "right",
+        bold: true,
+        italic: false,
+        underline: true,
+        fontSize: "18px",
+        color: "#1e3a8a",
+      },
+      {
+        id: "3",
+        type: "paragraph",
+        content:
+          "ادب کے ساتھ گزارش ہے کہ فدوی کا تعلق ایک کم آمدن گھرانے سے ہے۔ والد صاحب کی محدود آمدن کے باعث فدوی کے تعلیمی اخراجات ادا کرنا دشوار ہو رہا ہے۔ فدوی کی تعلیمی کارکردگی اور حاضری باقاعدہ بہترین ہے۔",
+        font: "urdu",
+        align: "justify",
+        bold: false,
+        italic: false,
+        underline: false,
+        fontSize: "16px",
+        color: "#1e293b",
+      },
+      {
+        id: "4",
+        type: "paragraph",
+        content: "التماس ہے کہ فدوی کی ماہانہ فیس میں خصوصی رعایت فرمائی جائے تا کہ تعلیم جاری رکھی جا سکے۔",
+        font: "urdu",
+        align: "justify",
+        bold: false,
+        italic: false,
+        underline: false,
+        fontSize: "16px",
+        color: "#1e293b",
+      },
+      {
+        id: "5",
+        type: "signature",
+        content: "العارض:\nسلمان خان\nرول نمبر: HMT-7712",
+        font: "urdu",
+        align: "right",
+        bold: true,
+        italic: false,
+        underline: false,
+        fontSize: "15px",
+        color: "#0f172a",
+      },
+    ],
+  },
+
+  // LEAVE ENGLISH
+  leave_english: {
+    docTitle: "OFFICIAL LEAVE APPLICATION",
+    docSubtitle: "HMT Success Academy & Education Center",
     authorName: "Muhammad Hamza",
-    docDate: "2026-09-11",
+    docDate: new Date().toISOString().split("T")[0],
     globalFont: "english",
     direction: "ltr",
     blocks: [
       {
         id: "1",
         type: "heading1",
-        content: "To, The Director of Admissions & Examination",
+        content: "To,\nThe Principal / Academic Director,\nHMT Success Academy, Peshawar",
         font: "english",
         align: "left",
         bold: true,
         italic: false,
         underline: false,
-        fontSize: "20px",
+        fontSize: "18px",
         color: "#0f172a",
       },
       {
         id: "2",
         type: "heading2",
-        content: "Subject: Request for Official Course Completion & Verification Letter",
+        content: "Subject: Application for Leave of Absence (2 Days)",
         font: "english",
         align: "left",
         bold: true,
@@ -125,7 +384,80 @@ const PRESET_TEMPLATES = {
         id: "3",
         type: "paragraph",
         content:
-          "Respected Sir/Madam,\n\nI am writing to formally request the issuance of my official completion certificate for the Free Professional Computer Application Course (Batch 02). I have successfully completed all core operational modules including Microsoft Word formatting, advanced Excel formulas, presentation design, and administrative record management.",
+          "Respected Sir/Madam,\n\nMost respectfully I beg to state that I am suffering from severe fever and doctor has advised complete bed rest for two days. Consequently, I am unable to attend regular lectures.",
+        font: "english",
+        align: "justify",
+        bold: false,
+        italic: false,
+        underline: false,
+        fontSize: "15px",
+        color: "#1e293b",
+      },
+      {
+        id: "4",
+        type: "paragraph",
+        content: "Kindly grant me leave for two days. I shall be deeply grateful to you for this act of kindness.",
+        font: "english",
+        align: "justify",
+        bold: false,
+        italic: false,
+        underline: false,
+        fontSize: "15px",
+        color: "#1e293b",
+      },
+      {
+        id: "5",
+        type: "signature",
+        content: "Yours Obediently,\nMuhammad Hamza\nRoll No: HMT-2026-889\nBatch: Computer Course Batch 02",
+        font: "english",
+        align: "left",
+        bold: true,
+        italic: false,
+        underline: false,
+        fontSize: "14px",
+        color: "#0f172a",
+      },
+    ],
+  },
+
+  // JOB APPLICATION ENGLISH
+  job_application_english: {
+    docTitle: "JOB APPLICATION & COVER LETTER",
+    docSubtitle: "Computer Operator / Office Assistant Position",
+    authorName: "Muhammad Hamza",
+    docDate: new Date().toISOString().split("T")[0],
+    globalFont: "english",
+    direction: "ltr",
+    blocks: [
+      {
+        id: "1",
+        type: "heading1",
+        content: "To,\nThe HR Manager / Administrator,\nOrganization Name, Peshawar",
+        font: "english",
+        align: "left",
+        bold: true,
+        italic: false,
+        underline: false,
+        fontSize: "18px",
+        color: "#0f172a",
+      },
+      {
+        id: "2",
+        type: "heading2",
+        content: "Subject: Application for the Post of Computer Operator / Office Assistant",
+        font: "english",
+        align: "left",
+        bold: true,
+        italic: false,
+        underline: true,
+        fontSize: "16px",
+        color: "#1e3a8a",
+      },
+      {
+        id: "3",
+        type: "paragraph",
+        content:
+          "Respected Sir,\n\nI am writing to express my strong interest in the Computer Operator position at your esteemed organization. Having recently completed the Master Computer Application & Office Automation Course from HMT Success Academy, I possess extensive practical skills in MS Word, MS Excel, PowerPoint, and document formatting.",
         font: "english",
         align: "justify",
         bold: false,
@@ -138,7 +470,7 @@ const PRESET_TEMPLATES = {
         id: "4",
         type: "bulletList",
         content:
-          "Verified module attendance and assignment submissions\nCleared final evaluation mock examination with high grade\nEligible for academic and professional recruitment verification",
+          "Proficient in English and Urdu document typing & formatting\nExpertise in Excel VLOOKUP, formulas, and marksheet generation\nStrong organizational skills with verified academic certifications",
         font: "english",
         align: "left",
         bold: false,
@@ -149,21 +481,8 @@ const PRESET_TEMPLATES = {
       },
       {
         id: "5",
-        type: "paragraph",
-        content:
-          "Your prompt assistance in issuing the certificate will allow me to attach it to my job applications. Thank you for your continued mentorship and guidance.",
-        font: "english",
-        align: "justify",
-        bold: false,
-        italic: false,
-        underline: false,
-        fontSize: "15px",
-        color: "#1e293b",
-      },
-      {
-        id: "6",
         type: "signature",
-        content: "Sincerely,\nMuhammad Hamza\nStudent ID: HMT-2026-889\nContact: +92 300 1234567",
+        content: "Sincerely,\nMuhammad Hamza\nPhone: +92 300 1234567\nEmail: hamza@example.com",
         font: "english",
         align: "left",
         bold: true,
@@ -174,43 +493,324 @@ const PRESET_TEMPLATES = {
       },
     ],
   },
-  arabic_doc: {
-    docTitle: "طلب الحصول على شهادة إتمام الدورة التدريبية",
-    docSubtitle: "أكاديمية اتش ام تي للخدمات المالية والتعليمية",
-    authorName: "محمد حمزة",
-    docDate: "2026-09-11",
-    globalFont: "arabic",
+
+  // RECOMMENDATION ENGLISH
+  recommendation_english: {
+    docTitle: "OFFICIAL RECOMMENDATION LETTER",
+    docSubtitle: "HMT Success Academy - Academic Reference",
+    authorName: "Muhammad Tufail (Director)",
+    docDate: new Date().toISOString().split("T")[0],
+    globalFont: "english",
+    direction: "ltr",
+    blocks: [
+      {
+        id: "1",
+        type: "heading1",
+        content: "TO WHOM IT MAY CONCERN",
+        font: "english",
+        align: "center",
+        bold: true,
+        italic: false,
+        underline: true,
+        fontSize: "22px",
+        color: "#0f172a",
+      },
+      {
+        id: "2",
+        type: "paragraph",
+        content:
+          "This letter serves to formally recommend Mr. Muhammad Hamza, who has completed the Free Professional Computer Application Course under HMT Success Academy. During his tenure, he demonstrated exceptional dedication, high ethical standards, and proficient technical mastery.",
+        font: "english",
+        align: "justify",
+        bold: false,
+        italic: false,
+        underline: false,
+        fontSize: "15px",
+        color: "#1e293b",
+      },
+      {
+        id: "3",
+        type: "signature",
+        content: "Issued by,\nMuhammad Tufail\nDirector & Master Instructor\nHMT Success Academy",
+        font: "english",
+        align: "left",
+        bold: true,
+        italic: false,
+        underline: false,
+        fontSize: "14px",
+        color: "#0f172a",
+      },
+    ],
+  },
+
+  // EXPERIENCE CERT URDU
+  experience_cert_urdu: {
+    docTitle: "تجربہ کار سرٹیفکیٹ (مراسلہ)",
+    docSubtitle: "ایچ ایم ٹی فنانشل سروسز",
+    authorName: "محمد طفیل (ڈائریکٹر)",
+    docDate: new Date().toISOString().split("T")[0],
+    globalFont: "urdu",
     direction: "rtl",
     blocks: [
       {
         id: "1",
         type: "heading1",
+        content: "جس سے بھی متعلق ہو (تصدیق نامہ)",
+        font: "urdu",
+        align: "center",
+        bold: true,
+        italic: false,
+        underline: true,
+        fontSize: "22px",
+        color: "#0f172a",
+      },
+      {
+        id: "2",
+        type: "paragraph",
+        content:
+          "تصدیق کی جاتی ہے کہ مسٹر محمد حمزہ نے ہمارے ادارے میں بحیثیت کمپیوٹر آپریٹر و ڈیٹا اینٹری اسسٹنٹ خدمات انجام دیں۔ ان کا کردار، اخلاق اور کام کی معیار انتہائی شاندار اور تسلی بخش رہا ہے۔",
+        font: "urdu",
+        align: "justify",
+        bold: false,
+        italic: false,
+        underline: false,
+        fontSize: "16px",
+        color: "#1e293b",
+      },
+      {
+        id: "3",
+        type: "signature",
+        content: "دستخط کنندہ:\nمحمد طفیل\nچیف ایگزیکٹو، ایچ ایم ٹی سروسز",
+        font: "urdu",
+        align: "right",
+        bold: true,
+        italic: false,
+        underline: false,
+        fontSize: "15px",
+        color: "#0f172a",
+      },
+    ],
+  },
+
+  // MEETING MINUTES
+  meeting_minutes: {
+    docTitle: "ROODAD-E-IJLAS / MEETING MINUTES",
+    docSubtitle: "Executive Committee Meeting",
+    authorName: "General Secretary",
+    docDate: new Date().toISOString().split("T")[0],
+    globalFont: "english",
+    direction: "ltr",
+    blocks: [
+      {
+        id: "1",
+        type: "heading1",
+        content: "OFFICIAL MEETING MINUTES RECORD",
+        font: "english",
+        align: "center",
+        bold: true,
+        italic: false,
+        underline: true,
+        fontSize: "20px",
+        color: "#0f172a",
+      },
+      {
+        id: "2",
+        type: "paragraph",
+        content: "Meeting Date: " + new Date().toISOString().split("T")[0] + "\nLocation: Main Campus Conference Hall\nChairperson: Director HMT Success Academy",
+        font: "english",
+        align: "left",
+        bold: false,
+        italic: false,
+        underline: false,
+        fontSize: "14px",
+        color: "#334155",
+      },
+      {
+        id: "3",
+        type: "heading2",
+        content: "Key Decision Points & Action Items:",
+        font: "english",
+        align: "left",
+        bold: true,
+        italic: false,
+        underline: false,
+        fontSize: "16px",
+        color: "#1e3a8a",
+      },
+      {
+        id: "4",
+        type: "numberedList",
+        content:
+          "Approved launch of Batch 03 Computer Course registrations\nFinalized examination rules for ETEA mock test portal\nResolved student identity verification and certificate issuance flow",
+        font: "english",
+        align: "left",
+        bold: false,
+        italic: false,
+        underline: false,
+        fontSize: "14px",
+        color: "#1e293b",
+      },
+      {
+        id: "5",
+        type: "signature",
+        content: "Recorded by:\nSecretary Executive Committee",
+        font: "english",
+        align: "left",
+        bold: true,
+        italic: false,
+        underline: false,
+        fontSize: "14px",
+        color: "#0f172a",
+      },
+    ],
+  },
+
+  // NOC CERTIFICATE
+  noc_certificate: {
+    docTitle: "NO OBJECTION CERTIFICATE (NOC / عدم اعتراض)",
+    docSubtitle: "HMT Academic Office",
+    authorName: "Registrar Office",
+    docDate: new Date().toISOString().split("T")[0],
+    globalFont: "english",
+    direction: "ltr",
+    blocks: [
+      {
+        id: "1",
+        type: "heading1",
+        content: "NO OBJECTION CERTIFICATE (NOC)",
+        font: "english",
+        align: "center",
+        bold: true,
+        italic: false,
+        underline: true,
+        fontSize: "22px",
+        color: "#0f172a",
+      },
+      {
+        id: "2",
+        type: "paragraph",
+        content:
+          "This is to certify that this institution has No Objection to Mr. Muhammad Hamza (Roll No: HMT-2026-889) applying for higher education or competitive examination certification.",
+        font: "english",
+        align: "justify",
+        bold: false,
+        italic: false,
+        underline: false,
+        fontSize: "15px",
+        color: "#1e293b",
+      },
+      {
+        id: "3",
+        type: "signature",
+        content: "Issued by Registrar,\nHMT Academic Board",
+        font: "english",
+        align: "left",
+        bold: true,
+        italic: false,
+        underline: false,
+        fontSize: "14px",
+        color: "#0f172a",
+      },
+    ],
+  },
+
+  // BLANK URDU
+  blank_urdu: {
+    docTitle: "عنوانِ دستاویز",
+    docSubtitle: "ذیلی عنوان",
+    authorName: "مصنف کا نام",
+    docDate: new Date().toISOString().split("T")[0],
+    globalFont: "urdu",
+    direction: "rtl",
+    blocks: [
+      {
+        id: "1",
+        type: "title",
+        content: "یہاں اپنا عنوان درج کریں",
+        font: "urdu",
+        align: "center",
+        bold: true,
+        italic: false,
+        underline: false,
+        fontSize: "26px",
+        color: "#0f172a",
+      },
+      {
+        id: "2",
+        type: "paragraph",
+        content: "یہاں اپنا تفصیل یا پیراگراف درج کریں...",
+        font: "urdu",
+        align: "justify",
+        bold: false,
+        italic: false,
+        underline: false,
+        fontSize: "16px",
+        color: "#1e293b",
+      },
+    ],
+  },
+
+  // BLANK ENGLISH
+  blank_english: {
+    docTitle: "Document Title",
+    docSubtitle: "Subtitle Here",
+    authorName: "Author Name",
+    docDate: new Date().toISOString().split("T")[0],
+    globalFont: "english",
+    direction: "ltr",
+    blocks: [
+      {
+        id: "1",
+        type: "title",
+        content: "Enter Document Title Here",
+        font: "english",
+        align: "center",
+        bold: true,
+        italic: false,
+        underline: false,
+        fontSize: "26px",
+        color: "#0f172a",
+      },
+      {
+        id: "2",
+        type: "paragraph",
+        content: "Enter your paragraph content here...",
+        font: "english",
+        align: "justify",
+        bold: false,
+        italic: false,
+        underline: false,
+        fontSize: "15px",
+        color: "#1e293b",
+      },
+    ],
+  },
+
+  // BLANK ARABIC
+  blank_arabic: {
+    docTitle: "عنوان المستند",
+    docSubtitle: "العنوان الفرعي",
+    authorName: "اسم الكاتب",
+    docDate: new Date().toISOString().split("T")[0],
+    globalFont: "arabic",
+    direction: "rtl",
+    blocks: [
+      {
+        id: "1",
+        type: "title",
         content: "بسم الله الرحمن الرحيم",
         font: "arabic",
         align: "center",
         bold: true,
         italic: false,
         underline: false,
-        fontSize: "24px",
+        fontSize: "26px",
         color: "#0f172a",
       },
       {
         id: "2",
-        type: "heading2",
-        content: "إلى المحترم/ مدير الأكاديمية التعليمية",
-        font: "arabic",
-        align: "right",
-        bold: true,
-        italic: false,
-        underline: false,
-        fontSize: "20px",
-        color: "#1e3a8a",
-      },
-      {
-        id: "3",
         type: "paragraph",
-        content:
-          "السلام عليكم ورحمة الله وبركاته،،\n\nأتقدم إليكم بهذا الطلب للحصول على شهادة إتمام دورة تطبيقات الحاسوب والمهارات المكتبية. لقد أتممت بفضل الله كافة الوحدات التعليمية والاختبارات العملية المعتمدة بمركزكم الموقر.",
+        content: "اكتب النص هنا...",
         font: "arabic",
         align: "justify",
         bold: false,
@@ -219,139 +819,54 @@ const PRESET_TEMPLATES = {
         fontSize: "17px",
         color: "#1e293b",
       },
-      {
-        id: "4",
-        type: "callout",
-        content: "ملاحظة: الشهادة مطلوبة لاستكمال ملف التقديم للوظائف الحكومية والخاصة.",
-        font: "arabic",
-        align: "right",
-        bold: true,
-        italic: false,
-        underline: false,
-        fontSize: "15px",
-        color: "#065f46",
-      },
-      {
-        id: "5",
-        type: "signature",
-        content: "وتفضلوا بقبول فائق الاحترام والتقدير،،\nالمقدم: محمد حمزة\nالرقم الأكاديمي: HMT-2026-889",
-        font: "arabic",
-        align: "right",
-        bold: true,
-        italic: false,
-        underline: false,
-        fontSize: "16px",
-        color: "#0f172a",
-      },
     ],
   },
 };
 
 export default function DocumentEditorPage() {
+  // Category and Subcategory selection state
+  const [selectedCategory, setSelectedCategory] = useState("application");
+  const [selectedSubTemplate, setSelectedSubTemplate] = useState("sick_leave_urdu");
+
+  // Autofill placeholder state
+  const [autofill, setAutofill] = useState({
+    applicantName: "محمد حمزہ",
+    rollNo: "HMT-2026-889",
+    instituteName: "ایچ ایم ٹی سکسیس اکیڈمی",
+    recipientName: "جناب پرنسپل صاحب",
+    docDate: new Date().toISOString().split("T")[0],
+  });
+
   const [docMeta, setDocMeta] = useState({
-    docTitle: "My Rich Document",
-    docSubtitle: "Formatted Document & MS Word Alternative",
-    authorName: "Muhammad Tufail",
+    docTitle: "درخواست برائے بیماری کی رخصت",
+    docSubtitle: "ایچ ایم ٹی سکسیس اکیڈمی / تعلیمی ادارہ",
+    authorName: "محمد علی (طالب علم)",
     docDate: new Date().toISOString().split("T")[0],
     globalFont: "urdu", // urdu | english | arabic | sans
     direction: "rtl", // rtl | ltr
-    pageSize: "A4", // A4 | Letter
-    watermark: "",
     lineHeight: "1.8",
   });
 
-  const [blocks, setBlocks] = useState([
-    {
-      id: "b1",
-      type: "title",
-      content: "درخواست برائے ایچ ایم ٹی سرٹیفکیٹ",
-      font: "urdu",
-      align: "center",
-      bold: true,
-      italic: false,
-      underline: false,
-      fontSize: "26px",
-      color: "#0f172a",
-    },
-    {
-      id: "b2",
-      type: "heading1",
-      content: "جناب عالی!",
-      font: "urdu",
-      align: "right",
-      bold: true,
-      italic: false,
-      underline: false,
-      fontSize: "20px",
-      color: "#1e3a8a",
-    },
-    {
-      id: "b3",
-      type: "paragraph",
-      content:
-        "گزارش ہے کہ میں نے ایچ ایم ٹی سکسیس اکیڈمی سے فری کمپیوٹر کورس بیچ 02 مکمل کر لیا ہے۔ میں اس موبائل ڈاکومنٹ ایڈیٹر کے ذریعے اپنی درخواست ٹائپ اور فارمیٹ کر رہا ہوں تا کہ پی ڈی ایف فائل حاصل کر سکوں۔",
-      font: "urdu",
-      align: "justify",
-      bold: false,
-      italic: false,
-      underline: false,
-      fontSize: "16px",
-      color: "#1e293b",
-    },
-    {
-      id: "b4",
-      type: "bulletList",
-      content: "ایم ایس ورڈ فارمیٹنگ مکمل\nایم ایس ایکسل فارمولاج مکمل\nپاورپوائنٹ پریزنٹیشن مکمل",
-      font: "urdu",
-      align: "right",
-      bold: false,
-      italic: false,
-      underline: false,
-      fontSize: "15px",
-      color: "#334155",
-    },
-    {
-      id: "b5",
-      type: "signature",
-      content: "نیازمند:\nمحمد حمزہ\nرول نمبر: HMT-9942",
-      font: "urdu",
-      align: "right",
-      bold: true,
-      italic: false,
-      underline: false,
-      fontSize: "15px",
-      color: "#0f172a",
-    },
-  ]);
-
+  const [blocks, setBlocks] = useState(PRESET_TEMPLATES.sick_leave_urdu.blocks);
   const [activeBlockId, setActiveBlockId] = useState(null);
   const [downloadingPdf, setDownloadingPdf] = useState(false);
   const printRef = useRef(null);
 
-  // Load from localStorage if present
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("hmt_doc_editor_draft");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.docMeta && parsed.blocks) {
-          setDocMeta(parsed.docMeta);
-          setBlocks(parsed.blocks);
-        }
-      }
-    } catch (e) {
-      console.error(e);
+  // When primary category changes, update available subtemplates and pick first one
+  const handleCategoryChange = (catId) => {
+    setSelectedCategory(catId);
+    const subList = SUB_TEMPLATES[catId];
+    if (subList && subList.length > 0) {
+      const firstSub = subList[0].id;
+      setSelectedSubTemplate(firstSub);
+      loadPreset(firstSub);
     }
-  }, []);
+  };
 
-  // Save to localStorage on change
-  const saveDraft = () => {
-    try {
-      localStorage.setItem("hmt_doc_editor_draft", JSON.stringify({ docMeta, blocks }));
-      alert("✅ Document draft saved locally!");
-    } catch (e) {
-      console.error(e);
-    }
+  // When subtemplate dropdown changes, load it
+  const handleSubTemplateChange = (subId) => {
+    setSelectedSubTemplate(subId);
+    loadPreset(subId);
   };
 
   const loadPreset = (key) => {
@@ -370,6 +885,29 @@ export default function DocumentEditorPage() {
     }
   };
 
+  // Apply quick autofill form variables to current document
+  const applyAutofill = () => {
+    setBlocks((prevBlocks) =>
+      prevBlocks.map((b) => {
+        let updatedText = b.content;
+        if (autofill.applicantName) {
+          updatedText = updatedText.replace(/محمد حمزہ|محمد علی|عمر فاروق|سلمان خان|Muhammad Hamza/g, autofill.applicantName);
+        }
+        if (autofill.rollNo) {
+          updatedText = updatedText.replace(/HMT-2026-889|HMT-4092|HMT-8821|HMT-7712/g, autofill.rollNo);
+        }
+        if (autofill.instituteName) {
+          updatedText = updatedText.replace(/ایچ ایم ٹی سکسیس اکیڈمی|HMT Success Academy/g, autofill.instituteName);
+        }
+        if (autofill.recipientName) {
+          updatedText = updatedText.replace(/جناب پرنسپل صاحب|جناب ڈائریکٹر صاحب|The Principal|The HR Manager/g, autofill.recipientName);
+        }
+        return { ...b, content: updatedText };
+      })
+    );
+    alert("✅ Document fields updated with your custom details!");
+  };
+
   // Block management
   const addBlock = (type) => {
     const newId = "b_" + Date.now();
@@ -383,8 +921,6 @@ export default function DocumentEditorPage() {
           ? "Heading Level 1"
           : type === "heading2"
           ? "Heading Level 2"
-          : type === "heading3"
-          ? "Heading Level 3"
           : type === "bulletList"
           ? "First item\nSecond item\nThird item"
           : type === "numberedList"
@@ -392,7 +928,7 @@ export default function DocumentEditorPage() {
           : type === "callout"
           ? "Important note or highlight box."
           : type === "signature"
-          ? "Signature\nName: \nDesignation: "
+          ? "Signature / دستخط\nName / نام: \nDesignation / عہدہ: "
           : "Enter your paragraph text here...",
       font: docMeta.globalFont,
       align: docMeta.direction === "rtl" ? "right" : "left",
@@ -406,8 +942,6 @@ export default function DocumentEditorPage() {
           ? "22px"
           : type === "heading2"
           ? "18px"
-          : type === "heading3"
-          ? "16px"
           : "15px",
       color: "#0f172a",
     };
@@ -451,10 +985,6 @@ export default function DocumentEditorPage() {
       });
 
       const imgData = canvas.toDataURL("image/png");
-      const imgWidth = 210; // A4 mm width
-      const pageHeight = 297; // A4 mm height
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
       const link = document.createElement("a");
       link.href = imgData;
       link.download = `${docMeta.docTitle.replace(/[^a-zA-Z0-9_\-\u0600-\u06FF]/g, "_") || "document"}.png`;
@@ -463,7 +993,6 @@ export default function DocumentEditorPage() {
       link.remove();
     } catch (err) {
       console.error(err);
-      alert("Standard PDF print dialog opening instead...");
       window.print();
     } finally {
       setDownloadingPdf(false);
@@ -489,41 +1018,57 @@ export default function DocumentEditorPage() {
         <HeaderNav />
 
         {/* TOP HERO */}
-        <section className="no-print relative overflow-hidden bg-gradient-to-b from-[#031530] via-slate-900 to-slate-950 py-12 px-4 border-b border-slate-800 text-center">
-          <div className="max-w-4xl mx-auto space-y-3">
+        <section className="no-print relative overflow-hidden bg-gradient-to-b from-[#031530] via-slate-900 to-slate-950 py-10 px-4 border-b border-slate-800 text-center">
+          <div className="max-w-5xl mx-auto space-y-4">
             <span className="px-3 py-1 rounded-full text-xs font-black bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase tracking-widest">
-              📝 Free Mobile MS Word Alternative & PDF Generator
+              📝 Mobile MS Word & Multi-Purpose Document Creator
             </span>
             <h1 className="text-3xl sm:text-5xl font-black text-white leading-tight">
-              Rich Document Editor & Word to PDF Creator
+              Pick Template & Create Professional Documents
             </h1>
-            <p className="text-xs sm:text-sm text-slate-300 max-w-2xl mx-auto leading-relaxed">
-              Create, format, and generate official documents on your mobile or computer without Microsoft Word. Includes authentic default font support for <strong className="text-amber-300">Urdu (Jameel Noori Nastaleeq)</strong>, <strong className="text-amber-300">English (Times New Roman)</strong>, and <strong className="text-amber-300">Arabic (Sakal Majalla / Amiri)</strong>.
+            <p className="text-xs sm:text-sm text-slate-300 max-w-3xl mx-auto leading-relaxed">
+              Select any document category below (Applications, Formal Letters, Reports, or Custom Blank Document) and customize pre-formatted text with <strong className="text-amber-300">Urdu (Jameel Noori Nastaleeq)</strong>, <strong className="text-amber-300">English (Times New Roman)</strong>, or <strong className="text-amber-300">Arabic (Sakal Majalla / Amiri)</strong>.
             </p>
 
-            {/* PRESET BUTTONS */}
-            <div className="pt-2 flex flex-wrap justify-center gap-2 text-xs">
-              <button
-                type="button"
-                onClick={() => loadPreset("urdu_app")}
-                className="px-3.5 py-2 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold hover:bg-amber-500/30 transition flex items-center gap-1.5"
-              >
-                <span>🇵🇰</span> Urdu Application Template (جمیل نوری نستعلیق)
-              </button>
-              <button
-                type="button"
-                onClick={() => loadPreset("english_letter")}
-                className="px-3.5 py-2 rounded-xl bg-blue-500/20 text-blue-300 border border-blue-500/40 font-bold hover:bg-blue-500/30 transition flex items-center gap-1.5"
-              >
-                <span>🇬🇧</span> English Letter Template (Times New Roman)
-              </button>
-              <button
-                type="button"
-                onClick={() => loadPreset("arabic_doc")}
-                className="px-3.5 py-2 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold hover:bg-emerald-500/30 transition flex items-center gap-1.5"
-              >
-                <span>🇸🇦</span> Arabic Document (صقل مجلة / أميري)
-              </button>
+            {/* DYNAMIC TWO-TIER DROPDOWN SELECTOR */}
+            <div className="pt-3 max-w-3xl mx-auto bg-slate-900/90 border border-slate-700/80 rounded-2xl p-4 sm:p-5 shadow-2xl space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
+                {/* 1ST DROPDOWN: CATEGORY */}
+                <div>
+                  <label className="block text-xs font-black uppercase text-amber-400 mb-1">
+                    1️⃣ Document Type / Category (قسم منتخب کریں)
+                  </label>
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => handleCategoryChange(e.target.value)}
+                    className="w-full rounded-xl bg-slate-950 border border-amber-500/40 px-3.5 py-2.5 text-xs sm:text-sm text-white font-bold outline-none focus:border-amber-400"
+                  >
+                    {TEMPLATE_CATEGORIES.map((cat) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* 2ND DROPDOWN: SUB-TEMPLATE */}
+                <div>
+                  <label className="block text-xs font-black uppercase text-amber-400 mb-1">
+                    2️⃣ Template Option (ٹیمپلیٹ چنیں)
+                  </label>
+                  <select
+                    value={selectedSubTemplate}
+                    onChange={(e) => handleSubTemplateChange(e.target.value)}
+                    className="w-full rounded-xl bg-slate-950 border border-amber-500/40 px-3.5 py-2.5 text-xs sm:text-sm text-white font-bold outline-none focus:border-amber-400"
+                  >
+                    {(SUB_TEMPLATES[selectedCategory] || []).map((sub) => (
+                      <option key={sub.id} value={sub.id}>
+                        {sub.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
             </div>
           </div>
         </section>
@@ -531,27 +1076,76 @@ export default function DocumentEditorPage() {
         {/* MAIN TWO-COLUMN WORKSPACE */}
         <section className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
           
-          {/* LEFT COLUMN: FORM EDIT CONTROLS */}
+          {/* LEFT COLUMN: AUTOFILL & EDIT CONTROLS */}
           <div className="no-print lg:col-span-6 space-y-6">
             
-            {/* DOCUMENT GLOBAL SETTINGS */}
-            <div className="rounded-2xl bg-slate-900 border border-slate-800 p-5 space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                <h2 className="text-base font-black text-amber-400 flex items-center gap-2">
-                  <span>⚙️</span> Document Global Settings
+            {/* QUICK AUTOFILL FORM */}
+            <div className="rounded-2xl bg-slate-900 border border-slate-800 p-5 space-y-3">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                <h2 className="text-sm font-black text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                  <span>⚡</span> Quick Fill Details (فوری معلومات تبدیل کریں)
                 </h2>
                 <button
                   type="button"
-                  onClick={saveDraft}
-                  className="px-3 py-1 rounded-lg bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500"
+                  onClick={applyAutofill}
+                  className="px-3 py-1 rounded-lg bg-amber-500 text-slate-950 font-black text-xs hover:bg-amber-400 transition shadow"
                 >
-                  💾 Save Draft
+                  ⚡ Auto-Apply to Document
                 </button>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-400 mb-1">Default Language Font</label>
+                  <label className="block text-[11px] font-bold text-slate-400 mb-1">Your Name (نام)</label>
+                  <input
+                    type="text"
+                    value={autofill.applicantName}
+                    onChange={(e) => setAutofill({ ...autofill, applicantName: e.target.value })}
+                    className="w-full rounded-xl bg-slate-950 border border-slate-700 px-3 py-2 text-white outline-none focus:border-amber-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-400 mb-1">Roll No / ID (رول نمبر)</label>
+                  <input
+                    type="text"
+                    value={autofill.rollNo}
+                    onChange={(e) => setAutofill({ ...autofill, rollNo: e.target.value })}
+                    className="w-full rounded-xl bg-slate-950 border border-slate-700 px-3 py-2 text-white outline-none focus:border-amber-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-400 mb-1">Institute / Company (ادارہ)</label>
+                  <input
+                    type="text"
+                    value={autofill.instituteName}
+                    onChange={(e) => setAutofill({ ...autofill, instituteName: e.target.value })}
+                    className="w-full rounded-xl bg-slate-950 border border-slate-700 px-3 py-2 text-white outline-none focus:border-amber-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-400 mb-1">Addressed To (بخدمت)</label>
+                  <input
+                    type="text"
+                    value={autofill.recipientName}
+                    onChange={(e) => setAutofill({ ...autofill, recipientName: e.target.value })}
+                    className="w-full rounded-xl bg-slate-950 border border-slate-700 px-3 py-2 text-white outline-none focus:border-amber-400"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* GLOBAL STYLING */}
+            <div className="rounded-2xl bg-slate-900 border border-slate-800 p-5 space-y-4">
+              <h2 className="text-base font-black text-amber-400 border-b border-slate-800 pb-2">
+                ⚙️ Global Document Formatting
+              </h2>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-400 mb-1">Font Family</label>
                   <select
                     value={docMeta.globalFont}
                     onChange={(e) => setDocMeta({ ...docMeta, globalFont: e.target.value })}
@@ -577,21 +1171,11 @@ export default function DocumentEditorPage() {
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-400 mb-1">Document Title / Header</label>
+                  <label className="block text-[11px] font-bold text-slate-400 mb-1">Document Header Title</label>
                   <input
                     type="text"
                     value={docMeta.docTitle}
                     onChange={(e) => setDocMeta({ ...docMeta, docTitle: e.target.value })}
-                    className="w-full rounded-xl bg-slate-950 border border-slate-700 px-3 py-2 text-white outline-none focus:border-amber-400"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-400 mb-1">Author / Organization Name</label>
-                  <input
-                    type="text"
-                    value={docMeta.authorName}
-                    onChange={(e) => setDocMeta({ ...docMeta, authorName: e.target.value })}
                     className="w-full rounded-xl bg-slate-950 border border-slate-700 px-3 py-2 text-white outline-none focus:border-amber-400"
                   />
                 </div>
@@ -605,83 +1189,63 @@ export default function DocumentEditorPage() {
                     className="w-full rounded-xl bg-slate-950 border border-slate-700 px-3 py-2 text-white outline-none focus:border-amber-400"
                   />
                 </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-400 mb-1">Line Height Spacing</label>
-                  <select
-                    value={docMeta.lineHeight}
-                    onChange={(e) => setDocMeta({ ...docMeta, lineHeight: e.target.value })}
-                    className="w-full rounded-xl bg-slate-950 border border-slate-700 px-3 py-2 text-white font-semibold outline-none focus:border-amber-400"
-                  >
-                    <option value="1.4">Tight (1.4)</option>
-                    <option value="1.8">Normal (1.8)</option>
-                    <option value="2.2">Relaxed / Urdu (2.2)</option>
-                  </select>
-                </div>
               </div>
             </div>
 
             {/* ADD BLOCK BUTTONS */}
             <div className="rounded-2xl bg-slate-900 border border-slate-800 p-5 space-y-3">
               <h2 className="text-sm font-black text-amber-400 uppercase tracking-wider">
-                ➕ Add Content Section / Block
+                ➕ Add Custom Block / Section
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                 <button
                   type="button"
                   onClick={() => addBlock("title")}
-                  className="p-2.5 rounded-xl bg-slate-800 hover:bg-amber-500/20 hover:border-amber-400 border border-slate-700 font-bold text-slate-200 transition"
+                  className="p-2.5 rounded-xl bg-slate-800 hover:bg-amber-500/20 border border-slate-700 font-bold text-slate-200"
                 >
-                  📌 Document Title
+                  📌 Title
                 </button>
                 <button
                   type="button"
                   onClick={() => addBlock("heading1")}
-                  className="p-2.5 rounded-xl bg-slate-800 hover:bg-amber-500/20 hover:border-amber-400 border border-slate-700 font-bold text-slate-200 transition"
+                  className="p-2.5 rounded-xl bg-slate-800 hover:bg-amber-500/20 border border-slate-700 font-bold text-slate-200"
                 >
-                  H1 Heading 1
-                </button>
-                <button
-                  type="button"
-                  onClick={() => addBlock("heading2")}
-                  className="p-2.5 rounded-xl bg-slate-800 hover:bg-amber-500/20 hover:border-amber-400 border border-slate-700 font-bold text-slate-200 transition"
-                >
-                  H2 Subheading
+                  H1 Heading
                 </button>
                 <button
                   type="button"
                   onClick={() => addBlock("paragraph")}
-                  className="p-2.5 rounded-xl bg-slate-800 hover:bg-amber-500/20 hover:border-amber-400 border border-slate-700 font-bold text-slate-200 transition"
+                  className="p-2.5 rounded-xl bg-slate-800 hover:bg-amber-500/20 border border-slate-700 font-bold text-slate-200"
                 >
-                  ¶ Paragraph Text
+                  ¶ Paragraph
                 </button>
                 <button
                   type="button"
                   onClick={() => addBlock("bulletList")}
-                  className="p-2.5 rounded-xl bg-slate-800 hover:bg-amber-500/20 hover:border-amber-400 border border-slate-700 font-bold text-slate-200 transition"
+                  className="p-2.5 rounded-xl bg-slate-800 hover:bg-amber-500/20 border border-slate-700 font-bold text-slate-200"
                 >
                   • Bullet List
                 </button>
                 <button
                   type="button"
                   onClick={() => addBlock("numberedList")}
-                  className="p-2.5 rounded-xl bg-slate-800 hover:bg-amber-500/20 hover:border-amber-400 border border-slate-700 font-bold text-slate-200 transition"
+                  className="p-2.5 rounded-xl bg-slate-800 hover:bg-amber-500/20 border border-slate-700 font-bold text-slate-200"
                 >
-                  1. Numbered List
+                  1. Number List
                 </button>
                 <button
                   type="button"
                   onClick={() => addBlock("callout")}
-                  className="p-2.5 rounded-xl bg-slate-800 hover:bg-amber-500/20 hover:border-amber-400 border border-slate-700 font-bold text-slate-200 transition"
+                  className="p-2.5 rounded-xl bg-slate-800 hover:bg-amber-500/20 border border-slate-700 font-bold text-slate-200"
                 >
                   💡 Highlight Box
                 </button>
                 <button
                   type="button"
                   onClick={() => addBlock("signature")}
-                  className="p-2.5 rounded-xl bg-slate-800 hover:bg-amber-500/20 hover:border-amber-400 border border-slate-700 font-bold text-slate-200 transition"
+                  className="p-2.5 rounded-xl bg-slate-800 hover:bg-amber-500/20 border border-slate-700 font-bold text-slate-200"
                 >
-                  ✍️ Signature Field
+                  ✍️ Signature
                 </button>
               </div>
             </div>
@@ -697,14 +1261,14 @@ export default function DocumentEditorPage() {
                   key={block.id}
                   className={`rounded-2xl border transition p-4 ${
                     activeBlockId === block.id
-                      ? "bg-slate-900 border-amber-400 shadow-lg shadow-amber-500/10"
+                      ? "bg-slate-900 border-amber-400 shadow-lg"
                       : "bg-slate-900/70 border-slate-800"
                   }`}
                   onClick={() => setActiveBlockId(block.id)}
                 >
-                  {/* Block Header Toolbar */}
+                  {/* Block Header */}
                   <div className="flex items-center justify-between gap-2 mb-3 pb-2 border-b border-slate-800">
-                    <span className="text-xs font-black uppercase text-amber-300 bg-amber-500/10 px-2.5 py-0.5 rounded-md border border-amber-500/20">
+                    <span className="text-xs font-black uppercase text-amber-300 bg-amber-500/10 px-2.5 py-0.5 rounded border border-amber-500/20">
                       Block #{index + 1}: {block.type}
                     </span>
 
@@ -716,7 +1280,7 @@ export default function DocumentEditorPage() {
                           moveBlock(index, -1);
                         }}
                         disabled={index === 0}
-                        className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 hover:bg-slate-700 disabled:opacity-30 text-xs"
+                        className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 disabled:opacity-30 text-xs"
                       >
                         ▲
                       </button>
@@ -727,7 +1291,7 @@ export default function DocumentEditorPage() {
                           moveBlock(index, 1);
                         }}
                         disabled={index === blocks.length - 1}
-                        className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 hover:bg-slate-700 disabled:opacity-30 text-xs"
+                        className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 disabled:opacity-30 text-xs"
                       >
                         ▼
                       </button>
@@ -737,14 +1301,14 @@ export default function DocumentEditorPage() {
                           e.stopPropagation();
                           deleteBlock(block.id);
                         }}
-                        className="px-2 py-0.5 rounded bg-red-950/60 text-red-400 hover:bg-red-900 border border-red-800/40 text-xs font-bold"
+                        className="px-2 py-0.5 rounded bg-red-950/60 text-red-400 hover:bg-red-900 text-xs font-bold"
                       >
                         ✕
                       </button>
                     </div>
                   </div>
 
-                  {/* Rich Block Formatting Controls */}
+                  {/* Format Controls */}
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-3 text-xs">
                     <div>
                       <label className="block text-[10px] font-bold text-slate-500">Font</label>
@@ -775,7 +1339,7 @@ export default function DocumentEditorPage() {
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-bold text-slate-500">Font Size</label>
+                      <label className="block text-[10px] font-bold text-slate-500">Size</label>
                       <select
                         value={block.fontSize}
                         onChange={(e) => updateBlock(block.id, "fontSize", e.target.value)}
@@ -820,12 +1384,11 @@ export default function DocumentEditorPage() {
                     </div>
                   </div>
 
-                  {/* Text Content Input */}
+                  {/* Text Input */}
                   <textarea
                     rows={block.type === "paragraph" || block.type.includes("List") ? 4 : 2}
                     value={block.content}
                     onChange={(e) => updateBlock(block.id, "content", e.target.value)}
-                    placeholder="Enter block text here..."
                     className={`w-full rounded-xl bg-slate-950 border border-slate-800 p-3 text-white text-sm outline-none focus:border-amber-400 ${getFontClass(
                       block.font
                     )}`}
@@ -836,7 +1399,7 @@ export default function DocumentEditorPage() {
             </div>
           </div>
 
-          {/* RIGHT COLUMN: LIVE A4 SHEET PREVIEW & EXPORT ACTIONS */}
+          {/* RIGHT COLUMN: LIVE A4 PREVIEW & EXPORT ACTIONS */}
           <div className="lg:col-span-6 space-y-4">
             
             {/* ACTION BAR */}
@@ -850,7 +1413,7 @@ export default function DocumentEditorPage() {
                 <button
                   type="button"
                   onClick={handlePrint}
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 font-black text-xs shadow-lg hover:brightness-110 transition flex items-center gap-1.5"
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 font-black text-xs shadow-lg hover:brightness-110 flex items-center gap-1.5"
                 >
                   <span>🖨️</span> Print / Save PDF
                 </button>
@@ -859,18 +1422,18 @@ export default function DocumentEditorPage() {
                   type="button"
                   onClick={handleDownloadPdf}
                   disabled={downloadingPdf}
-                  className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs transition flex items-center gap-1.5"
+                  className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs flex items-center gap-1.5"
                 >
                   <span>📥</span> {downloadingPdf ? "Generating..." : "Download PNG"}
                 </button>
               </div>
             </div>
 
-            {/* A4 CANVAS CONTAINER */}
+            {/* A4 PAPER CANVAS */}
             <div className="overflow-x-auto pb-6">
               <div
                 ref={printRef}
-                className={`print-area mx-auto bg-white text-slate-900 shadow-2xl rounded-sm p-8 sm:p-12 border border-slate-200 transition-all ${getFontClass(
+                className={`print-area mx-auto bg-white text-slate-900 shadow-2xl rounded-sm p-8 sm:p-12 border border-slate-200 ${getFontClass(
                   docMeta.globalFont
                 )}`}
                 style={{
@@ -881,7 +1444,7 @@ export default function DocumentEditorPage() {
                   lineHeight: docMeta.lineHeight,
                 }}
               >
-                {/* DOCUMENT HEADER */}
+                {/* HEADER */}
                 <div className="border-b-2 border-slate-900 pb-4 mb-6 flex justify-between items-end">
                   <div>
                     <h1 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">
@@ -932,22 +1495,10 @@ export default function DocumentEditorPage() {
                       );
                     }
 
-                    if (block.type === "heading3") {
-                      return (
-                        <h4 key={block.id} className={`${blockFontClass} my-1`} style={style}>
-                          {block.content}
-                        </h4>
-                      );
-                    }
-
                     if (block.type === "bulletList") {
                       const items = block.content.split("\n").filter((i) => i.trim());
                       return (
-                        <ul
-                          key={block.id}
-                          className={`list-disc list-inside space-y-1 ${blockFontClass}`}
-                          style={style}
-                        >
+                        <ul key={block.id} className={`list-disc list-inside space-y-1 ${blockFontClass}`} style={style}>
                           {items.map((it, i) => (
                             <li key={i}>{it}</li>
                           ))}
@@ -958,11 +1509,7 @@ export default function DocumentEditorPage() {
                     if (block.type === "numberedList") {
                       const items = block.content.split("\n").filter((i) => i.trim());
                       return (
-                        <ol
-                          key={block.id}
-                          className={`list-decimal list-inside space-y-1 ${blockFontClass}`}
-                          style={style}
-                        >
+                        <ol key={block.id} className={`list-decimal list-inside space-y-1 ${blockFontClass}`} style={style}>
                           {items.map((it, i) => (
                             <li key={i}>{it}</li>
                           ))}
@@ -1005,7 +1552,7 @@ export default function DocumentEditorPage() {
                   })}
                 </div>
 
-                {/* DOCUMENT FOOTER */}
+                {/* FOOTER */}
                 <div className="mt-16 pt-4 border-t border-slate-200 text-center text-[10px] text-slate-400 flex justify-between items-center">
                   <span>Generated via HMT Success Academy Rich Document Editor</span>
                   <span>Page 1 of 1</span>
@@ -1029,9 +1576,6 @@ export default function DocumentEditorPage() {
             </Link>
             <Link href="/cv-builder" className="hover:underline">
               CV Builder
-            </Link>
-            <Link href="/portal" className="hover:underline">
-              Student Portal
             </Link>
           </div>
         </div>
