@@ -1450,11 +1450,12 @@ export default function DocumentEditorPage() {
                     <h1 className="text-xl sm:text-2xl font-black text-slate-950 tracking-tight">
                       {docMeta.docTitle || "Untitled Document"}
                     </h1>
-                    <p className="text-xs text-slate-600 font-semibold">{docMeta.docSubtitle}</p>
+                    {docMeta.docSubtitle && (
+                      <p className="text-xs text-slate-600 font-semibold">{docMeta.docSubtitle}</p>
+                    )}
                   </div>
-                  <div className="text-right text-[11px] font-semibold text-slate-500 space-y-0.5">
+                  <div className="text-right text-[11px] font-semibold text-slate-500">
                     <p>Date: {docMeta.docDate}</p>
-                    <p>Author: {docMeta.authorName}</p>
                   </div>
                 </div>
 
