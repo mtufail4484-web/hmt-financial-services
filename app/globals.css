@@ -1,4 +1,22 @@
+@import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Gulzar&family=Noto+Nastaliq+Urdu:wght@400;700&family=Scheherazade+New:wght@400;700&family=Tinos:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 @import "tailwindcss";
+
+@font-face {
+  font-family: 'Jameel Noori Nastaleeq';
+  src: url('https://cdn.jsdelivr.net/gh/m-a-k-s/urdu-fonts/JameelNooriNastaleeq.ttf') format('truetype'),
+       url('https://fonts.gstatic.com/ea/notonastaliqurdu/v4/NotoNastaliqUrdu-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Sakal Majalla';
+  src: url('https://fonts.gstatic.com/s/amiri/v27/J7aRnpd8CGxBHpUrtLMA7w.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   --background: #ffffff;
@@ -25,6 +43,22 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Multi-Lingual Font Classes */
+.font-urdu {
+  font-family: 'Jameel Noori Nastaleeq', 'Noto Nastaliq Urdu', 'Gulzar', 'Urdu Typesetting', serif !important;
+  line-height: 2.2 !important;
+}
+
+.font-english {
+  font-family: 'Times New Roman', 'Tinos', Times, 'Georgia', serif !important;
+}
+
+.font-arabic {
+  font-family: 'Sakal Majalla', 'Amiri', 'Scheherazade New', 'Traditional Arabic', serif !important;
+  line-height: 1.9 !important;
+}
+
+/* Feature Marquee */
 .feature-marquee {
   overflow: hidden;
 }
@@ -48,3 +82,35 @@ body {
     transform: translateX(-50%);
   }
 }
+
+/* Print Styles for Document Editor */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  .no-print,
+  nav,
+  header,
+  footer {
+    display: none !important;
+  }
+
+  .print-area {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: transparent !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 15mm;
+  }
+}
+

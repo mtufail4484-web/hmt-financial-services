@@ -53,6 +53,12 @@ export default function sitemap() {
       priority: 0.85,
     },
     {
+      url: `${SITE_URL}/document-editor`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.90,
+    },
+    {
       url: `${SITE_URL}/verify`,
       lastModified: now,
       changeFrequency: "weekly",

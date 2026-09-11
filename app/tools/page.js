@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
 const tools = [
+  { id: "doc-editor", label: "📝 MS Word to PDF Creator" },
   { id: "zakat", label: "Zakat Calculator" },
   { id: "tax", label: "Income Tax Calculator" },
   { id: "gpa", label: "GPA Calculator" },
@@ -533,6 +534,57 @@ export default function ToolsPage() {
         </aside>
 
         <div className="calculator-card rounded-2xl border bg-white p-4 shadow-sm md:p-6">
+          <section id="doc-editor-calculator-panel" className={panelClass("doc-editor")} data-tool="doc-editor" aria-hidden={activeTool !== "doc-editor"}>
+            <div className="space-y-4">
+              <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <h2 className="text-xl font-black text-slate-950">Mobile MS Word Alternative & Rich Document Editor</h2>
+                  <p className="mt-1 text-xs font-semibold text-slate-500">
+                    Create headings, subheadings, rich paragraphs, bullet points, and convert formatted text to PDF. Built-in default font support for Urdu (Jameel Noori Nastaleeq), English (Times New Roman), and Arabic (Sakal Majalla / Amiri).
+                  </p>
+                </div>
+                <Link
+                  href="/document-editor"
+                  className="rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-black text-white hover:bg-blue-700 shadow-md text-center shrink-0"
+                >
+                  🚀 Open Fullscreen Editor
+                </Link>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 text-xs">
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <span className="text-xl">🇵🇰</span>
+                  <h3 className="font-bold text-slate-900 mt-1">Urdu Document Mode</h3>
+                  <p className="text-slate-600 text-[11px] mt-0.5">Default font: <strong>Jameel Noori Nastaleeq</strong> with right-to-left layout for applications and letters.</p>
+                </div>
+
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <span className="text-xl">🇬🇧</span>
+                  <h3 className="font-bold text-slate-900 mt-1">English Document Mode</h3>
+                  <p className="text-slate-600 text-[11px] mt-0.5">Default font: <strong>Times New Roman</strong> for formal recommendation letters and office reports.</p>
+                </div>
+
+                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <span className="text-xl">🇸🇦</span>
+                  <h3 className="font-bold text-slate-900 mt-1">Arabic Document Mode</h3>
+                  <p className="text-slate-600 text-[11px] mt-0.5">Default font: <strong>Sakal Majalla / Amiri</strong> with full diacritics and RTL justification.</p>
+                </div>
+              </div>
+
+              <div className="rounded-xl bg-blue-50 border border-blue-200 p-4 text-center">
+                <p className="text-xs font-bold text-blue-950">
+                  Ready to write your document and save crisp vector PDFs on mobile?
+                </p>
+                <Link
+                  href="/document-editor"
+                  className="mt-2 inline-block rounded-xl bg-blue-600 px-6 py-2.5 text-xs font-black text-white hover:bg-blue-700 shadow-md"
+                >
+                  📝 Launch MS Word to PDF Tool Now →
+                </Link>
+              </div>
+            </div>
+          </section>
+
           <section id="zakat-calculator-panel" className={panelClass("zakat")} data-tool="zakat" aria-hidden={activeTool !== "zakat"}>
               <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                 <div>

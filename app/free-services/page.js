@@ -77,6 +77,16 @@ export default function FreeServicesPage() {
       color: "from-emerald-500 to-teal-600",
     },
     {
+      title: "Mobile MS Word Alternative & Rich Document to PDF",
+      subtitle: "Headings • Paragraphs • Urdu (Jameel Noori) • English (Times New Roman) • Arabic",
+      desc: "Work on MS Word style documents on mobile devices without installing Microsoft Word. Format headings, subheadings, rich paragraphs, lists, and convert to crisp PDF files.",
+      image: "/Excel Automation.jpg",
+      link: "/document-editor",
+      badge: "📝 MOBILE WORD TO PDF",
+      btnText: "📄 Open Document Editor",
+      color: "from-blue-600 to-indigo-700",
+    },
+    {
       title: "Official WhatsApp & Community Study Groups",
       subtitle: "ETEA Group • KPPSC Group • Student Broadcast",
       desc: "Direct join buttons for official WhatsApp and Telegram study groups hosted by Muhammad Tufail for instant material sharing.",
