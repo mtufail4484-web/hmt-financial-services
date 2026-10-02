@@ -7757,10 +7757,17 @@ export default function PortalPage() {
         )}
         {selectedAdminCertStudent && (
           <div className="fixed inset-0 bg-black/75 z-[60] flex items-center justify-center p-2 overflow-auto print:p-0">
-            <div className="certificate-landscape bg-white rounded-2xl shadow-2xl overflow-hidden border-[8px] border-amber-700 relative print:border-none print:shadow-none">
+            <div className="certificate-landscape bg-white rounded-2xl shadow-2xl overflow-hidden border-[8px] border-amber-700 relative print:border-none print:shadow-none my-4">
+              <div className="bg-slate-900 px-6 py-4 flex justify-between items-center sm:gap-4 no-print border-b border-slate-800">
+                <span className="text-white font-black text-xs sm:text-sm"><span className="text-amber-400">🎓</span> Certificate Preview</span>
+                <div className="flex gap-2">
+                  <button type="button" onClick={() => window.print()} className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-[#031735] rounded-xl px-5 py-2 text-xs font-black shadow-lg">🖨️ Print / Download PDF</button>
+                  <button type="button" onClick={() => setSelectedAdminCertStudent(null)} className="bg-slate-700 hover:bg-slate-600 text-white rounded-xl px-4 py-2 text-xs font-black">Close</button>
+                </div>
+              </div>
               
               {/* Outer Border Frame */}
-              <div className="m-3 border-4 border-double border-amber-500 bg-gradient-to-br from-amber-50/40 via-white to-blue-50/40 p-6 sm:p-12 text-center flex flex-col justify-between min-h-[560px] relative select-none print:m-0 print:border-none">
+              <div className="m-3 border-4 border-double border-amber-500 bg-gradient-to-br from-amber-50/20 via-white to-sky-50 p-6 sm:p-12 text-center flex flex-col justify-between min-h-[560px] relative select-none print:m-0 print:border-none">
                 
                 {/* Vintage Corner Flourishes */}
                 <div className="absolute top-4 left-4 w-12 h-12 border-t-2 border-l-2 border-amber-600/40 rounded-tl-sm pointer-events-none print:hidden" />
@@ -7775,38 +7782,38 @@ export default function PortalPage() {
                   </div>
                   <h1 className="text-2xl sm:text-4xl font-serif font-black tracking-tight text-amber-950 mt-1 uppercase">Certificate of Completion</h1>
                   <p className="text-[10px] sm:text-xs font-serif font-black tracking-[0.25em] text-slate-500">HMT SUCCESS ACADEMY</p>
-                  <p className="text-[10px] sm:text-xs text-slate-400 font-bold max-w-xs mx-auto border-t border-b border-amber-200 py-1 uppercase">Government of Pakistan Registered Standard verified</p>
+                  <p className="text-[10px] sm:text-xs text-amber-800 bg-amber-50 border border-amber-200 font-extrabold max-w-sm mx-auto px-4 py-1.5 rounded-full uppercase tracking-wider">Independent Professional Competency Standard</p>
                 </div>
 
                 {/* Recipient Details */}
                 <div className="my-5">
                   <p className="text-xs sm:text-sm text-gray-500 italic">This official credential is proudly presented to</p>
-                  <h2 className="text-2xl sm:text-4xl font-serif font-black text-slate-900 mt-2 underline decoration-amber-600 decoration-wavy decoration-1 underline-offset-8">
+                  <h2 className="text-3xl sm:text-5xl font-serif font-black text-slate-900 mt-2 underline decoration-amber-600 decoration-wavy decoration-1 underline-offset-8">
                     {selectedAdminCertStudent.name}
                   </h2>
-                  <p className="text-xs sm:text-sm text-slate-700 mt-5 max-w-2xl mx-auto leading-relaxed font-semibold">
+                  <p className="text-xs sm:text-sm text-slate-700 mt-6 max-w-2xl mx-auto leading-relaxed font-semibold">
                     for comprehensively completing all academic requirements, assignments, and practical milestones for the
-                    <span className="font-extrabold text-slate-950 block text-sm sm:text-base mt-1.5 text-amber-900">
+                    <span className="font-extrabold text-slate-950 block text-sm sm:text-base mt-2 text-indigo-950 bg-indigo-50 border border-indigo-100 rounded-xl py-1.5 px-4">
                       💻 Free Professional Computer Application Course 2026 (کی بورڈ و کمپیوٹر کورس)
                     </span>
                   </p>
                 </div>
 
                 {/* Modules Covered Badge Grid */}
-                <div className="bg-slate-100/60 border border-slate-200/50 rounded-2xl p-3 sm:py-3.5 sm:px-6 max-w-lg mx-auto w-full">
-                  <p className="text-[10px] font-black uppercase text-slate-500 tracking-wider">Expertise Modules Thoroughly Mastered:</p>
-                  <div className="grid grid-cols-3 gap-3 mt-2">
-                    <div className="bg-white text-[#041d3b] font-black rounded-xl py-2 px-1 text-xs border border-slate-200 shadow-sm flex flex-col justify-center items-center">
-                      <span className="text-base">📝</span>
-                      <span className="text-[10px] sm:text-[11px] font-extrabold mt-0.5">MS WORD</span>
+                <div className="bg-slate-100/60 border border-slate-200/50 rounded-2xl p-4 max-w-xl mx-auto w-full">
+                  <p className="text-[10px] font-black uppercase text-slate-500 tracking-wider">Specialized Competencies Covered:</p>
+                  <div className="grid grid-cols-3 gap-4 mt-2.5">
+                    <div className="bg-white border-l-4 border-l-blue-600 text-[#0c244c] font-black rounded-xl py-2 px-1 text-xs border border-slate-200 shadow-sm flex flex-col justify-center items-center">
+                      <span className="text-base text-blue-600">📝</span>
+                      <span className="text-[10px] sm:text-[11px] font-extrabold mt-0.5 text-blue-900">MS WORD</span>
                     </div>
-                    <div className="bg-white text-[#041d3b] font-black rounded-xl py-2 px-1 text-xs border border-slate-200 shadow-sm flex flex-col justify-center items-center">
-                      <span className="text-base">📊</span>
-                      <span className="text-[10px] sm:text-[11px] font-extrabold mt-0.5">MS EXCEL</span>
+                    <div className="bg-white border-l-4 border-l-emerald-600 text-[#0c244c] font-black rounded-xl py-2 px-1 text-xs border border-slate-200 shadow-sm flex flex-col justify-center items-center">
+                      <span className="text-base text-emerald-600">📊</span>
+                      <span className="text-[10px] sm:text-[11px] font-extrabold mt-0.5 text-emerald-950">MS EXCEL</span>
                     </div>
-                    <div className="bg-white text-[#041d3b] font-black rounded-xl py-2 px-1 text-xs border border-slate-200 shadow-sm flex flex-col justify-center items-center">
-                      <span className="text-base">🖥️</span>
-                      <span className="text-[10px] sm:text-[11px] font-extrabold mt-0.5">POWERPOINT</span>
+                    <div className="bg-white border-l-4 border-l-orange-500 text-[#0c244c] font-black rounded-xl py-2 px-1 text-xs border border-slate-200 shadow-sm flex flex-col justify-center items-center">
+                      <span className="text-base text-orange-600">🖥️</span>
+                      <span className="text-[10px] sm:text-[11px] font-extrabold mt-0.5 text-orange-900">POWERPOINT</span>
                     </div>
                   </div>
                 </div>
@@ -7817,7 +7824,7 @@ export default function PortalPage() {
                   {/* Verification ID Block */}
                   <div className="text-left space-y-1">
                     <span className="block text-slate-400 font-extrabold uppercase tracking-wider text-[9px]">Verification ID</span>
-                    <span className="font-mono font-black text-slate-900 bg-slate-100 rounded-lg px-2.5 py-1 select-all border border-slate-200">
+                    <span className="font-mono font-black text-indigo-950 bg-indigo-50 border border-indigo-200 rounded-lg px-2.5 py-1 select-all">
                       {selectedAdminCertStudent.certificateId || `HMT-CERT-${selectedAdminCertStudent.rollNo}`}
                     </span>
                   </div>
@@ -7869,23 +7876,6 @@ export default function PortalPage() {
                   </div>
                 </div>
 
-                {/* Print Control buttons - Hidden in Print View */}
-                <div className="mt-8 flex justify-center gap-2 no-print">
-                  <button 
-                    type="button" 
-                    onClick={() => window.print()} 
-                    className="bg-amber-700 hover:bg-amber-800 text-white rounded-xl px-5 py-2.5 text-xs font-black shadow-lg shadow-amber-700/20 active:scale-95 transition"
-                  >
-                    🖨️ Print / Download PDF
-                  </button>
-                  <button 
-                    type="button" 
-                    onClick={() => setSelectedAdminCertStudent(null)} 
-                    className="bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl px-5 py-2.5 text-xs font-black transition"
-                  >
-                    Close
-                  </button>
-                </div>
               </div>
             </div>
           </div>
