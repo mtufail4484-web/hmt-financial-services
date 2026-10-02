@@ -445,6 +445,7 @@ export default function PortalPage() {
 
   const [showCardModal, setShowCardModal] = useState(false);
   const [showCertModal, setShowCertModal] = useState(false);
+  const [selectedAdminCertStudent, setSelectedAdminCertStudent] = useState(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showQuestionModal, setShowQuestionModal] = useState(false);
   const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
@@ -1483,10 +1484,15 @@ export default function PortalPage() {
     const merged = { ...student, ...overrides };
     return {
       uid: merged.uid || "",
+      name: merged.name || "",
       rollNo: normalizeRollNo(merged.rollNo),
       accountStatus: merged.accountStatus || "active",
       course: "Free Computer Course 2026",
       updatedAt: new Date().toISOString(),
+      certificateIssued: merged.certificateIssued || false,
+      certificateIssuedAt: merged.certificateIssuedAt || "",
+      certificateId: merged.certificateId || "",
+      courseModules: ["MS Word", "Excel", "PowerPoint"],
     };
   };
 
@@ -4352,6 +4358,54 @@ export default function PortalPage() {
     }
   };
 
+  const handleIssueCertificate = async (student) => {
+    if (!requireBackupBeforeAdminMutation("issue certificate")) return;
+    const cleanRollNo = normalizeRollNo(student.rollNo);
+    if (!cleanRollNo) {
+      alert("Student must have a valid Roll Number to issue a certificate.");
+      return;
+    }
+
+    try {
+      const now = new Date().toISOString();
+      const certificateId = `HMT-CERT-${cleanRollNo}`;
+      const updates = {
+        certificateIssued: true,
+        certificateIssuedAt: now,
+        certificateId: certificateId
+      };
+
+      await updateDoc(doc(db, "students", student.uid), updates);
+      await upsertPublicStudentVerification(student, updates);
+
+      setAllStudents((prev) => prev.map((item) => (item.uid === student.uid ? { ...item, ...updates } : item)));
+      alert(`Certificate issued successfully! Verification ID is ${certificateId}.`);
+    } catch (err) {
+      alert("Error issuing certificate: " + err.message);
+    }
+  };
+
+  const handleRevokeCertificate = async (student) => {
+    if (!requireBackupBeforeAdminMutation("revoke certificate")) return;
+    if (!confirm("Are you sure you want to revoke this student's certificate?")) return;
+
+    try {
+      const updates = {
+        certificateIssued: false,
+        certificateIssuedAt: "",
+        certificateId: ""
+      };
+
+      await updateDoc(doc(db, "students", student.uid), updates);
+      await upsertPublicStudentVerification(student, updates);
+
+      setAllStudents((prev) => prev.map((item) => (item.uid === student.uid ? { ...item, ...updates } : item)));
+      alert(`Certificate revoked successfully.`);
+    } catch (err) {
+      alert("Error revoking certificate: " + err.message);
+    }
+  };
+
   const handleSyncVerificationRecords = async () => {
     if (!requireBackupBeforeAdminMutation("sync verification records")) return;
     if (!isAdmin || syncingVerificationRecords) return;
@@ -5314,7 +5368,7 @@ export default function PortalPage() {
                       </div>
                     </div>
                     <div className="table-scroll-container">
-                      <table className="w-full text-xs min-w-[1320px] text-left border-collapse">
+                      <table className="w-full text-xs min-w-[1440px] text-left border-collapse">
                         <thead>
                           <tr className="bg-slate-100 text-slate-700 font-bold">
                             <th className="p-3 rounded-l-xl">Student Name</th>
@@ -5327,6 +5381,7 @@ export default function PortalPage() {
                             <th className="p-3">Status</th>
                             <th className="p-3">System Role</th>
                             <th className="p-3">Assignments</th>
+                            <th className="p-3 animate-pulse text-amber-700">Certificate</th>
                             <th className="p-3 rounded-r-xl">Actions</th>
                           </tr>
                         </thead>
@@ -5445,6 +5500,53 @@ export default function PortalPage() {
                                   </div>
                                   {studentStats.pendingReview > 0 && (
                                     <p className="mt-1 text-[10px] font-black text-amber-600">{studentStats.pendingReview} pending review</p>
+                                  )}
+                                </td>
+                                <td className="p-3">
+                                  {studentStats.completed >= courseVideos.length ? (
+                                    <div className="flex flex-col gap-1 w-28 text-center">
+                                      {s.certificateIssued ? (
+                                        <>
+                                          <span className="text-[10px] font-bold text-green-700 bg-green-50 px-2 py-0.5 rounded border border-green-200 uppercase tracking-wider">
+                                            Issued
+                                          </span>
+                                          <button
+                                            type="button"
+                                            onClick={() => setSelectedAdminCertStudent(s)}
+                                            className="bg-amber-600 hover:bg-amber-700 text-white px-2 py-1 rounded text-[10px] font-black"
+                                          >
+                                            🎓 View/Print
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={() => handleRevokeCertificate(s)}
+                                            className="bg-red-50 hover:bg-red-100 text-red-600 px-2 py-0.5 rounded text-[9px] font-bold mt-0.5"
+                                            title="Revoke Certificate"
+                                          >
+                                            Revoke
+                                          </button>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <span className="text-[10px] font-bold text-slate-500">
+                                            Completed 😊
+                                          </span>
+                                          <button
+                                            type="button"
+                                            onClick={() => handleIssueCertificate(s)}
+                                            className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1.5 rounded text-[10px] font-black"
+                                          >
+                                            🏆 Issue Cert
+                                          </button>
+                                        </>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <div className="text-center">
+                                      <span className="text-[10px] font-semibold text-slate-400 bg-slate-100/50 px-2 py-0.5 rounded">
+                                        {studentStats.completed}/{courseVideos.length} lectures
+                                      </span>
+                                    </div>
                                   )}
                                 </td>
                                 <td className="p-3">
@@ -7648,6 +7750,141 @@ export default function PortalPage() {
                 <div className="mt-6 flex justify-center gap-2 no-print">
                   <button type="button" onClick={() => window.print()} className="bg-amber-700 text-white rounded-xl px-4 py-2 text-xs font-bold">Print Certificate</button>
                   <button type="button" onClick={() => setShowCertModal(false)} className="bg-gray-200 rounded-xl px-4 py-2 text-xs font-bold">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {selectedAdminCertStudent && (
+          <div className="fixed inset-0 bg-black/75 z-[60] flex items-center justify-center p-2 overflow-auto print:p-0">
+            <div className="certificate-landscape bg-white rounded-2xl shadow-2xl overflow-hidden border-[8px] border-amber-700 relative print:border-none print:shadow-none">
+              
+              {/* Outer Border Frame */}
+              <div className="m-3 border-4 border-double border-amber-500 bg-gradient-to-br from-amber-50/40 via-white to-blue-50/40 p-6 sm:p-12 text-center flex flex-col justify-between min-h-[560px] relative select-none print:m-0 print:border-none">
+                
+                {/* Vintage Corner Flourishes */}
+                <div className="absolute top-4 left-4 w-12 h-12 border-t-2 border-l-2 border-amber-600/40 rounded-tl-sm pointer-events-none print:hidden" />
+                <div className="absolute top-4 right-4 w-12 h-12 border-t-2 border-r-2 border-amber-600/40 rounded-tr-sm pointer-events-none print:hidden" />
+                <div className="absolute bottom-4 left-4 w-12 h-12 border-b-2 border-l-2 border-amber-600/40 rounded-bl-sm pointer-events-none print:hidden" />
+                <div className="absolute bottom-4 right-4 w-12 h-12 border-b-2 border-r-2 border-amber-600/40 rounded-br-sm pointer-events-none print:hidden" />
+                
+                {/* HMT Certificate Header */}
+                <div className="space-y-2">
+                  <div className="flex justify-center items-center gap-2">
+                    <img src={HMT_LOGO} alt="HMT Logo" className="w-16 h-16 sm:w-20 sm:h-20 object-contain" />
+                  </div>
+                  <h1 className="text-2xl sm:text-4xl font-serif font-black tracking-tight text-amber-950 mt-1 uppercase">Certificate of Completion</h1>
+                  <p className="text-[10px] sm:text-xs font-serif font-black tracking-[0.25em] text-slate-500">HMT SUCCESS ACADEMY</p>
+                  <p className="text-[10px] sm:text-xs text-slate-400 font-bold max-w-xs mx-auto border-t border-b border-amber-200 py-1 uppercase">Government of Pakistan Registered Standard verified</p>
+                </div>
+
+                {/* Recipient Details */}
+                <div className="my-5">
+                  <p className="text-xs sm:text-sm text-gray-500 italic">This official credential is proudly presented to</p>
+                  <h2 className="text-2xl sm:text-4xl font-serif font-black text-slate-900 mt-2 underline decoration-amber-600 decoration-wavy decoration-1 underline-offset-8">
+                    {selectedAdminCertStudent.name}
+                  </h2>
+                  <p className="text-xs sm:text-sm text-slate-700 mt-5 max-w-2xl mx-auto leading-relaxed font-semibold">
+                    for comprehensively completing all academic requirements, assignments, and practical milestones for the
+                    <span className="font-extrabold text-slate-950 block text-sm sm:text-base mt-1.5 text-amber-900">
+                      💻 Free Professional Computer Application Course 2026 (کی بورڈ و کمپیوٹر کورس)
+                    </span>
+                  </p>
+                </div>
+
+                {/* Modules Covered Badge Grid */}
+                <div className="bg-slate-100/60 border border-slate-200/50 rounded-2xl p-3 sm:py-3.5 sm:px-6 max-w-lg mx-auto w-full">
+                  <p className="text-[10px] font-black uppercase text-slate-500 tracking-wider">Expertise Modules Thoroughly Mastered:</p>
+                  <div className="grid grid-cols-3 gap-3 mt-2">
+                    <div className="bg-white text-[#041d3b] font-black rounded-xl py-2 px-1 text-xs border border-slate-200 shadow-sm flex flex-col justify-center items-center">
+                      <span className="text-base">📝</span>
+                      <span className="text-[10px] sm:text-[11px] font-extrabold mt-0.5">MS WORD</span>
+                    </div>
+                    <div className="bg-white text-[#041d3b] font-black rounded-xl py-2 px-1 text-xs border border-slate-200 shadow-sm flex flex-col justify-center items-center">
+                      <span className="text-base">📊</span>
+                      <span className="text-[10px] sm:text-[11px] font-extrabold mt-0.5">MS EXCEL</span>
+                    </div>
+                    <div className="bg-white text-[#041d3b] font-black rounded-xl py-2 px-1 text-xs border border-slate-200 shadow-sm flex flex-col justify-center items-center">
+                      <span className="text-base">🖥️</span>
+                      <span className="text-[10px] sm:text-[11px] font-extrabold mt-0.5">POWERPOINT</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer Signature and Credentials */}
+                <div className="grid grid-cols-3 items-center gap-4 mt-6 max-w-2xl mx-auto w-full pt-4 border-t border-slate-200/60 text-[10px] sm:text-xs">
+                  
+                  {/* Verification ID Block */}
+                  <div className="text-left space-y-1">
+                    <span className="block text-slate-400 font-extrabold uppercase tracking-wider text-[9px]">Verification ID</span>
+                    <span className="font-mono font-black text-slate-900 bg-slate-100 rounded-lg px-2.5 py-1 select-all border border-slate-200">
+                      {selectedAdminCertStudent.certificateId || `HMT-CERT-${selectedAdminCertStudent.rollNo}`}
+                    </span>
+                  </div>
+
+                  {/* Verification Seal / QR */}
+                  <div className="flex flex-col items-center justify-center h-full relative cursor-pointer" title="Verify Online">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full border-4 border-amber-500 bg-gradient-to-br from-amber-400 to-amber-600 text-white flex items-center justify-center shadow-lg font-black text-[9px] uppercase tracking-tighter text-center leading-tight">
+                      HMT SEAL<br/>★
+                    </div>
+                  </div>
+
+                  {/* Signature Block */}
+                  <div className="text-right flex flex-col items-end space-y-1">
+                    <span className="block text-slate-400 font-extrabold uppercase tracking-wider text-[9px] text-right w-full">Authorized Signature</span>
+                    
+                    {/* Hand-drawn inline Vector Ink Signature of Muhammad Tufail */}
+                    <div className="text-blue-700 bg-transparent flex justify-end py-1 select-none w-32 h-12 relative">
+                      <svg 
+                        className="w-28 h-12 sm:w-32 sm:h-14 stroke-current filter drop-shadow-[0_1px_1px_rgba(0,0,0,0.1)] text-blue-700" 
+                        viewBox="0 0 140 80" 
+                        fill="none" 
+                        strokeWidth="2.8" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round"
+                      >
+                        {/* Asterisk/Star symbol representing ink flourish */}
+                        <path d="M 12 50 L 22 58 M 22 50 L 12 58 M 11 54 L 23 54" strokeWidth="1.8" />
+                        
+                        {/* Elegant recursive 'T' loop */}
+                        <path d="M 28 32 C 26 22, 42 16, 52 24 C 60 30, 48 42, 38 48 C 30 54, 38 60, 48 58 C 58 56, 64 48, 70 38" />
+                        
+                        {/* Fine ink dot inside T-loop */}
+                        <circle cx="48" cy="36" r="2" fill="currentColor" stroke="none" />
+                        
+                        {/* Flowing 'u' and 'f' cursive structures */}
+                        <path d="M 68 40 C 72 34, 76 34, 78 40 C 80 44, 76 52, 82 52 C 88 52, 92 18, 92 10 C 92 2, 96 6, 94 22 C 92 32, 88 64, 94 66 C 96 66, 98 62, 100 58" />
+                        
+                        {/* Final loop representing 'a', 'i', 'l' */}
+                        <path d="M 102 46 C 98 48, 100 52, 104 52 C 108 52, 110 48, 110 44 L 110 52 C 112 52, 116 48, 116 38 C 116 28, 120 34, 118 46 C 117 50, 119 52, 122 51 C 124 50, 128 44, 130 46" />
+                      </svg>
+                    </div>
+                    
+                    <span className="font-extrabold text-slate-900 border-t border-slate-300 pt-1 text-[9px] sm:text-[10px] tracking-wide text-right w-full block">
+                      Muhammad Tufail
+                    </span>
+                    <span className="text-[8px] sm:text-[9px] text-slate-400 font-bold block text-right -mt-0.5">
+                      Founder & Director, HMT
+                    </span>
+                  </div>
+                </div>
+
+                {/* Print Control buttons - Hidden in Print View */}
+                <div className="mt-8 flex justify-center gap-2 no-print">
+                  <button 
+                    type="button" 
+                    onClick={() => window.print()} 
+                    className="bg-amber-700 hover:bg-amber-800 text-white rounded-xl px-5 py-2.5 text-xs font-black shadow-lg shadow-amber-700/20 active:scale-95 transition"
+                  >
+                    🖨️ Print / Download PDF
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => setSelectedAdminCertStudent(null)} 
+                    className="bg-slate-200 hover:bg-slate-300 text-slate-800 rounded-xl px-5 py-2.5 text-xs font-black transition"
+                  >
+                    Close
+                  </button>
                 </div>
               </div>
             </div>
